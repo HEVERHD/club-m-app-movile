@@ -1,7 +1,7 @@
 // src/stores/auth-store.ts
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
-import { loginUser, checkCompany, logout as apiLogout, LoginParams } from '../api/client';
+import { loginUser, checkCompany, logout as apiLogout, LoginParams, STORAGE_KEYS } from '../api/client';
 
 interface User {
     id: string;
@@ -28,13 +28,14 @@ interface AuthActions {
     loadStoredAuth: () => Promise<void>;
 }
 
-// Helper para normalizar roles
-const normalizeRoles = (rawRoles: any[]): string[] => {
-    if (!Array.isArray(rawRoles)) return [];
-    return rawRoles.map((r) => {
+// Helper para normalizar roles desde UserRoles[]
+const normalizeRoles = (userRoles: any[]): string[] => {
+    if (!Array.isArray(userRoles)) return [];
+    return userRoles.map((r) => {
         if (typeof r === 'string') return r;
         if (typeof r === 'object' && r !== null) {
-            return r.Name || r.RoleName || r.name || String(r);
+            // La API devuelve { RoleName: "Super Admin", ... }
+            return r.RoleName || r.Name || r.name || String(r);
         }
         return String(r);
     }).filter(Boolean);
@@ -52,10 +53,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             const response = await checkCompany(companyName);
-
-            // client.ts ya devuelve data.Data que es un array
             const companyData = Array.isArray(response) ? response[0] : response;
-
             const tenantId = companyData?.SaaSId || companyData?.TenantId;
             const tenantName = companyData?.CompanyName || companyName;
 
@@ -63,17 +61,12 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
                 throw new Error('Compañía no encontrada');
             }
 
-            // Guardar en SecureStore ANTES de actualizar el state
             await SecureStore.setItemAsync('tenantId', String(tenantId));
             await SecureStore.setItemAsync('tenantName', tenantName);
 
             console.log('✅ Company guardada:', { tenantId, tenantName });
 
-            set({
-                tenantId,
-                tenantName,
-                isLoading: false,
-            });
+            set({ tenantId, tenantName, isLoading: false });
         } catch (error: any) {
             set({
                 isLoading: false,
@@ -88,13 +81,11 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     login: async (params: LoginParams) => {
         set({ isLoading: true, error: null });
 
-        // Si tenantId no está en el state, intentar leerlo de SecureStore
         let currentTenantId = params.tenantId;
         if (!currentTenantId) {
             const storedTenantId = await SecureStore.getItemAsync('tenantId');
             if (storedTenantId) {
                 currentTenantId = parseInt(storedTenantId);
-                console.log('📖 TenantId leído de SecureStore:', currentTenantId);
             }
         }
 
@@ -106,24 +97,24 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
         try {
             const data = await loginUser({ ...params, tenantId: currentTenantId });
 
-            // 🔍 DEBUG: Loguear toda la respuesta del login
+            // ✅ CORREGIDO: Acceder a las propiedades correctas (PascalCase)
+            const authInfo = data?.AuthenticationInfo;
+            const customerInfo = data?.CustomerInfo;
+
             console.log('═══════════════════════════════════════');
-            console.log('🔐 LOGIN RESPONSE - FULL DATA:');
-            console.log('═══════════════════════════════════════');
-            console.log(JSON.stringify(data, null, 2));
-            console.log('═══════════════════════════════════════');
-            console.log('📋 DESGLOSE:');
-            console.log('→ userId:', data.userId);
-            console.log('→ userName:', data.userName);
-            console.log('→ token:', data.token ? '✅ Presente' : '❌ No presente');
-            console.log('→ accessToken:', data.accessToken ? '✅ Presente' : '❌ No presente');
-            console.log('→ userRoles:', data.userRoles);
-            console.log('→ customerInfo:', data.customerInfo);
+            console.log('🔐 LOGIN RESPONSE:');
+            console.log('→ Token:', authInfo?.Token ? '✅ Presente' : '❌ No presente');
+            console.log('→ UserId:', authInfo?.UserId);
+            console.log('→ UserName:', authInfo?.UserName);
+            console.log('→ FullName:', customerInfo?.FullName);
+            console.log('→ UserRoles:', authInfo?.UserRoles?.length, 'roles');
             console.log('═══════════════════════════════════════');
 
-            const roles = normalizeRoles(data.userRoles || []);
+            // Normalizar roles desde AuthenticationInfo.UserRoles
+            const roles = normalizeRoles(authInfo?.UserRoles || []);
             console.log('🎭 Roles normalizados:', roles);
 
+            // Determinar rol de la app
             let role: User['role'] = 'operator';
             if (roles.some(r => r.toLowerCase().includes('admin'))) {
                 role = 'admin';
@@ -132,18 +123,19 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             }
 
             const user: User = {
-                id: data.userId || '',
-                email: data.userName || params.email,
-                name: data.customerInfo?.CustomerName || data.userName || params.email,
+                id: authInfo?.UserId || '',
+                email: authInfo?.Email || authInfo?.UserName || params.email,
+                name: customerInfo?.FullName || authInfo?.UserName || params.email,
                 role,
                 tenantId: String(currentTenantId),
             };
 
-            console.log('👤 Usuario final guardado:', user);
+            console.log('👤 Usuario final:', user);
 
-            // Guardar token en SecureStore
-            if (data.accessToken) {
-                await SecureStore.setItemAsync('accessToken', data.accessToken);
+            // El token ya se guarda en client.ts loginUser(), pero por si acaso:
+            if (authInfo?.Token) {
+                await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, authInfo.Token);
+                console.log('✅ Token guardado en SecureStore');
             }
 
             set({
@@ -156,6 +148,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
             console.log('✅ Login exitoso');
         } catch (error: any) {
+            console.error('❌ Login error:', error);
             set({
                 isLoading: false,
                 error: error.message || 'Error de autenticación',
@@ -173,10 +166,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             console.error('Logout API error:', e);
         }
 
-        // Limpiar SecureStore
         await SecureStore.deleteItemAsync('tenantId');
         await SecureStore.deleteItemAsync('tenantName');
-        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
 
         set({
             user: null,
@@ -193,15 +185,39 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
         try {
             const tenantId = await SecureStore.getItemAsync('tenantId');
             const tenantName = await SecureStore.getItemAsync('tenantName');
-            const token = await SecureStore.getItemAsync('accessToken');
+            const token = await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+            const userData = await SecureStore.getItemAsync(STORAGE_KEYS.USER_DATA);
 
-            console.log('📖 Cargando auth guardada:', { tenantId, tenantName, hasToken: !!token });
+            console.log('📖 Cargando auth guardada:', {
+                tenantId,
+                tenantName,
+                hasToken: !!token,
+                hasUserData: !!userData
+            });
 
             if (tenantId) {
+                let user: User | null = null;
+
+                if (userData && token) {
+                    try {
+                        const parsed = JSON.parse(userData);
+                        user = {
+                            id: parsed.userId || parsed.customerId || '',
+                            email: parsed.email || '',
+                            name: parsed.fullName || parsed.email || '',
+                            role: 'operator', // Default, puedes mejorarlo
+                            tenantId: tenantId,
+                        };
+                    } catch (e) {
+                        console.error('Error parsing userData:', e);
+                    }
+                }
+
                 set({
                     tenantId: parseInt(tenantId),
                     tenantName: tenantName || null,
-                    isAuthenticated: !!token,
+                    isAuthenticated: !!token && !!user,
+                    user,
                 });
             }
         } catch (e) {

@@ -1,4 +1,4 @@
-// src/components/clubs/CreateClubModal.tsx - ACTUALIZADO
+// src/components/clubs/CreateClubModal.tsx - CON BÚSQUEDA DE CLIENTES
 import { useEffect, useState } from 'react';
 import {
     View, Text, Modal, TouchableOpacity, ScrollView, TextInput,
@@ -10,8 +10,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateClub, useClubTypes, useDenominations } from '../../hooks/useClubs';
 import { createClubSchema, CreateClubFormData, getShareLimit } from '../../schemas/club.schema';
 import { COLORS } from '../../constants/colors';
-import { DEFAULT_VALUES, mockClientes } from '../../data/mockData';
-
+import { DEFAULT_VALUES } from '../../data/mockData';
+import { CustomerSearchSelect } from './CustomerSearchSelect';
+import { CustomerSearchResult } from '../../services/customerSearch';
 
 interface Props {
     visible: boolean;
@@ -23,8 +24,8 @@ export function CreateClubModal({ visible, onClose }: Props) {
     const { data: denominations, isLoading: loadingDenoms } = useDenominations();
     const createMutation = useCreateClub();
 
-    // Para el buscador de clientes (simplificado por ahora)
-    const [selectedCustomer, setSelectedCustomer] = useState<typeof mockClientes[0] | null>(null);
+    // Estado para el cliente seleccionado (ahora usa el tipo de la API)
+    const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchResult | null>(null);
 
     const { control, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm<CreateClubFormData>({
         resolver: zodResolver(createClubSchema),
@@ -53,16 +54,14 @@ export function CreateClubModal({ visible, onClose }: Props) {
     const weeklyAmount = selectedDenom?.value || 0;
     const totalAmount = weeklyAmount * 52;
 
-    // Seleccionar cliente demo (para pruebas)
-    const handleSelectDemoCustomer = () => {
-        const customer = mockClientes[0];
+    // Handler para cuando se selecciona un cliente del buscador
+    const handleCustomerChange = (customerId: string, customer: CustomerSearchResult | null) => {
         setSelectedCustomer(customer);
-        setValue('customerId', customer.customerId, { shouldValidate: true });
+        setValue('customerId', customerId, { shouldValidate: true });
     };
 
     const onSubmit = async (data: CreateClubFormData) => {
         try {
-            // Formato de fecha exacto: "2025-06-01 12:57:17.250"
             const now = new Date();
             const pad = (n: number) => n.toString().padStart(2, '0');
             const formattedDate = `${data.startDate} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${now.getMilliseconds().toString().padStart(3, '0')}`;
@@ -114,48 +113,21 @@ export function CreateClubModal({ visible, onClose }: Props) {
                         <Text style={styles.loadingText}>Cargando catálogos...</Text>
                     </View>
                 ) : (
-                    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-
-                        {/* Cliente */}
-                        <View style={styles.field}>
+                    <ScrollView
+                        style={styles.content}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                        nestedScrollEnabled={true}
+                    >
+                        {/* Cliente - AHORA CON BÚSQUEDA */}
+                        <View style={[styles.field, { zIndex: 100 }]}>
                             <Text style={styles.label}>Cliente *</Text>
-
-                            {selectedCustomer ? (
-                                <View style={styles.selectedCustomer}>
-                                    <View style={styles.customerInfo}>
-                                        <Ionicons name="person-circle" size={40} color={COLORS.accent.blue} />
-                                        <View style={styles.customerDetails}>
-                                            <Text style={styles.customerName}>{selectedCustomer.fullName}</Text>
-                                            <Text style={styles.customerId}>{selectedCustomer.identificationNumber}</Text>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity onPress={() => { setSelectedCustomer(null); setValue('customerId', ''); }}>
-                                        <Ionicons name="close-circle" size={24} color={COLORS.text.muted} />
-                                    </TouchableOpacity>
-                                </View>
-                            ) : (
-                                <View>
-                                    <Controller
-                                        control={control}
-                                        name="customerId"
-                                        render={({ field: { onChange, value } }) => (
-                                            <TextInput
-                                                style={[styles.input, errors.customerId && styles.inputError]}
-                                                value={value}
-                                                onChangeText={onChange}
-                                                placeholder="ID del cliente (GUID)"
-                                                placeholderTextColor={COLORS.text.muted}
-                                            />
-                                        )}
-                                    />
-                                    {/* Botón para usar cliente demo */}
-                                    <TouchableOpacity style={styles.demoBtn} onPress={handleSelectDemoCustomer}>
-                                        <Ionicons name="flask" size={16} color={COLORS.accent.orange} />
-                                        <Text style={styles.demoBtnText}>Usar cliente demo (pruebas)</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                            {errors.customerId && <Text style={styles.error}>{errors.customerId.message}</Text>}
+                            <CustomerSearchSelect
+                                value={watch('customerId')}
+                                onChange={handleCustomerChange}
+                                error={errors.customerId?.message}
+                                selectedCustomer={selectedCustomer}
+                            />
                         </View>
 
                         {/* Tipo de Club */}
@@ -260,8 +232,16 @@ export function CreateClubModal({ visible, onClose }: Props) {
                         {watchDenominationId && watchClubTypeId && (
                             <View style={styles.summary}>
                                 <Text style={styles.summaryTitle}>📋 Resumen del Club</Text>
-
                                 <View style={styles.summaryGrid}>
+                                    {/* Mostrar cliente seleccionado en el resumen */}
+                                    {selectedCustomer && (
+                                        <View style={[styles.summaryItem, { width: '100%' }]}>
+                                            <Text style={styles.summaryLabel}>Cliente</Text>
+                                            <Text style={styles.summaryValue} numberOfLines={1}>
+                                                {selectedCustomer.FullName}
+                                            </Text>
+                                        </View>
+                                    )}
                                     <View style={styles.summaryItem}>
                                         <Text style={styles.summaryLabel}>Tipo</Text>
                                         <Text style={styles.summaryValue}>
@@ -325,8 +305,6 @@ export function CreateClubModal({ visible, onClose }: Props) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.bg.primary },
-
-    // Header
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12,
@@ -335,13 +313,9 @@ const styles = StyleSheet.create({
     closeBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
     title: { fontSize: 18, fontWeight: '700', color: COLORS.text.primary },
     placeholder: { width: 40 },
-
-    // Content
     content: { flex: 1, padding: 20 },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 12, color: COLORS.text.muted, fontSize: 14 },
-
-    // Fields
     field: { marginBottom: 24 },
     label: { fontSize: 14, fontWeight: '600', color: COLORS.text.primary, marginBottom: 10 },
     input: {
@@ -353,24 +327,6 @@ const styles = StyleSheet.create({
     error: { fontSize: 12, color: COLORS.status.error, marginTop: 6 },
     hint: { fontSize: 12, color: COLORS.text.muted, marginTop: 6, textAlign: 'center' },
     row: { flexDirection: 'row' },
-
-    // Customer
-    selectedCustomer: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        backgroundColor: COLORS.bg.card, borderRadius: 12, padding: 12,
-        borderWidth: 1, borderColor: COLORS.accent.blue,
-    },
-    customerInfo: { flexDirection: 'row', alignItems: 'center' },
-    customerDetails: { marginLeft: 12 },
-    customerName: { fontSize: 15, fontWeight: '600', color: COLORS.text.primary },
-    customerId: { fontSize: 13, color: COLORS.text.muted, marginTop: 2 },
-    demoBtn: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        marginTop: 10, paddingVertical: 10, gap: 8,
-    },
-    demoBtnText: { fontSize: 13, color: COLORS.accent.orange, fontWeight: '500' },
-
-    // Type buttons
     optionsRow: { flexDirection: 'row', gap: 12 },
     typeBtn: {
         flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -380,8 +336,6 @@ const styles = StyleSheet.create({
     typeBtnActive: { backgroundColor: COLORS.accent.blue, borderColor: COLORS.accent.blue },
     typeText: { fontSize: 15, fontWeight: '600', color: COLORS.text.secondary },
     typeTextActive: { color: COLORS.white },
-
-    // Denomination
     denomRow: { flexDirection: 'row', gap: 10 },
     denomBtn: {
         flex: 1, alignItems: 'center', paddingVertical: 16, borderRadius: 12,
@@ -392,8 +346,6 @@ const styles = StyleSheet.create({
     denomValueActive: { color: COLORS.accent.green },
     denomLabel: { fontSize: 12, color: COLORS.text.muted, marginTop: 2 },
     denomLabelActive: { color: COLORS.accent.green },
-
-    // Summary
     summary: {
         backgroundColor: COLORS.bg.card, borderRadius: 16, padding: 16, marginBottom: 16,
         borderWidth: 1, borderColor: COLORS.border.default,
@@ -404,15 +356,11 @@ const styles = StyleSheet.create({
     summaryLabel: { fontSize: 12, color: COLORS.text.muted, marginBottom: 4 },
     summaryValue: { fontSize: 16, fontWeight: '600', color: COLORS.text.primary },
     summaryTotal: { color: COLORS.accent.blue, fontSize: 20 },
-
-    // Alert
     alert: {
         flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14,
         backgroundColor: COLORS.status.warningBg, borderRadius: 12, marginBottom: 20,
     },
     alertText: { flex: 1, fontSize: 13, color: COLORS.accent.orange, lineHeight: 18 },
-
-    // Buttons
     buttons: { flexDirection: 'row', gap: 12 },
     cancelBtn: {
         flex: 1, paddingVertical: 16, borderRadius: 12, alignItems: 'center',

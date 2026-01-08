@@ -37,6 +37,7 @@ export default function RootLayout() {
         );
     }
 
+
     return (
         <QueryClientProvider client={queryClient}>
             <StatusBar style="light" backgroundColor={COLORS.bg.primary} />

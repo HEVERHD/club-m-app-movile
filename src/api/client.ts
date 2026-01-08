@@ -1,7 +1,7 @@
-// src/api/client.ts - ACTUALIZADO
+// src/api/client.ts - COMPLETO
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { getBaseUrl, getApiKey, getMdl05Key, logApiConfig } from '../services/api.config';
+import { getBaseUrl, getApiKey, getMdl05Key } from '../services/api.config';
 
 export const STORAGE_KEYS = {
     ACCESS_TOKEN: 'accessToken',
@@ -10,6 +10,18 @@ export const STORAGE_KEYS = {
     USER_DATA: 'userData',
 } as const;
 
+// ============================================
+// Login Params Interface
+// ============================================
+export interface LoginParams {
+    email: string;
+    password: string;
+    tenantId: number;
+}
+
+// ============================================
+// Helper para obtener token
+// ============================================
 const getAccessToken = async (): Promise<string | null> => {
     try {
         return await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
@@ -20,7 +32,7 @@ const getAccessToken = async (): Promise<string | null> => {
 };
 
 // ============================================
-// Factory para crear clientes con config actual
+// API Client (con Bearer token)
 // ============================================
 const createApiClient = (): AxiosInstance => {
     const client = axios.create({
@@ -28,29 +40,33 @@ const createApiClient = (): AxiosInstance => {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Ocp-Apim-Subscription-Key': getApiKey(),
         },
         timeout: 30000,
     });
 
     client.interceptors.request.use(
         async (config: InternalAxiosRequestConfig) => {
-            // Actualizar baseURL y headers en cada request
             config.baseURL = getBaseUrl();
             config.headers['Ocp-Apim-Subscription-Key'] = getApiKey();
 
             const token = await getAccessToken();
             if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
+                config.headers['Authorization'] = `Bearer ${token}`;
             }
+
+            console.log('📤 API:', config.method?.toUpperCase(), config.url);
             return config;
         },
         (error) => Promise.reject(error)
     );
 
     client.interceptors.response.use(
-        (response) => response,
+        (response) => {
+            console.log('📥 API OK:', response.status);
+            return response;
+        },
         async (error: AxiosError) => {
+            console.log('❌ API ERROR:', error.response?.status, error.config?.url);
             if (error.response?.status === 401) {
                 await SecureStore.deleteItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
                 await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
@@ -62,30 +78,24 @@ const createApiClient = (): AxiosInstance => {
     return client;
 };
 
+// ============================================
+// MDL05 Client (con api-key)
+// ============================================
 const createMdl05Client = (): AxiosInstance => {
     const client = axios.create({
         baseURL: getBaseUrl(),
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'api-key': getMdl05Key(),
         },
-        timeout: 180000, // 3 minutos - endpoints lentos
+        timeout: 180000,
     });
 
     client.interceptors.request.use(
         (config: InternalAxiosRequestConfig) => {
-            // Actualizar baseURL y api-key en cada request
             config.baseURL = getBaseUrl();
             config.headers['api-key'] = getMdl05Key();
-
-            console.log('📤 MDL05 REQUEST:', {
-                url: config.url,
-                method: config.method,
-                baseURL: config.baseURL,
-                hasApiKey: !!config.headers['api-key'],
-            });
-
+            console.log('📤 MDL05:', config.method?.toUpperCase(), config.url);
             return config;
         },
         (error) => Promise.reject(error)
@@ -93,15 +103,11 @@ const createMdl05Client = (): AxiosInstance => {
 
     client.interceptors.response.use(
         (response) => {
-            console.log('📥 MDL05 RESPONSE:', response.status);
+            console.log('📥 MDL05 OK:', response.status);
             return response;
         },
         async (error: AxiosError) => {
-            console.error('❌ MDL05 ERROR:', {
-                status: error.response?.status,
-                data: error.response?.data,
-                message: error.message,
-            });
+            console.log('❌ MDL05 ERROR:', error.response?.status, error.config?.url);
             return Promise.reject(error);
         }
     );
@@ -114,6 +120,73 @@ const createMdl05Client = (): AxiosInstance => {
 // ============================================
 export const apiClient = createApiClient();
 export const mdl05Client = createMdl05Client();
+
+// ============================================
+// AUTH FUNCTIONS
+// ============================================
+
+/**
+ * Verificar compañía por nombre
+ * GET /core/CheckCompany/companyname/{companyName}
+ */
+export async function checkCompany(companyName: string) {
+    const response = await apiClient.get(`/core/CheckCompany/companyname/${encodeURIComponent(companyName)}`);
+    return response.data?.Data || response.data;
+}
+
+/**
+ * Login de usuario
+ * POST /core/Login
+ */
+export async function loginUser(params: LoginParams) {
+    const { email, password, tenantId } = params;
+
+    const response = await apiClient.post('/core/Login', {
+        Email: email,
+        userName: null,
+        Password: password,
+        RememberMe: false,
+        Tenant: tenantId,
+    });
+
+    const data = response.data?.Data || response.data;
+
+    // ✅ CORREGIDO: El token está en AuthenticationInfo.Token
+    const token = data?.AuthenticationInfo?.Token;
+
+    if (token) {
+        await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, token);
+        console.log('✅ Token guardado correctamente');
+    } else {
+        console.warn('⚠️ No se encontró token en la respuesta');
+    }
+
+    // Opcional: Guardar datos del usuario
+    if (data?.CustomerInfo) {
+        await SecureStore.setItemAsync(
+            STORAGE_KEYS.USER_DATA,
+            JSON.stringify({
+                userId: data.AuthenticationInfo?.UserId,
+                email: data.AuthenticationInfo?.Email,
+                fullName: data.CustomerInfo?.FullName,
+                customerId: data.CustomerInfo?.CustomerId,
+                companies: data.CustomerInfo?.Companies,
+                warehouses: data.CustomerInfo?.Warehouses,
+            })
+        );
+    }
+
+    return data;
+}
+
+/**
+ * Logout
+ */
+export async function logout() {
+    await SecureStore.deleteItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+    await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+    await SecureStore.deleteItemAsync(STORAGE_KEYS.TENANT_ID);
+}
 
 // ============================================
 // Storage helpers
@@ -156,8 +229,5 @@ export const getErrorMessage = (error: unknown): string => {
     if (error instanceof Error) return error.message;
     return 'Error desconocido';
 };
-
-// Log inicial
-logApiConfig();
 
 export default apiClient;
