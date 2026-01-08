@@ -1,16 +1,9 @@
 // app/(auth)/company.tsx
 import { useState } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Alert,
-    StyleSheet,
-    StatusBar,
+    View, Text, TextInput, TouchableOpacity, ActivityIndicator,
+    KeyboardAvoidingView, Platform, Alert, StyleSheet, StatusBar, Image,
+    ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,7 +20,6 @@ export default function CompanyScreen() {
             Alert.alert('Error', 'Ingresa el nombre de la compañía');
             return;
         }
-
         try {
             await checkCompany(company.trim());
             router.push('/(auth)/login');
@@ -37,273 +29,268 @@ export default function CompanyScreen() {
     };
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
-        >
-            <StatusBar barStyle="light-content" backgroundColor={COLORS.bg.primary} />
-            <View style={styles.content}>
-                {/* Header */}
-                <View style={styles.header}>
-                    {/* Logo */}
-                    <View style={styles.logoContainer}>
-                        <View style={styles.logoOuter}>
-                            <View style={styles.logoInner}>
-                                <View style={styles.logoBlue} />
-                                <View style={styles.logoGreen} />
-                                <View style={styles.logoDark} />
-                                <View style={styles.dot1} />
-                                <View style={styles.dot2} />
-                                <View style={styles.dot3} />
-                            </View>
-                        </View>
-                    </View>
+        <View style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#0a0f1a" />
 
-                    <Text style={styles.appName}>Clubes de Mercancías</Text>
-                    <Text style={styles.subtitle}>Ingresa tu compañía para continuar</Text>
-                </View>
+            {/* Fondo con gradiente sutil */}
+            <View style={styles.backgroundGlow} />
 
-                {/* Form */}
-                <View style={styles.form}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Nombre de la compañía</Text>
-                        <View style={[
-                            styles.inputContainer,
-                            isFocused && styles.inputContainerFocused
-                        ]}>
-                            <View style={styles.inputIconContainer}>
-                                <Ionicons
-                                    name="business"
-                                    size={18}
-                                    color={isFocused ? COLORS.accent.blue : COLORS.text.muted}
-                                />
-                            </View>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Ej: Cochez"
-                                placeholderTextColor={COLORS.text.muted}
-                                value={company}
-                                onChangeText={(text) => {
-                                    setCompany(text);
-                                    if (error) clearError();
-                                }}
-                                onFocus={() => setIsFocused(true)}
-                                onBlur={() => setIsFocused(false)}
-                                autoCapitalize="none"
-                                autoCorrect={false}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardView}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    {/* Header / Branding */}
+                    <View style={styles.brandingSection}>
+                        <View style={styles.logoWrapper}>
+                            <Image
+                                source={require('../../assets/icon.png')}
+                                style={styles.logo}
+                                resizeMode="contain"
                             />
                         </View>
+
+                        <Text style={styles.brandName}>Clubes de Mercancías</Text>
+                        <Text style={styles.tagline}>Sistema de gestión empresarial</Text>
                     </View>
 
-                    {error && (
-                        <View style={styles.errorContainer}>
-                            <Ionicons name="alert-circle" size={18} color={COLORS.status.error} />
-                            <Text style={styles.errorText}>{error}</Text>
+                    {/* Card del formulario */}
+                    <View style={styles.formCard}>
+                        <View style={styles.formHeader}>
+                            <View style={styles.stepIndicator}>
+                                <Text style={styles.stepNumber}>1</Text>
+                            </View>
+                            <View>
+                                <Text style={styles.formTitle}>Identifica tu empresa</Text>
+                                <Text style={styles.formSubtitle}>Ingresa el código de tu compañía</Text>
+                            </View>
                         </View>
-                    )}
 
-                    <TouchableOpacity
-                        style={[styles.continueButton, isLoading && styles.continueButtonDisabled]}
-                        onPress={handleContinue}
-                        disabled={isLoading}
-                        activeOpacity={0.8}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator color={COLORS.white} />
-                        ) : (
-                            <>
-                                <Text style={styles.continueButtonText}>Continuar</Text>
-                                <View style={styles.buttonArrow}>
-                                    <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
-                                </View>
-                            </>
+                        {/* Input */}
+                        <View style={styles.inputWrapper}>
+                            <Text style={styles.inputLabel}>Código de empresa</Text>
+                            <View style={[
+                                styles.inputContainer,
+                                isFocused && styles.inputFocused
+                            ]}>
+                                <Ionicons
+                                    name="business-outline"
+                                    size={20}
+                                    color={isFocused ? COLORS.accent.blue : COLORS.text.muted}
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Ej: cochez"
+                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    value={company}
+                                    onChangeText={(text) => {
+                                        setCompany(text);
+                                        if (error) clearError();
+                                    }}
+                                    onFocus={() => setIsFocused(true)}
+                                    onBlur={() => setIsFocused(false)}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                                {company.length > 0 && (
+                                    <TouchableOpacity onPress={() => setCompany('')}>
+                                        <Ionicons name="close-circle" size={20} color={COLORS.text.muted} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </View>
+
+                        {/* Error */}
+                        {error && (
+                            <View style={styles.errorBox}>
+                                <Ionicons name="alert-circle" size={18} color="#ef4444" />
+                                <Text style={styles.errorText}>{error}</Text>
+                            </View>
                         )}
-                    </TouchableOpacity>
-                </View>
 
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <View style={styles.infoCard}>
-                        <View style={styles.infoIconContainer}>
-                            <Ionicons name="information-circle" size={20} color={COLORS.accent.cyan} />
+                        {/* Continue Button */}
+                        <TouchableOpacity
+                            style={[styles.continueBtn, isLoading && styles.continueBtnDisabled]}
+                            onPress={handleContinue}
+                            disabled={isLoading}
+                            activeOpacity={0.85}
+                        >
+                            {isLoading ? (
+                                <ActivityIndicator color="#fff" size="small" />
+                            ) : (
+                                <>
+                                    <Text style={styles.continueBtnText}>Continuar</Text>
+                                    <View style={styles.continueBtnIcon}>
+                                        <Ionicons name="arrow-forward" size={18} color="#fff" />
+                                    </View>
+                                </>
+                            )}
+                        </TouchableOpacity>
+
+                        {/* Info tip */}
+                        <View style={styles.infoTip}>
+                            <Ionicons name="information-circle-outline" size={16} color={COLORS.text.muted} />
+                            <Text style={styles.infoTipText}>
+                                El código fue proporcionado por tu administrador
+                            </Text>
                         </View>
-                        <Text style={styles.infoText}>
-                            Ingresa el identificador único de tu empresa para acceder al sistema.
-                        </Text>
                     </View>
-                </View>
-            </View>
-        </KeyboardAvoidingView>
+
+                    {/* Footer */}
+                    <View style={styles.footer}>
+                        <View style={styles.securityIndicator}>
+                            <View style={styles.securityDot} />
+                            <Text style={styles.securityText}>Conexión cifrada SSL</Text>
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bg.primary,
+        backgroundColor: '#0a0f1a',
     },
-    content: {
+    backgroundGlow: {
+        position: 'absolute',
+        top: -100,
+        left: '50%',
+        marginLeft: -200,
+        width: 400,
+        height: 400,
+        borderRadius: 200,
+        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    },
+    keyboardView: {
         flex: 1,
-        justifyContent: 'center',
+    },
+    scrollContent: {
+        flexGrow: 1,
         paddingHorizontal: 24,
+        paddingTop: 60,
+        paddingBottom: 40,
     },
 
-    // Header
-    header: {
+    // Branding
+    brandingSection: {
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 32,
     },
-    logoContainer: {
-        marginBottom: 24,
+    logoWrapper: {
+        marginBottom: 16,
     },
-    logoOuter: {
-        width: 110,
-        height: 110,
-        borderRadius: 28,
-        backgroundColor: COLORS.bg.card,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: COLORS.border.default,
+    logo: {
+        width: 100,
+        height: 100,
     },
-    logoInner: {
-        width: 80,
-        height: 80,
-        position: 'relative',
-    },
-    logoBlue: {
-        position: 'absolute',
-        top: 2,
-        left: 2,
-        width: 36,
-        height: 44,
-        backgroundColor: COLORS.accent.blue,
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 18,
-        borderBottomLeftRadius: 4,
-    },
-    logoGreen: {
-        position: 'absolute',
-        top: 18,
-        left: 22,
-        width: 36,
-        height: 44,
-        backgroundColor: COLORS.accent.green,
-        borderBottomLeftRadius: 18,
-        borderBottomRightRadius: 8,
-        borderTopRightRadius: 4,
-    },
-    logoDark: {
-        position: 'absolute',
-        bottom: 2,
-        right: 6,
-        width: 32,
-        height: 36,
-        backgroundColor: COLORS.bg.elevated,
-        borderRadius: 8,
-        borderTopLeftRadius: 18,
-    },
-    dot1: {
-        position: 'absolute',
-        top: 10,
-        right: 18,
-        width: 10,
-        height: 10,
-        backgroundColor: COLORS.accent.cyan,
-        borderRadius: 5,
-    },
-    dot2: {
-        position: 'absolute',
-        top: 26,
-        right: 10,
-        width: 7,
-        height: 7,
-        backgroundColor: COLORS.bg.card,
-        borderRadius: 4,
-        borderWidth: 1.5,
-        borderColor: COLORS.text.muted,
-    },
-    dot3: {
-        position: 'absolute',
-        top: 38,
-        right: 22,
-        width: 9,
-        height: 9,
-        backgroundColor: COLORS.accent.green,
-        borderRadius: 5,
-    },
-    appName: {
-        fontSize: 24,
+    brandName: {
+        fontSize: 22,
         fontWeight: '700',
-        color: COLORS.text.primary,
-        marginBottom: 8,
-        textAlign: 'center',
-        letterSpacing: -0.5,
+        color: '#fff',
+        marginBottom: 6,
+        letterSpacing: -0.3,
     },
-    subtitle: {
+    tagline: {
         fontSize: 14,
-        color: COLORS.text.secondary,
-        textAlign: 'center',
+        color: COLORS.text.muted,
     },
 
-    // Form
-    form: {
-        gap: 16,
+    // Form Card
+    formCard: {
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderRadius: 24,
+        padding: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.06)',
     },
-    inputGroup: {
-        marginBottom: 4,
+    formHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        marginBottom: 28,
     },
-    label: {
-        fontSize: 13,
+    stepIndicator: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        backgroundColor: COLORS.accent.blue,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    stepNumber: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    formTitle: {
+        fontSize: 18,
         fontWeight: '600',
+        color: '#fff',
+        marginBottom: 2,
+    },
+    formSubtitle: {
+        fontSize: 13,
+        color: COLORS.text.muted,
+    },
+
+    // Inputs
+    inputWrapper: {
+        marginBottom: 20,
+    },
+    inputLabel: {
+        fontSize: 13,
+        fontWeight: '500',
         color: COLORS.text.secondary,
         marginBottom: 8,
         marginLeft: 4,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.card,
+        backgroundColor: 'rgba(255,255,255,0.04)',
         borderRadius: 14,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        gap: 12,
         borderWidth: 1.5,
-        borderColor: COLORS.border.default,
+        borderColor: 'rgba(255,255,255,0.06)',
     },
-    inputContainerFocused: {
+    inputFocused: {
         borderColor: COLORS.accent.blue,
-        backgroundColor: COLORS.bg.secondary,
-    },
-    inputIconContainer: {
-        width: 44,
-        height: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 4,
+        backgroundColor: 'rgba(59, 130, 246, 0.06)',
     },
     input: {
         flex: 1,
-        paddingVertical: 16,
-        paddingRight: 16,
         fontSize: 16,
-        color: COLORS.text.primary,
+        color: '#fff',
+        padding: 0,
     },
-    errorContainer: {
+
+    // Error
+    errorBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.status.errorBg,
-        borderWidth: 1,
-        borderColor: 'rgba(239, 68, 68, 0.3)',
-        borderRadius: 12,
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
         padding: 12,
+        borderRadius: 12,
         gap: 10,
+        marginBottom: 8,
     },
     errorText: {
-        color: COLORS.status.error,
+        color: '#ef4444',
         fontSize: 13,
         flex: 1,
     },
-    continueButton: {
+
+    // Continue Button
+    continueBtn: {
         backgroundColor: COLORS.accent.blue,
         borderRadius: 14,
         paddingVertical: 16,
@@ -311,51 +298,56 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        marginTop: 8,
+        marginBottom: 16,
     },
-    continueButtonDisabled: {
+    continueBtnDisabled: {
         opacity: 0.6,
     },
-    continueButtonText: {
-        color: COLORS.white,
+    continueBtnText: {
+        color: '#fff',
         fontSize: 16,
         fontWeight: '600',
     },
-    buttonArrow: {
-        width: 24,
-        height: 24,
+    continueBtnIcon: {
+        width: 28,
+        height: 28,
         borderRadius: 8,
         backgroundColor: 'rgba(255,255,255,0.2)',
-        justifyContent: 'center',
         alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    // Info tip
+    infoTip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+    },
+    infoTipText: {
+        color: COLORS.text.muted,
+        fontSize: 12,
     },
 
     // Footer
     footer: {
+        alignItems: 'center',
         marginTop: 32,
     },
-    infoCard: {
+    securityIndicator: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.card,
-        borderRadius: 12,
-        padding: 14,
-        gap: 12,
-        borderWidth: 1,
-        borderColor: COLORS.border.default,
+        gap: 8,
     },
-    infoIconContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        backgroundColor: 'rgba(6, 182, 212, 0.12)',
-        justifyContent: 'center',
-        alignItems: 'center',
+    securityDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: COLORS.accent.green,
     },
-    infoText: {
-        flex: 1,
-        color: COLORS.text.secondary,
-        fontSize: 13,
-        lineHeight: 18,
+    securityText: {
+        color: COLORS.text.muted,
+        fontSize: 12,
+        fontWeight: '500',
     },
 });
