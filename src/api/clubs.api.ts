@@ -1,5 +1,12 @@
-// src/api/clubs.api.ts - ACTUALIZADO
+// src/api/clubs.api.ts - CON IDs REALES
 import { mdl05Client } from './client';
+import {
+    mockClubTypes,
+    mockDenominations,
+    mockClubStatuses,
+    mockTransactionTypes,
+    DEFAULT_VALUES,
+} from '../data/mockData';
 import type {
     Club, ClubFilters, PaginatedClubs, CreateClubDTO, UpdateClubDTO,
     ClubType, ClubStatus, Denomination, ClubWeek, ClubTransaction,
@@ -8,27 +15,7 @@ import type {
 
 const BASE = '/mdl05';
 
-// Mock data para catálogos (mientras no haya endpoint real)
-const mockClubTypes: ClubType[] = [
-    { clubTypeId: '1', name: 'Miércoles', drawDay: 'wednesday', active: true },
-    { clubTypeId: '2', name: 'Domingo', drawDay: 'sunday', active: true },
-    { clubTypeId: '3', name: 'Combinado', drawDay: 'combined', active: true },
-];
-
-const mockDenominations: Denomination[] = [
-    { denominationId: '1', value: 3, description: '$3 semanal', active: true },
-    { denominationId: '2', value: 5, description: '$5 semanal', active: true },
-    { denominationId: '3', value: 10, description: '$10 semanal', active: true },
-];
-
-const mockStatuses: ClubStatus[] = [
-    { clubStatusId: '1', name: 'Activo', color: '#22c55e' },
-    { clubStatusId: '2', name: 'Anulado', color: '#ef4444' },
-    { clubStatusId: '3', name: 'Cerrado', color: '#6b7280' },
-    { clubStatusId: '4', name: 'En Auditoría', color: '#f59e0b' },
-];
-
-// Mapper para transformar respuesta del API a nuestro tipo
+// Mapper para transformar respuesta del API
 const mapClubResponse = (c: any): Club => ({
     clubId: c.ClubId || c.clubId || '',
     contractNumber: c.ContractNumber || c.contractNumber || '',
@@ -73,33 +60,17 @@ export const clubApi = {
             };
 
             console.log('📤 Buscando clubes:', payload);
-
             const { data: response } = await mdl05Client.post(`${BASE}/club/history`, payload);
-
-            console.log('📥 Respuesta recibida:', {
-                hasData: !!response.Data,
-                length: response.Data?.length || 0,
-            });
 
             const dataArray = response.Data || response || [];
             const clubs: Club[] = dataArray.map(mapClubResponse);
             const total = dataArray[0]?.TotalRegisters || response.TotalRegisters || clubs.length;
 
-            return {
-                data: clubs,
-                total,
-                page,
-                pageSize,
-                totalPages: Math.ceil(total / pageSize),
-            };
+            console.log(`✅ Clubes obtenidos: ${clubs.length} de ${total}`);
+
+            return { data: clubs, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
         } catch (error: any) {
             console.error('❌ Error en getClubs:', error.message);
-
-            // Si es error 400, loguear más detalles
-            if (error.response?.status === 400) {
-                console.error('📋 Detalles del error 400:', error.response?.data);
-            }
-
             return { data: [], total: 0, page, pageSize, totalPages: 0 };
         }
     },
@@ -115,18 +86,23 @@ export const clubApi = {
     },
 
     async createClub(dto: CreateClubDTO): Promise<Club> {
+        // Formato exacto que espera el API
         const payload = {
-            saaSId: dto.saaSId || 2,
+            saaSId: dto.saaSId || DEFAULT_VALUES.saaSId,
             ClubTypeId: dto.clubTypeId,
             CustomerId: dto.customerId,
-            SalesAgentId: dto.salesAgentId,
+            SalesAgentId: dto.salesAgentId || DEFAULT_VALUES.salesAgentId,
             DenominationId: dto.denominationId,
-            StoreId: dto.storeId,
+            StoreId: dto.storeId || DEFAULT_VALUES.storeId,
             Share: dto.share,
             StartDate: dto.startDate,
         };
-        console.log('📤 Creando club:', payload);
+
+        console.log('🚀 Creando club con payload:', JSON.stringify(payload, null, 2));
+
         const { data } = await mdl05Client.post(`${BASE}/createClub`, payload);
+
+        console.log('✅ Club creado:', data);
         return mapClubResponse(data);
     },
 
@@ -166,23 +142,27 @@ export const clubApi = {
     },
 
     // ==========================================
-    // CATÁLOGOS
+    // CATÁLOGOS - Usando IDs reales de la BD
     // ==========================================
     async getClubTypes(): Promise<ClubType[]> {
-        // TODO: Reemplazar con endpoint real cuando esté disponible
+        // Retornamos los tipos con IDs reales de la BD
         return Promise.resolve(mockClubTypes);
     },
 
     async getClubStatuses(): Promise<ClubStatus[]> {
-        return Promise.resolve(mockStatuses);
+        return Promise.resolve(mockClubStatuses);
     },
 
     async getDenominations(): Promise<Denomination[]> {
         return Promise.resolve(mockDenominations);
     },
 
+    async getTransactionTypes(): Promise<any[]> {
+        return Promise.resolve(mockTransactionTypes);
+    },
+
     // ==========================================
-    // STATS
+    // STATS & HISTORY
     // ==========================================
     async getClubStats(clubId: string): Promise<ClubStats> {
         const { data } = await mdl05Client.get(`${BASE}/getClubStats/${clubId}`);
@@ -192,6 +172,24 @@ export const clubApi = {
     async getClubHistory(clubId: string): Promise<any[]> {
         const { data } = await mdl05Client.get(`${BASE}/getClubHistory/${clubId}`);
         return data || [];
+    },
+
+    // ==========================================
+    // BÚSQUEDA DE CLIENTES
+    // ==========================================
+    async searchCustomers(searchText: string): Promise<any[]> {
+        try {
+            // Este endpoint puede variar según tu API
+            const { data } = await mdl05Client.post(`/core/searchCustomers/post`, {
+                SearchText: searchText,
+                PageNumber: 1,
+                PageSize: 20,
+            });
+            return data?.Data || [];
+        } catch (error) {
+            console.error('Error buscando clientes:', error);
+            return [];
+        }
     },
 
     // ==========================================

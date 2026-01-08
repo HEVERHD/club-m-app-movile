@@ -1,6 +1,8 @@
-// ============================================================
-// ARCHIVO 1: src/types/club.ts
-// ============================================================
+// src/types/club.ts - ACTUALIZADO
+
+// ==========================================
+// Entidades principales
+// ==========================================
 
 export interface Club {
     clubId: string;
@@ -54,11 +56,16 @@ export interface ClubTransaction {
     createdBy: string;
 }
 
+// ==========================================
+// Catálogos
+// ==========================================
+
 export interface ClubType {
     clubTypeId: string;
     name: string;
     description?: string;
-    drawDay: string;
+    drawDay?: string;
+    weeksCount?: number;
     active: boolean;
 }
 
@@ -67,6 +74,7 @@ export interface ClubStatus {
     name: string;
     description?: string;
     color?: string;
+    active?: boolean;
 }
 
 export interface Denomination {
@@ -79,8 +87,14 @@ export interface Denomination {
 export interface TransactionType {
     transactionTypeId: string;
     name: string;
+    description?: string;
     isCredit: boolean;
+    active?: boolean;
 }
+
+// ==========================================
+// Reglas y Configuración
+// ==========================================
 
 export interface ClubRule {
     ruleId: string;
@@ -98,6 +112,10 @@ export interface LimitNumber {
     currentCount: number;
 }
 
+// ==========================================
+// Sorteos
+// ==========================================
+
 export interface Draw {
     drawId: string;
     clubTypeId: string;
@@ -113,6 +131,10 @@ export interface DrawWinner {
     customerName: string;
     prizeAmount: number;
 }
+
+// ==========================================
+// DTOs y Filtros
+// ==========================================
 
 export interface ClubFilters {
     search?: string;
@@ -162,6 +184,10 @@ export interface CreateTransactionDTO {
     description?: string;
 }
 
+// ==========================================
+// Stats
+// ==========================================
+
 export interface ClubStats {
     totalPaid: number;
     totalRetired: number;
@@ -171,4 +197,18 @@ export interface ClubStats {
     weeksPending: number;
     nextPaymentDate?: string;
     estimatedPrize?: number;
+}
+
+// ==========================================
+// Customer (para búsqueda)
+// ==========================================
+
+export interface Customer {
+    customerId: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    email?: string;
+    phone?: string;
+    identificationNumber?: string;
 }
