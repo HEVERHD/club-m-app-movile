@@ -2,32 +2,40 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../../src/constants/colors';
 
 export default function TabsLayout() {
+    const insets = useSafeAreaInsets();
+    
+    // Calcular altura del tab bar considerando safe area
+    const tabBarHeight = Platform.OS === 'ios' ? 50 + insets.bottom : 60 + insets.bottom;
+
     return (
         <Tabs
             screenOptions={{
                 headerShown: false,
                 tabBarStyle: {
-                    backgroundColor: COLORS.bg.secondary,
-                    borderTopColor: COLORS.border.default,
+                    backgroundColor: COLORS.bg.card,
+                    borderTopColor: COLORS.border.light,
                     borderTopWidth: 1,
-                    height: Platform.OS === 'ios' ? 85 : 65,
-                    paddingBottom: Platform.OS === 'ios' ? 28 : 10,
-                    paddingTop: 10,
-                    elevation: 0,
-                    shadowOpacity: 0,
+                    height: tabBarHeight,
+                    paddingBottom: insets.bottom + 5,
+                    paddingTop: 8,
+                    elevation: 8,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: -2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
                 },
                 tabBarActiveTintColor: COLORS.accent.blue,
-                tabBarInactiveTintColor: COLORS.text.muted,
+                tabBarInactiveTintColor: COLORS.text.secondary,
                 tabBarLabelStyle: {
                     fontSize: 11,
                     fontWeight: '600',
-                    marginTop: 4,
                 },
                 tabBarIconStyle: {
-                    marginTop: 4,
+                    marginTop: 2,
                 },
             }}
         >
@@ -38,7 +46,7 @@ export default function TabsLayout() {
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? 'home' : 'home-outline'}
-                            size={24}
+                            size={22}
                             color={color}
                         />
                     ),
@@ -51,7 +59,7 @@ export default function TabsLayout() {
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? 'people' : 'people-outline'}
-                            size={24}
+                            size={22}
                             color={color}
                         />
                     ),
@@ -64,7 +72,7 @@ export default function TabsLayout() {
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? 'person' : 'person-outline'}
-                            size={24}
+                            size={22}
                             color={color}
                         />
                     ),

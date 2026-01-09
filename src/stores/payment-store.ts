@@ -1,0 +1,207 @@
+// src/stores/payment-store.ts
+// Crear este archivo en: src/stores/payment-store.ts
+
+import { create } from 'zustand';
+import { paymentsApi, ClubDetail, ClubWeek } from '../api/payments.api';
+
+interface PaymentState {
+    // Club detail
+    clubDetail: ClubDetail | null;
+    isLoadingDetail: boolean;
+    detailError: string | null;
+
+    // Selected weeks for payment
+    selectedWeeks: number[];
+
+    // Payment process
+    isProcessingPayment: boolean;
+    paymentError: string | null;
+    paymentSuccess: boolean;
+    lastPaymentResult: {
+        transactionId: string;
+        amount: number;
+        weeksCount: number;
+    } | null;
+
+    // Cancel process
+    isCancelling: boolean;
+    cancelError: string | null;
+
+    // Actions
+    fetchClubDetail: (clubId: string) => Promise<void>;
+    toggleWeekSelection: (weekNumber: number) => void;
+    selectAllUnpaidWeeks: () => void;
+    selectWeeksUpTo: (weekNumber: number) => void;
+    clearSelection: () => void;
+    processPayment: (clubId: string, comment?: string) => Promise<boolean>;
+    cancelClub: (clubId: string) => Promise<boolean>;
+    reset: () => void;
+
+    // Computed (helpers)
+    getSelectedAmount: () => number;
+    getUnpaidWeeks: () => ClubWeek[];
+}
+
+const MAX_WEEKS_ADVANCE = 25; // Máximo semanas por adelantado permitidas
+
+const initialState = {
+    clubDetail: null,
+    isLoadingDetail: false,
+    detailError: null,
+    selectedWeeks: [],
+    isProcessingPayment: false,
+    paymentError: null,
+    paymentSuccess: false,
+    lastPaymentResult: null,
+    isCancelling: false,
+    cancelError: null,
+};
+
+export const usePaymentStore = create<PaymentState>((set, get) => ({
+    ...initialState,
+
+    fetchClubDetail: async (clubId: string) => {
+        set({ isLoadingDetail: true, detailError: null });
+
+        try {
+            const detail = await paymentsApi.getClubDetail(clubId);
+            set({
+                clubDetail: detail,
+                isLoadingDetail: false,
+                selectedWeeks: [], // Reset selection when loading new club
+            });
+        } catch (error: any) {
+            console.error('❌ Error fetching club detail:', error);
+            set({
+                detailError: error.message || 'Error al cargar el club',
+                isLoadingDetail: false,
+            });
+        }
+    },
+
+    toggleWeekSelection: (weekNumber: number) => {
+        const { selectedWeeks, clubDetail } = get();
+
+        // Verificar que la semana no esté pagada
+        const week = clubDetail?.weeks.find(w => w.weekNumber === weekNumber);
+        if (week?.status === 'paid') return;
+
+        if (selectedWeeks.includes(weekNumber)) {
+            set({ selectedWeeks: selectedWeeks.filter(w => w !== weekNumber) });
+        } else {
+            // Verificar límite de 25 semanas
+            if (selectedWeeks.length >= MAX_WEEKS_ADVANCE) {
+                return; // No permitir más de 25
+            }
+            set({ selectedWeeks: [...selectedWeeks, weekNumber].sort((a, b) => a - b) });
+        }
+    },
+
+    selectAllUnpaidWeeks: () => {
+        const { clubDetail } = get();
+        if (!clubDetail) return;
+
+        // Limitar a MAX_WEEKS_ADVANCE semanas
+        const unpaidWeekNumbers = clubDetail.weeks
+            .filter(w => w.status !== 'paid')
+            .slice(0, MAX_WEEKS_ADVANCE)
+            .map(w => w.weekNumber);
+
+        set({ selectedWeeks: unpaidWeekNumbers });
+    },
+
+    selectWeeksUpTo: (weekNumber: number) => {
+        const { clubDetail } = get();
+        if (!clubDetail) return;
+
+        const weeksToSelect = clubDetail.weeks
+            .filter(w => w.status !== 'paid' && w.weekNumber <= weekNumber)
+            .map(w => w.weekNumber);
+
+        set({ selectedWeeks: weeksToSelect });
+    },
+
+    clearSelection: () => {
+        set({ selectedWeeks: [] });
+    },
+
+    processPayment: async (clubId: string, comment?: string) => {
+        const { selectedWeeks, clubDetail } = get();
+
+        if (selectedWeeks.length === 0 || !clubDetail) {
+            set({ paymentError: 'Selecciona al menos una semana' });
+            return false;
+        }
+
+        const amount = selectedWeeks.length * clubDetail.denomination;
+
+        set({ isProcessingPayment: true, paymentError: null, paymentSuccess: false });
+
+        try {
+            const result = await paymentsApi.registerPayment(
+                clubId,
+                amount,
+                selectedWeeks.length,
+                comment
+            );
+
+            set({
+                isProcessingPayment: false,
+                paymentSuccess: true,
+                lastPaymentResult: {
+                    transactionId: result.transactionId,
+                    amount,
+                    weeksCount: selectedWeeks.length,
+                },
+                selectedWeeks: [],
+            });
+
+            // Recargar detalle del club para actualizar semanas
+            await get().fetchClubDetail(clubId);
+
+            return true;
+        } catch (error: any) {
+            console.error('❌ Error processing payment:', error);
+            set({
+                isProcessingPayment: false,
+                paymentError: error.message || 'Error al procesar el pago',
+            });
+            return false;
+        }
+    },
+
+    reset: () => {
+        set(initialState);
+    },
+
+    cancelClub: async (clubId: string) => {
+        set({ isCancelling: true, cancelError: null });
+
+        try {
+            const result = await paymentsApi.cancelClub(clubId);
+
+            set({ isCancelling: false });
+
+            return true;
+        } catch (error: any) {
+            console.error('❌ Error cancelling club:', error);
+            set({
+                isCancelling: false,
+                cancelError: error.message || 'Error al cancelar el club',
+            });
+            return false;
+        }
+    },
+
+    getSelectedAmount: () => {
+        const { selectedWeeks, clubDetail } = get();
+        if (!clubDetail) return 0;
+        return selectedWeeks.length * clubDetail.denomination;
+    },
+
+    getUnpaidWeeks: () => {
+        const { clubDetail } = get();
+        if (!clubDetail) return [];
+        return clubDetail.weeks.filter(w => w.status !== 'paid');
+    },
+}));

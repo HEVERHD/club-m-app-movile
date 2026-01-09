@@ -6,12 +6,12 @@
     "orientation": "portrait",
     "scheme": "clubmercancias",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a5fb4"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.clubmercancias.app"
@@ -23,7 +23,7 @@
       "versionCode": 61785,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1a5fb4"
       },
       "permissions": [
         "android.permission.POST_NOTIFICATIONS"

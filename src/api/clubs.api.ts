@@ -1,4 +1,4 @@
-// src/api/clubs.api.ts - CON IDs REALES
+// src/api/clubs.api.ts - OPTIMIZADO PARA LENTITUD DEL BACKEND
 import { mdl05Client } from './client';
 import {
     mockClubTypes,
@@ -15,7 +15,31 @@ import type {
 
 const BASE = '/mdl05';
 
-// Mapper para transformar respuesta del API
+// ============================================
+// CACHE LOCAL EN MEMORIA
+// ============================================
+interface ClubCache {
+    data: Club[];
+    timestamp: number;
+    totalRegisters: number;
+}
+
+let clubsCache: ClubCache | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+const isCacheValid = (): boolean => {
+    if (!clubsCache) return false;
+    return Date.now() - clubsCache.timestamp < CACHE_DURATION;
+};
+
+export const clearClubsCache = () => {
+    clubsCache = null;
+    console.log('🗑️ Cache de clubes limpiado');
+};
+
+// ============================================
+// MAPPER
+// ============================================
 const mapClubResponse = (c: any): Club => ({
     clubId: c.ClubId || c.clubId || '',
     contractNumber: c.ContractNumber || c.contractNumber || '',
@@ -46,47 +70,142 @@ const mapClubResponse = (c: any): Club => ({
     active: (c.NameStatus || c.statusName || '').toLowerCase() === 'activo',
 });
 
+// ============================================
+// HELPER: Retry con backoff
+// ============================================
+const fetchWithRetry = async <T>(
+    fn: () => Promise<T>,
+    retries = 2,
+    delay = 2000
+): Promise<T> => {
+    try {
+        return await fn();
+    } catch (error: any) {
+        if (retries > 0 && (!error.response || error.code === 'ECONNABORTED')) {
+            console.log(`🔄 Reintentando... (${retries} intentos restantes)`);
+            await new Promise(r => setTimeout(r, delay));
+            return fetchWithRetry(fn, retries - 1, delay * 1.5);
+        }
+        throw error;
+    }
+};
+
+// ============================================
+// API
+// ============================================
 export const clubApi = {
     // ==========================================
-    // CLUBES
+    // CLUBES - CON CACHE
     // ==========================================
-    async getClubs(filters: ClubFilters = {}, page = 1, pageSize = 20): Promise<PaginatedClubs> {
+    async getClubs(filters: ClubFilters = {}, page = 1, pageSize = 20, forceRefresh = false): Promise<PaginatedClubs> {
         try {
+            const hasFilters = filters.search || filters.status;
+
+            // Usar cache si es válido y no hay filtros y no es refresh forzado
+            if (!forceRefresh && !hasFilters && isCacheValid() && clubsCache) {
+                console.log('📦 Usando cache de clubes');
+                const start = (page - 1) * pageSize;
+                const paginatedData = clubsCache.data.slice(start, start + pageSize);
+
+                return {
+                    data: paginatedData,
+                    total: clubsCache.totalRegisters,
+                    page,
+                    pageSize,
+                    totalPages: Math.ceil(clubsCache.totalRegisters / pageSize),
+                };
+            }
+
             const payload = {
                 SearchText: filters.search || '',
-                PageNumber: page,
-                PageSize: pageSize,
+                PageNumber: 1, // Siempre pedir desde el inicio para cache
+                PageSize: 100, // Pedir más para cachear
                 Status: filters.status || null,
             };
 
-            console.log('📤 Buscando clubes:', payload);
-            const { data: response } = await mdl05Client.post(`${BASE}/club/history`, payload);
+            console.log('📤 Buscando clubes (puede tardar)...', payload);
+
+            const { data: response } = await fetchWithRetry(() =>
+                mdl05Client.post(`${BASE}/club/history`, payload)
+            );
 
             const dataArray = response.Data || response || [];
             const clubs: Club[] = dataArray.map(mapClubResponse);
             const total = dataArray[0]?.TotalRegisters || response.TotalRegisters || clubs.length;
 
-            console.log(`✅ Clubes obtenidos: ${clubs.length} de ${total}`);
+            // Guardar en cache si no hay filtros
+            if (!hasFilters) {
+                clubsCache = {
+                    data: clubs,
+                    timestamp: Date.now(),
+                    totalRegisters: total,
+                };
+                console.log(`✅ Cache actualizado: ${clubs.length} clubes`);
+            }
 
-            return { data: clubs, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+            // Paginar desde cache
+            const start = (page - 1) * pageSize;
+            const paginatedData = clubs.slice(start, start + pageSize);
+
+            console.log(`✅ Clubes obtenidos: ${paginatedData.length} de ${total}`);
+
+            return {
+                data: paginatedData,
+                total,
+                page,
+                pageSize,
+                totalPages: Math.ceil(total / pageSize)
+            };
         } catch (error: any) {
             console.error('❌ Error en getClubs:', error.message);
+
+            // Si falla pero hay cache, usar cache aunque esté expirado
+            if (clubsCache && clubsCache.data.length > 0) {
+                console.log('⚠️ Usando cache expirado por error de red');
+                const start = (page - 1) * pageSize;
+                const paginatedData = clubsCache.data.slice(start, start + pageSize);
+
+                return {
+                    data: paginatedData,
+                    total: clubsCache.totalRegisters,
+                    page,
+                    pageSize,
+                    totalPages: Math.ceil(clubsCache.totalRegisters / pageSize),
+                };
+            }
+
             return { data: [], total: 0, page, pageSize, totalPages: 0 };
         }
     },
 
+    // Obtener club por ID desde cache o API
     async getClubById(clubId: string): Promise<Club | null> {
+        // Primero buscar en cache
+        if (clubsCache?.data) {
+            const cached = clubsCache.data.find(c => c.clubId === clubId);
+            if (cached) {
+                console.log('📦 Club encontrado en cache');
+                return cached;
+            }
+        }
+
+        // Si no está en cache, buscar en API
         try {
-            const { data } = await mdl05Client.get(`${BASE}/getClub/${clubId}`);
-            return data ? mapClubResponse(data) : null;
+            const result = await this.getClubs({ search: '' }, 1, 100);
+            return result.data.find(c => c.clubId === clubId) || null;
         } catch (error) {
             console.error('Error en getClubById:', error);
             return null;
         }
     },
 
+    // Forzar recarga del cache
+    async refreshClubs(): Promise<PaginatedClubs> {
+        clearClubsCache();
+        return this.getClubs({}, 1, 20, true);
+    },
+
     async createClub(dto: CreateClubDTO): Promise<Club> {
-        // Formato exacto que espera el API
         const payload = {
             saaSId: dto.saaSId || DEFAULT_VALUES.saaSId,
             ClubTypeId: dto.clubTypeId,
@@ -102,50 +221,28 @@ export const clubApi = {
 
         const { data } = await mdl05Client.post(`${BASE}/createClub`, payload);
 
+        // Limpiar cache para que recargue con el nuevo club
+        clearClubsCache();
+
         console.log('✅ Club creado:', data);
         return mapClubResponse(data);
     },
 
     async updateClub(clubId: string, dto: UpdateClubDTO): Promise<Club> {
         const { data } = await mdl05Client.patch(`${BASE}/updateClub/${clubId}`, dto);
+        clearClubsCache();
         return mapClubResponse(data);
     },
 
     async deleteClub(clubId: string): Promise<void> {
         await mdl05Client.delete(`${BASE}/deleteClub/${clubId}`);
+        clearClubsCache();
     },
 
     // ==========================================
-    // SEMANAS
-    // ==========================================
-    async getClubWeeks(clubId: string): Promise<ClubWeek[]> {
-        const { data } = await mdl05Client.get(`${BASE}/getClubWeeks/${clubId}`);
-        return data || [];
-    },
-
-    async payWeek(clubId: string, weekNumber: number, amount: number): Promise<ClubWeek> {
-        const { data } = await mdl05Client.post(`${BASE}/payClubWeek`, { clubId, weekNumber, amount });
-        return data;
-    },
-
-    // ==========================================
-    // TRANSACCIONES
-    // ==========================================
-    async getClubTransactions(clubId: string): Promise<ClubTransaction[]> {
-        const { data } = await mdl05Client.get(`${BASE}/getClubTransactions/${clubId}`);
-        return data || [];
-    },
-
-    async createTransaction(clubId: string, dto: CreateTransactionDTO): Promise<ClubTransaction> {
-        const { data } = await mdl05Client.post(`${BASE}/createClubTransaction`, { clubId, ...dto });
-        return data;
-    },
-
-    // ==========================================
-    // CATÁLOGOS - Usando IDs reales de la BD
+    // CATÁLOGOS - Usando datos locales (rápido)
     // ==========================================
     async getClubTypes(): Promise<ClubType[]> {
-        // Retornamos los tipos con IDs reales de la BD
         return Promise.resolve(mockClubTypes);
     },
 
@@ -162,24 +259,20 @@ export const clubApi = {
     },
 
     // ==========================================
-    // STATS & HISTORY
+    // OTROS ENDPOINTS
     // ==========================================
-    async getClubStats(clubId: string): Promise<ClubStats> {
-        const { data } = await mdl05Client.get(`${BASE}/getClubStats/${clubId}`);
-        return data;
-    },
-
-    async getClubHistory(clubId: string): Promise<any[]> {
-        const { data } = await mdl05Client.get(`${BASE}/getClubHistory/${clubId}`);
+    async getClubWeeks(clubId: string): Promise<ClubWeek[]> {
+        const { data } = await mdl05Client.get(`${BASE}/getClubWeeks/${clubId}`);
         return data || [];
     },
 
-    // ==========================================
-    // BÚSQUEDA DE CLIENTES
-    // ==========================================
+    async getClubTransactions(clubId: string): Promise<ClubTransaction[]> {
+        const { data } = await mdl05Client.get(`${BASE}/getClubTransactions/${clubId}`);
+        return data || [];
+    },
+
     async searchCustomers(searchText: string): Promise<any[]> {
         try {
-            // Este endpoint puede variar según tu API
             const { data } = await mdl05Client.post(`/core/searchCustomers/post`, {
                 SearchText: searchText,
                 PageNumber: 1,
@@ -190,57 +283,5 @@ export const clubApi = {
             console.error('Error buscando clientes:', error);
             return [];
         }
-    },
-
-    // ==========================================
-    // REGLAS
-    // ==========================================
-    async getClubRules(): Promise<ClubRule[]> {
-        const { data } = await mdl05Client.get(`${BASE}/getClubRules`);
-        return data || [];
-    },
-
-    async createRule(dto: Partial<ClubRule>): Promise<ClubRule> {
-        const { data } = await mdl05Client.post(`${BASE}/createClubRule`, dto);
-        return data;
-    },
-
-    async updateRule(ruleId: string, dto: Partial<ClubRule>): Promise<ClubRule> {
-        const { data } = await mdl05Client.patch(`${BASE}/updateClubRule/${ruleId}`, dto);
-        return data;
-    },
-
-    async deleteRule(ruleId: string): Promise<void> {
-        await mdl05Client.delete(`${BASE}/deleteClubRule/${ruleId}`);
-    },
-
-    // ==========================================
-    // SORTEOS
-    // ==========================================
-    async getDraws(clubTypeId?: string, dateFrom?: string, dateTo?: string): Promise<Draw[]> {
-        const params = new URLSearchParams();
-        if (clubTypeId) params.append('clubTypeId', clubTypeId);
-        if (dateFrom) params.append('dateFrom', dateFrom);
-        if (dateTo) params.append('dateTo', dateTo);
-        const { data } = await mdl05Client.get(`${BASE}/getDraws?${params}`);
-        return data || [];
-    },
-
-    async registerDraw(dto: { date: string; numberPlayed: number; clubTypeId: string }): Promise<Draw> {
-        const { data } = await mdl05Client.post(`${BASE}/registerDraw`, dto);
-        return data;
-    },
-
-    // ==========================================
-    // LÍMITES
-    // ==========================================
-    async getLimitNumbers(): Promise<LimitNumber[]> {
-        const { data } = await mdl05Client.get(`${BASE}/getLimitNumbers`);
-        return data || [];
-    },
-
-    async updateLimitNumber(number: number, limit: number): Promise<LimitNumber> {
-        const { data } = await mdl05Client.patch(`${BASE}/updateLimitNumber/${number}`, { limit });
-        return data;
     },
 };

@@ -1,5 +1,6 @@
 // app/_layout.tsx
 import { useEffect, useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -39,14 +40,19 @@ export default function RootLayout() {
 
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <StatusBar style="light" backgroundColor={COLORS.bg.primary} />
-            <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-        </QueryClientProvider>
+        <SafeAreaProvider>
+            <QueryClientProvider client={queryClient}>
+                <StatusBar style="light" backgroundColor={COLORS.bg.primary} />
+                <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="club/[id]" options={{ headerShown: false }} />
+                    <Stack.Screen name="search" />
+                    <Stack.Screen name="draw" />
+                </Stack>
+            </QueryClientProvider>
+        </SafeAreaProvider>
     );
 }
 

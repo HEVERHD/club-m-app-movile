@@ -1,16 +1,24 @@
 // app/(tabs)/profile.tsx
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { COLORS } from '../../src/constants/colors';
 import { useSettingsStore } from '../../src/stores/settingsStore';
+import { useAuthStore } from '../../src/stores/auth-store';
+import { useDashboardStore } from '../../src/stores/dashboard-store';
 import { EnvironmentSelector } from '../../src/components/settings/EnvironmentSelector';
-
-// import { useAuthStore } from '../../src/store/authStore'; // Si tienes auth store
+import { clearClubsCache } from '../../src/api/clubs.api';
 
 export default function ProfileScreen() {
+    const queryClient = useQueryClient();
     const { environment } = useSettingsStore();
-    // const { user, logout } = useAuthStore();
+    const { user, tenantName, logout } = useAuthStore();
+    const resetDashboard = useDashboardStore((state) => state.fetchDashboardData);
+
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [isClearing, setIsClearing] = useState(false);
 
     const handleLogout = () => {
         Alert.alert(
@@ -21,14 +29,66 @@ export default function ProfileScreen() {
                 {
                     text: 'Cerrar Sesión',
                     style: 'destructive',
-                    onPress: () => {
-                        // logout();
-                        router.replace('/(auth)/login');
+                    onPress: async () => {
+                        await logout();
+                        router.replace('/(auth)/company');
                     },
                 },
             ]
         );
     };
+
+    const handleSyncData = async () => {
+        setIsSyncing(true);
+        try {
+            // Invalidar todas las queries para forzar refetch
+            await queryClient.invalidateQueries();
+            // Recargar dashboard
+            await resetDashboard();
+
+            Alert.alert('✅ Sincronizado', 'Los datos se han actualizado correctamente');
+        } catch (error) {
+            Alert.alert('Error', 'No se pudieron sincronizar los datos');
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+    const handleClearCache = () => {
+        Alert.alert(
+            'Limpiar Cache',
+            '¿Estás seguro? Esto eliminará los datos almacenados temporalmente y tendrás que volver a cargarlos.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Limpiar',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setIsClearing(true);
+                        try {
+                            // Limpiar cache de React Query
+                            queryClient.clear();
+
+                            // Limpiar cache de clubes
+                            clearClubsCache();
+
+                            Alert.alert('✅ Cache Limpiado', 'El cache ha sido eliminado. Los datos se cargarán nuevamente.');
+                        } catch (error) {
+                            Alert.alert('Error', 'No se pudo limpiar el cache');
+                        } finally {
+                            setIsClearing(false);
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const getInitials = (name: string) => {
+        return name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'US';
+    };
+
+    const currentYear = new Date().getFullYear();
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -41,11 +101,17 @@ export default function ProfileScreen() {
             {/* User Info Card */}
             <View style={styles.userCard}>
                 <View style={styles.avatar}>
-                    <Ionicons name="person" size={32} color={COLORS.accent.blue} />
+                    <Text style={styles.avatarText}>{getInitials(user?.name || 'Usuario')}</Text>
                 </View>
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>Usuario Demo</Text>
-                    <Text style={styles.userEmail}>demo@aludra.com</Text>
+                    <Text style={styles.userName}>{user?.name || 'Usuario'}</Text>
+                    <Text style={styles.userEmail}>{user?.email || 'sin email'}</Text>
+                    {tenantName && (
+                        <View style={styles.tenantBadge}>
+                            <Ionicons name="business" size={12} color={COLORS.accent.cyan} />
+                            <Text style={styles.tenantText}>{tenantName}</Text>
+                        </View>
+                    )}
                 </View>
                 <TouchableOpacity style={styles.editBtn}>
                     <Ionicons name="pencil" size={18} color={COLORS.accent.blue} />
@@ -82,7 +148,7 @@ export default function ProfileScreen() {
                             </Text>
                         </View>
                     </View>
-                    <View style={styles.infoRow}>
+                    <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
                         <Text style={styles.infoLabel}>Build</Text>
                         <Text style={styles.infoValue}>{__DEV__ ? 'Development' : 'Production'}</Text>
                     </View>
@@ -96,19 +162,39 @@ export default function ProfileScreen() {
                     <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
                 </View>
                 <View style={styles.sectionContent}>
-                    <TouchableOpacity style={styles.actionBtn}>
+                    <TouchableOpacity
+                        style={styles.actionBtn}
+                        onPress={handleSyncData}
+                        disabled={isSyncing}
+                    >
                         <View style={styles.actionIcon}>
-                            <Ionicons name="refresh" size={20} color={COLORS.accent.blue} />
+                            {isSyncing ? (
+                                <ActivityIndicator size="small" color={COLORS.accent.blue} />
+                            ) : (
+                                <Ionicons name="refresh" size={20} color={COLORS.accent.blue} />
+                            )}
                         </View>
-                        <Text style={styles.actionText}>Sincronizar Datos</Text>
+                        <Text style={styles.actionText}>
+                            {isSyncing ? 'Sincronizando...' : 'Sincronizar Datos'}
+                        </Text>
                         <Ionicons name="chevron-forward" size={18} color={COLORS.text.muted} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionBtn}>
-                        <View style={styles.actionIcon}>
-                            <Ionicons name="trash-outline" size={20} color={COLORS.accent.orange} />
+                    <TouchableOpacity
+                        style={styles.actionBtn}
+                        onPress={handleClearCache}
+                        disabled={isClearing}
+                    >
+                        <View style={[styles.actionIcon, { backgroundColor: COLORS.status.warningBg }]}>
+                            {isClearing ? (
+                                <ActivityIndicator size="small" color={COLORS.accent.orange} />
+                            ) : (
+                                <Ionicons name="trash-outline" size={20} color={COLORS.accent.orange} />
+                            )}
                         </View>
-                        <Text style={styles.actionText}>Limpiar Cache</Text>
+                        <Text style={styles.actionText}>
+                            {isClearing ? 'Limpiando...' : 'Limpiar Cache'}
+                        </Text>
                         <Ionicons name="chevron-forward" size={18} color={COLORS.text.muted} />
                     </TouchableOpacity>
 
@@ -123,7 +209,7 @@ export default function ProfileScreen() {
             </View>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Club de Mercancías © 2024</Text>
+                <Text style={styles.footerText}>Club de Mercancías © {currentYear}</Text>
                 <Text style={styles.footerText}>Powered by Aludra</Text>
             </View>
         </ScrollView>
@@ -154,12 +240,33 @@ const styles = StyleSheet.create({
     },
     avatar: {
         width: 56, height: 56, borderRadius: 28,
-        backgroundColor: COLORS.status.infoBg,
+        backgroundColor: COLORS.accent.blue,
         justifyContent: 'center', alignItems: 'center',
+    },
+    avatarText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: COLORS.white,
     },
     userInfo: { flex: 1, marginLeft: 14 },
     userName: { fontSize: 17, fontWeight: '600', color: COLORS.text.primary },
     userEmail: { fontSize: 13, color: COLORS.text.muted, marginTop: 2 },
+    tenantBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+    },
+    tenantText: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: COLORS.accent.cyan,
+    },
     editBtn: {
         width: 36, height: 36, borderRadius: 10,
         backgroundColor: COLORS.status.infoBg,
@@ -199,6 +306,6 @@ const styles = StyleSheet.create({
     actionText: { flex: 1, fontSize: 15, color: COLORS.text.primary },
     logoutBtn: { borderBottomWidth: 0 },
 
-    footer: { alignItems: 'center', paddingVertical: 32 },
+    footer: { alignItems: 'center', paddingVertical: 32, paddingBottom: 100 },
     footerText: { fontSize: 12, color: COLORS.text.muted },
 });

@@ -6,7 +6,7 @@ import { useAuthStore } from '../../src/stores/auth-store';
 import { useDashboardStore } from '../../src/stores/dashboard-store';
 import { COLORS } from '../../src/constants/colors';
 import { useResponsive } from '../../src/hooks/useResponsive';
-
+import { router } from 'expo-router';
 // Helper para formatear moneda
 const formatCurrency = (amount: number): string => {
     if (amount >= 1000000) {
@@ -62,10 +62,38 @@ export default function HomeScreen() {
     };
 
     const actions = [
-        { icon: 'add-circle', title: 'Nuevo Club', subtitle: 'Crear un club', color: COLORS.accent.blue, bg: COLORS.status.infoBg },
-        { icon: 'card', title: 'Registrar Pago', subtitle: 'Pagar semana', color: COLORS.accent.green, bg: COLORS.status.successBg },
-        { icon: 'search', title: 'Buscar Club', subtitle: 'Por contrato', color: COLORS.accent.purple, bg: 'rgba(139, 92, 246, 0.15)' },
-        { icon: 'stats-chart', title: 'Reportes', subtitle: 'Estadísticas', color: COLORS.accent.cyan, bg: 'rgba(6, 182, 212, 0.15)' },
+        {
+            icon: 'add-circle',
+            title: 'Nuevo Club',
+            subtitle: 'Crear un club',
+            color: COLORS.accent.blue,
+            bg: COLORS.status.infoBg,
+            onPress: () => router.push('/(tabs)/clubs'),
+        },
+        {
+            icon: 'card',
+            title: 'Registrar Pago',
+            subtitle: 'Pagar semana',
+            color: COLORS.accent.green,
+            bg: COLORS.status.successBg,
+            onPress: () => router.push('/(tabs)/clubs'),
+        },
+        {
+            icon: 'search',
+            title: 'Buscar Club',
+            subtitle: 'Por contrato',
+            color: COLORS.accent.purple,
+            bg: 'rgba(139, 92, 246, 0.15)',
+            onPress: () => router.push('/search'),
+        },
+        {
+            icon: 'trophy',
+            title: 'Sorteos',
+            subtitle: 'Registrar sorteo',
+            color: COLORS.accent.orange,
+            bg: COLORS.status.warningBg,
+            onPress: () => router.push('/draw'),
+        },
     ];
 
     const getActivityIcon = (type: string) => {
@@ -201,6 +229,7 @@ export default function HomeScreen() {
                                 key={index}
                                 style={[styles.actionCard, { width: cardWidth, minHeight: isLarge ? 140 : 120 }]}
                                 activeOpacity={0.7}
+                                onPress={action.onPress}  // <-- AGREGAR ESTA LÍNEA
                             >
                                 <View style={[styles.actionIconBg, { backgroundColor: action.bg }]}>
                                     <Ionicons name={action.icon as any} size={24} color={action.color} />
