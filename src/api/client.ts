@@ -138,6 +138,10 @@ export async function checkCompany(companyName: string) {
  * Login de usuario
  * POST /core/Login
  */
+/**
+ * Login de usuario
+ * POST /core/Login
+ */
 export async function loginUser(params: LoginParams) {
     const { email, password, tenantId } = params;
 
@@ -151,29 +155,31 @@ export async function loginUser(params: LoginParams) {
 
     const data = response.data?.Data || response.data;
 
-    // ✅ CORREGIDO: El token está en AuthenticationInfo.Token
-    const token = data?.AuthenticationInfo?.Token;
+    // 🔍 Debug: ver estructura completa
+    console.log('🔍 LOGIN DATA STRUCTURE:', JSON.stringify(data, null, 2));
+
+    // ✅ VALIDAR LoginCode ANTES de continuar
+    const loginCode = data?.CustomerInfo?.LoginCode;
+    const loginMessage = data?.CustomerInfo?.LoginMessage;
+
+    if (loginCode && loginCode !== 200) {
+        // El API devolvió un error (404 = usuario no existe, etc.)
+        throw new Error(loginMessage || 'Error de autenticación');
+    }
+
+    // Buscar token en múltiples ubicaciones posibles
+    const token = data?.AuthenticationInfo?.Token
+        || data?.Token
+        || data?.token
+        || data?.AccessToken
+        || data?.accessToken;
 
     if (token) {
         await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, token);
-        console.log('✅ Token guardado correctamente');
+        console.log('✅ Token guardado, length:', token.length);
     } else {
-        console.warn('⚠️ No se encontró token en la respuesta');
-    }
-
-    // Opcional: Guardar datos del usuario
-    if (data?.CustomerInfo) {
-        await SecureStore.setItemAsync(
-            STORAGE_KEYS.USER_DATA,
-            JSON.stringify({
-                userId: data.AuthenticationInfo?.UserId,
-                email: data.AuthenticationInfo?.Email,
-                fullName: data.CustomerInfo?.FullName,
-                customerId: data.CustomerInfo?.CustomerId,
-                companies: data.CustomerInfo?.Companies,
-                warehouses: data.CustomerInfo?.Warehouses,
-            })
-        );
+        // Si no hay token después de validar LoginCode, algo salió mal
+        throw new Error(loginMessage || 'No se pudo autenticar. Verifica tus credenciales.');
     }
 
     return data;

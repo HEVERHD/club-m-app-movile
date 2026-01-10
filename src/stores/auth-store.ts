@@ -79,6 +79,16 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     },
 
     login: async (params: LoginParams) => {
+        const { useSettingsStore } = await import('./settingsStore');
+        const env = useSettingsStore.getState().environment;
+        const { getBaseUrl } = await import('../services/api.config');
+
+        console.log('════════════════════════════════════════');
+        console.log('🌍 AMBIENTE:', env);
+        console.log('🔗 BASE URL:', getBaseUrl());
+        console.log('📧 EMAIL:', params.email);
+        console.log('🏢 TENANT ID:', params.tenantId);
+        console.log('════════════════════════════════════════');
         set({ isLoading: true, error: null });
 
         let currentTenantId = params.tenantId;

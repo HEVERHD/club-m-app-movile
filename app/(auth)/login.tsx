@@ -10,7 +10,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { COLORS } from '../../src/constants/colors';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
