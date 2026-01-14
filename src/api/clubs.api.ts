@@ -284,4 +284,54 @@ export const clubApi = {
             return [];
         }
     },
+
+    /**
+     * Obtener estadísticas de clubs de un cliente
+     * Esta función está aquí para evitar dependencias circulares
+     */
+    async getCustomerClubStats(customerId: string): Promise<{
+        totalClubs: number;
+        activeClubs: number;
+        totalInvested: number;
+        totalBalance: number;
+        totalRedeemed: number;
+        averageShare: number;
+        lastActivity?: string;
+    }> {
+        try {
+            console.log('📊 [clubs.api] Obteniendo estadísticas para cliente:', customerId);
+
+            const clubsResponse = await clubsApi.getClubs({ customerId }, 1, 100);
+            const clubs = clubsResponse.data || [];
+            const activeClubs = clubs.filter((c: any) => c.active);
+
+            console.log(`✅ [clubs.api] Se encontraron ${clubs.length} clubs para el cliente`);
+
+            return {
+                totalClubs: clubs.length,
+                activeClubs: activeClubs.length,
+                totalInvested: clubs.reduce((sum: number, c: any) => sum + (c.paidAmount || 0), 0),
+                totalBalance: clubs.reduce((sum: number, c: any) => sum + (c.balanceAmount || 0), 0),
+                totalRedeemed: clubs.reduce((sum: number, c: any) => sum + (c.retiredAmount || 0), 0),
+                averageShare: clubs.length > 0
+                    ? clubs.reduce((sum: number, c: any) => sum + (c.share || 0), 0) / clubs.length
+                    : 0,
+                lastActivity: clubs.length > 0
+                    ? clubs.sort((a: any, b: any) =>
+                        new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+                      )[0].createdDate
+                    : undefined,
+            };
+        } catch (error: any) {
+            console.error('❌ [clubs.api] Error obteniendo estadísticas:', error);
+            return {
+                totalClubs: 0,
+                activeClubs: 0,
+                totalInvested: 0,
+                totalBalance: 0,
+                totalRedeemed: 0,
+                averageShare: 0,
+            };
+        }
+    },
 };

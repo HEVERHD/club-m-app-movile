@@ -53,6 +53,19 @@ export default function TabsLayout() {
                 }}
             />
             <Tabs.Screen
+                name="customers"
+                options={{
+                    title: 'Clientes',
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? 'person' : 'person-outline'}
+                            size={22}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
                 name="clubs"
                 options={{
                     title: 'Clubes',
@@ -66,12 +79,25 @@ export default function TabsLayout() {
                 }}
             />
             <Tabs.Screen
+                name="draws"
+                options={{
+                    title: 'Sorteos',
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? 'trophy' : 'trophy-outline'}
+                            size={22}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
                 name="profile"
                 options={{
                     title: 'Perfil',
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
-                            name={focused ? 'person' : 'person-outline'}
+                            name={focused ? 'settings' : 'settings-outline'}
                             size={22}
                             color={color}
                         />

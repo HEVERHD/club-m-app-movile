@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, RefreshControl, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
@@ -15,9 +15,11 @@ import { ClubFilters } from '../../src/components/clubs/ClubFilters';
 import { ClubCard } from '../../src/components/clubs/ClubCard';
 
 export default function ClubsScreen() {
-    const [filters, setFilters] = useState<IClubFilters>({});
+    // Inicializar con "Vencido" para carga más rápida
+    const [filters, setFilters] = useState<IClubFilters>({ status: 'Vencido' });
     const [page, setPage] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [searchText, setSearchText] = useState('');
 
     const { data, isLoading, isFetching, refetch } = useClubs(filters, page, 20);
 
@@ -31,8 +33,18 @@ export default function ClubsScreen() {
         setPage(1);
     }, []);
 
+    const handleSearch = useCallback((text: string) => {
+        setSearchText(text);
+        setFilters(prev => ({ ...prev, search: text.trim() || undefined }));
+        setPage(1);
+    }, []);
+
     const handleClubPress = useCallback((club: Club) => {
-        router.push(`/club/${club.clubId}`);
+        // Pasar datos del club para evitar re-fetch innecesario
+        router.push({
+            pathname: `/club/${club.clubId}`,
+            params: { clubData: JSON.stringify(club) },
+        });
     }, []);
 
     const handleLoadMore = useCallback(() => {
@@ -78,6 +90,27 @@ export default function ClubsScreen() {
                 >
                     <Ionicons name="refresh" size={18} color={isFetching ? COLORS.text.muted : COLORS.accent.blue} />
                 </TouchableOpacity>
+            </View>
+
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+                <Ionicons name="search" size={20} color={COLORS.text.secondary} style={styles.searchIcon} />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Buscar por cédula, nombre, contrato..."
+                    placeholderTextColor={COLORS.text.muted}
+                    value={searchText}
+                    onChangeText={handleSearch}
+                    returnKeyType="search"
+                />
+                {searchText.length > 0 && (
+                    <TouchableOpacity
+                        onPress={() => handleSearch('')}
+                        style={styles.clearButton}
+                    >
+                        <Ionicons name="close-circle" size={20} color={COLORS.text.secondary} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Filters */}
@@ -137,6 +170,10 @@ const styles = StyleSheet.create({
     headerSubtitle: { fontSize: 13, color: COLORS.text.secondary, marginTop: 4 },
     refreshBtn: { width: 42, height: 42, borderRadius: 12, backgroundColor: COLORS.bg.card, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.border.default },
     refreshBtnDisabled: { opacity: 0.6 },
+    searchContainer: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginTop: 4, marginBottom: 12, backgroundColor: COLORS.bg.card, borderRadius: 12, paddingHorizontal: 12, borderWidth: 1, borderColor: COLORS.border.default },
+    searchIcon: { marginRight: 8 },
+    searchInput: { flex: 1, fontSize: 15, color: COLORS.text.primary, paddingVertical: 12, fontWeight: '500' },
+    clearButton: { marginLeft: 8, padding: 4 },
     listContent: { paddingHorizontal: 20, paddingBottom: 100 },
     footer: { paddingVertical: 20 },
     loadingContainer: { flex: 1, backgroundColor: COLORS.bg.primary, justifyContent: 'center', alignItems: 'center' },

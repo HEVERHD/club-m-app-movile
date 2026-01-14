@@ -16,10 +16,10 @@ type FilterOption = {
 };
 
 const STATUS_OPTIONS: FilterOption[] = [
-    { key: undefined, label: 'Todos' },
-    { key: 'activo', label: 'Activos', color: COLORS.accent.green },
-    { key: 'vencido', label: 'Vencidos', color: COLORS.accent.orange },
-    { key: 'anulado', label: 'Anulados', color: COLORS.status.error },
+    { key: 'Vencido', label: 'Vencidos (rápido)', color: COLORS.accent.orange }, // Por defecto para rendimiento
+    { key: 'Activo', label: 'Activos', color: COLORS.accent.green },
+    { key: undefined, label: 'Todos (lento)', color: COLORS.text.muted },
+    { key: 'Anulado', label: 'Anulados', color: COLORS.status.error },
 ];
 
 export const ClubFilters = memo(function ClubFilters({ filters, onChange }: Props) {

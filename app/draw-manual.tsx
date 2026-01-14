@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, ScrollView,
-    StyleSheet, Alert, ActivityIndicator, Platform
+    StyleSheet, Alert, ActivityIndicator, Platform, KeyboardAvoidingView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -114,140 +114,149 @@ export default function DrawScreen() {
                 </View>
             </View>
 
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Resultado del último registro */}
-                {lastResult && (
-                    <View style={[
-                        styles.resultCard,
-                        lastResult.success ? styles.resultSuccess : styles.resultError
-                    ]}>
-                        <Ionicons
-                            name={lastResult.success ? 'checkmark-circle' : 'alert-circle'}
-                            size={24}
-                            color={lastResult.success ? COLORS.status.success : COLORS.status.error}
-                        />
-                        <View style={styles.resultInfo}>
-                            <Text style={[
-                                styles.resultText,
-                                { color: lastResult.success ? COLORS.status.success : COLORS.status.error }
-                            ]}>
-                                {lastResult.message}
-                            </Text>
-                            {lastResult.drawId && (
-                                <Text style={styles.resultId}>ID: {lastResult.drawId}</Text>
-                            )}
-                        </View>
-                        <TouchableOpacity onPress={() => setLastResult(null)}>
-                            <Ionicons name="close" size={20} color={COLORS.text.muted} />
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {/* Selector de Fecha */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Fecha del Sorteo</Text>
-                    <View style={styles.dateCard}>
-                        <TouchableOpacity
-                            style={styles.dateArrow}
-                            onPress={() => handleDateChange(-1)}
-                        >
-                            <Ionicons name="chevron-back" size={24} color={COLORS.accent.blue} />
-                        </TouchableOpacity>
-
-                        <View style={styles.dateInfo}>
-                            <Text style={styles.dateDay}>
-                                {selectedDate.toLocaleDateString('es-PA', { weekday: 'long' })}
-                            </Text>
-                            <Text style={styles.dateNumber}>
-                                {selectedDate.getDate()}
-                            </Text>
-                            <Text style={styles.dateMonth}>
-                                {selectedDate.toLocaleDateString('es-PA', { month: 'long', year: 'numeric' })}
-                            </Text>
-                        </View>
-
-                        <TouchableOpacity
-                            style={styles.dateArrow}
-                            onPress={() => handleDateChange(1)}
-                        >
-                            <Ionicons name="chevron-forward" size={24} color={COLORS.accent.blue} />
-                        </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity style={styles.todayBtn} onPress={setToday}>
-                        <Ionicons name="today" size={16} color={COLORS.accent.blue} />
-                        <Text style={styles.todayText}>Hoy</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Número Ganador */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Número Ganador (Opcional)</Text>
-                    <View style={styles.numberInputContainer}>
-                        <TextInput
-                            style={styles.numberInput}
-                            value={share}
-                            onChangeText={(text) => {
-                                // Solo permitir números de hasta 2 dígitos
-                                if (/^\d{0,2}$/.test(text)) {
-                                    setShare(text);
-                                }
-                            }}
-                            placeholder="00"
-                            placeholderTextColor={COLORS.text.muted}
-                            keyboardType="number-pad"
-                            maxLength={2}
-                            textAlign="center"
-                        />
-                        <Text style={styles.numberHint}>Ingresa el número del 00 al 99</Text>
-                    </View>
-                </View>
-
-                {/* Hora Alternativa */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Hora Alternativa (Opcional)</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={alternativeHour}
-                        onChangeText={setAlternativeHour}
-                        placeholder="Ej: 15:00:00"
-                        placeholderTextColor={COLORS.text.muted}
-                    />
-                </View>
-
-                {/* Comentario */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Comentario (Opcional)</Text>
-                    <TextInput
-                        style={[styles.input, styles.textArea]}
-                        value={comment}
-                        onChangeText={setComment}
-                        placeholder="Agregar comentario..."
-                        placeholderTextColor={COLORS.text.muted}
-                        multiline
-                        numberOfLines={3}
-                        textAlignVertical="top"
-                    />
-                </View>
-
-                {/* Botón Registrar */}
-                <TouchableOpacity
-                    style={[styles.registerBtn, isLoading && styles.registerBtnDisabled]}
-                    onPress={handleRegisterDraw}
-                    disabled={isLoading}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <ScrollView
+                    style={styles.content}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={{ paddingBottom: 120 }}
                 >
-                    {isLoading ? (
-                        <ActivityIndicator color={COLORS.white} />
-                    ) : (
-                        <>
-                            <Ionicons name="trophy" size={20} color={COLORS.white} />
-                            <Text style={styles.registerBtnText}>Registrar Sorteo</Text>
-                        </>
+                        {/* Resultado del último registro */}
+                    {lastResult && (
+                        <View style={[
+                            styles.resultCard,
+                            lastResult.success ? styles.resultSuccess : styles.resultError
+                        ]}>
+                            <Ionicons
+                                name={lastResult.success ? 'checkmark-circle' : 'alert-circle'}
+                                size={24}
+                                color={lastResult.success ? COLORS.status.success : COLORS.status.error}
+                            />
+                            <View style={styles.resultInfo}>
+                                <Text style={[
+                                    styles.resultText,
+                                    { color: lastResult.success ? COLORS.status.success : COLORS.status.error }
+                                ]}>
+                                    {lastResult.message}
+                                </Text>
+                                {lastResult.drawId && (
+                                    <Text style={styles.resultId}>ID: {lastResult.drawId}</Text>
+                                )}
+                            </View>
+                            <TouchableOpacity onPress={() => setLastResult(null)}>
+                                <Ionicons name="close" size={20} color={COLORS.text.muted} />
+                            </TouchableOpacity>
+                        </View>
                     )}
-                </TouchableOpacity>
 
-                <View style={{ height: 100 }} />
-            </ScrollView>
+                    {/* Selector de Fecha */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Fecha del Sorteo</Text>
+                        <View style={styles.dateCard}>
+                            <TouchableOpacity
+                                style={styles.dateArrow}
+                                onPress={() => handleDateChange(-1)}
+                            >
+                                <Ionicons name="chevron-back" size={24} color={COLORS.accent.blue} />
+                            </TouchableOpacity>
+
+                            <View style={styles.dateInfo}>
+                                <Text style={styles.dateDay}>
+                                    {selectedDate.toLocaleDateString('es-PA', { weekday: 'long' })}
+                                </Text>
+                                <Text style={styles.dateNumber}>
+                                    {selectedDate.getDate()}
+                                </Text>
+                                <Text style={styles.dateMonth}>
+                                    {selectedDate.toLocaleDateString('es-PA', { month: 'long', year: 'numeric' })}
+                                </Text>
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.dateArrow}
+                                onPress={() => handleDateChange(1)}
+                            >
+                                <Ionicons name="chevron-forward" size={24} color={COLORS.accent.blue} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity style={styles.todayBtn} onPress={setToday}>
+                            <Ionicons name="today" size={16} color={COLORS.accent.blue} />
+                            <Text style={styles.todayText}>Hoy</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Número Ganador */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Número Ganador (Opcional)</Text>
+                        <View style={styles.numberInputContainer}>
+                            <TextInput
+                                style={styles.numberInput}
+                                value={share}
+                                onChangeText={(text) => {
+                                    // Solo permitir números de hasta 2 dígitos
+                                    if (/^\d{0,2}$/.test(text)) {
+                                        setShare(text);
+                                    }
+                                }}
+                                placeholder="00"
+                                placeholderTextColor={COLORS.text.muted}
+                                keyboardType="number-pad"
+                                maxLength={2}
+                                textAlign="center"
+                            />
+                            <Text style={styles.numberHint}>Ingresa el número del 00 al 99</Text>
+                        </View>
+                    </View>
+
+                    {/* Hora Alternativa */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Hora Alternativa (Opcional)</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={alternativeHour}
+                            onChangeText={setAlternativeHour}
+                            placeholder="Ej: 15:00:00"
+                            placeholderTextColor={COLORS.text.muted}
+                        />
+                    </View>
+
+                    {/* Comentario */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Comentario (Opcional)</Text>
+                        <TextInput
+                            style={[styles.input, styles.textArea]}
+                            value={comment}
+                            onChangeText={setComment}
+                            placeholder="Agregar comentario..."
+                            placeholderTextColor={COLORS.text.muted}
+                            multiline
+                            numberOfLines={3}
+                            textAlignVertical="top"
+                        />
+                    </View>
+
+                    {/* Botón Registrar */}
+                    <TouchableOpacity
+                        style={[styles.registerBtn, isLoading && styles.registerBtnDisabled]}
+                        onPress={handleRegisterDraw}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator color={COLORS.white} />
+                        ) : (
+                            <>
+                                <Ionicons name="trophy" size={20} color={COLORS.white} />
+                                <Text style={styles.registerBtnText}>Registrar Sorteo</Text>
+                            </>
+                        )}
+                    </TouchableOpacity>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </View>
     );
 }

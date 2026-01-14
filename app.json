@@ -8,8 +8,8 @@
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "image": "./assets/adaptive-icon copy.png",
+      "resizeMode": "native",
       "backgroundColor": "#1a5fb4"
     },
     "ios": {
@@ -46,7 +46,17 @@
             "DEFAULT"
           ]
         }
-      ]
+      ],
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "native",
+        "backgroundColor": "#1a5fb4",
+        "mdpi": "./assets/splash.png",
+        "hdpi": "./assets/splash.png",
+        "xhdpi": "./assets/splash.png",
+        "xxhdpi": "./assets/splash.png",
+        "xxxhdpi": "./assets/splash.png"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -60,7 +70,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
-          "resizeMode": "contain",
+          "resizeMode": "native",
           "backgroundColor": "#1a5fb4"
         }
       ]

@@ -9,7 +9,7 @@ import { WeekSelector } from '../../src/components/payments/WeekSelector';
 import { PaymentSummary } from '../../src/components/payments/PaymentSummary';
 
 export default function ClubDetailScreen() {
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const { id, clubData } = useLocalSearchParams<{ id: string; clubData?: string }>();
 
     const {
         clubDetail,
@@ -23,6 +23,7 @@ export default function ClubDetailScreen() {
         isCancelling,
         cancelError,
         fetchClubDetail,
+        setClubDetailFromCache,
         toggleWeekSelection,
         selectAllUnpaidWeeks,
         clearSelection,
@@ -33,11 +34,24 @@ export default function ClubDetailScreen() {
     } = usePaymentStore();
 
     useEffect(() => {
-        if (id) {
+        if (clubData) {
+            // Si recibimos datos del club a través de la navegación, usarlos directamente
+            try {
+                const parsedClub = JSON.parse(clubData);
+                setClubDetailFromCache(parsedClub);
+            } catch (error) {
+                console.error('Error parsing club data:', error);
+                // Fallback a fetch si hay error
+                if (id) {
+                    fetchClubDetail(id);
+                }
+            }
+        } else if (id) {
+            // Fallback: si no hay datos pasados, hacer fetch normal
             fetchClubDetail(id);
         }
         return () => reset();
-    }, [id]);
+    }, [id, clubData]);
 
     useEffect(() => {
         if (paymentSuccess && lastPaymentResult) {

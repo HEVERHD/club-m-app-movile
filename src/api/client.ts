@@ -116,10 +116,58 @@ const createMdl05Client = (): AxiosInstance => {
 };
 
 // ============================================
+// MDL03 Client (con Bearer token + Ocp-Apim-Subscription-Key)
+// ============================================
+const createMdl03Client = (): AxiosInstance => {
+    const client = axios.create({
+        baseURL: getBaseUrl(),
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        timeout: 30000,
+    });
+
+    client.interceptors.request.use(
+        async (config: InternalAxiosRequestConfig) => {
+            config.baseURL = getBaseUrl();
+            config.headers['Ocp-Apim-Subscription-Key'] = getApiKey();
+
+            const token = await getAccessToken();
+            if (token) {
+                config.headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            console.log('📤 MDL03:', config.method?.toUpperCase(), config.url);
+            return config;
+        },
+        (error) => Promise.reject(error)
+    );
+
+    client.interceptors.response.use(
+        (response) => {
+            console.log('📥 MDL03 OK:', response.status);
+            return response;
+        },
+        async (error: AxiosError) => {
+            console.log('❌ MDL03 ERROR:', error.response?.status, error.config?.url);
+            if (error.response?.status === 401) {
+                await SecureStore.deleteItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+                await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+            }
+            return Promise.reject(error);
+        }
+    );
+
+    return client;
+};
+
+// ============================================
 // Exportar clientes
 // ============================================
 export const apiClient = createApiClient();
 export const mdl05Client = createMdl05Client();
+export const mdl03Client = createMdl03Client();
 
 // ============================================
 // AUTH FUNCTIONS

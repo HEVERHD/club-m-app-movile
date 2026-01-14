@@ -29,9 +29,20 @@ export const clubKeys = {
 
 // Queries - Clubes
 export function useClubs(filters: ClubFilters = {}, page = 1, pageSize = 20) {
+    // Optimización: Si hay búsqueda, usar null para buscar en todos los clubes
+    // Si no hay búsqueda, usar "Vencido" por defecto para cargar más rápido
+    const optimizedFilters: ClubFilters = {
+        ...filters,
+        // Si hay búsqueda activa, permitir buscar en todos (null)
+        // Si no hay búsqueda y no hay status definido, usar "Vencido" para mejor rendimiento
+        status: filters.search
+            ? (filters.status !== undefined ? filters.status : null)  // Con búsqueda: usar el status seleccionado o null
+            : (filters.status !== undefined ? filters.status : 'Vencido'),  // Sin búsqueda: usar status seleccionado o Vencido
+    };
+
     return useQuery({
-        queryKey: clubKeys.list(filters, page, pageSize),
-        queryFn: () => clubApi.getClubs(filters, page, pageSize),
+        queryKey: clubKeys.list(optimizedFilters, page, pageSize),
+        queryFn: () => clubApi.getClubs(optimizedFilters, page, pageSize),
         staleTime: 5 * 60 * 1000,
         gcTime: 30 * 60 * 1000,
         placeholderData: (prev) => prev,

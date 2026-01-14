@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         paddingHorizontal: 24,
         paddingTop: 60,
-        paddingBottom: 40,
+        paddingBottom: Platform.OS === 'ios' ? 100 : 80,
     },
 
     // Branding

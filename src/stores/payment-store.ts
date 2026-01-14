@@ -29,6 +29,7 @@ interface PaymentState {
 
     // Actions
     fetchClubDetail: (clubId: string) => Promise<void>;
+    setClubDetailFromCache: (club: any) => void;
     toggleWeekSelection: (weekNumber: number) => void;
     selectAllUnpaidWeeks: () => void;
     selectWeeksUpTo: (weekNumber: number) => void;
@@ -77,6 +78,52 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
                 isLoadingDetail: false,
             });
         }
+    },
+
+    setClubDetailFromCache: (club: any) => {
+        // Convertir datos del club de la lista al formato ClubDetail
+        const denomination = club.denominationValue || club.denomination || 5;
+        const weeksPaid = club.weeksPaid || 0;
+        const startDate = new Date(club.startDate || new Date());
+
+        // Generar 52 semanas basadas en la fecha de inicio
+        const weeks: ClubWeek[] = [];
+        for (let i = 1; i <= 52; i++) {
+            const drawDate = new Date(startDate);
+            drawDate.setDate(drawDate.getDate() + (i - 1) * 7);
+
+            weeks.push({
+                weekNumber: i,
+                drawDate: drawDate.toISOString(),
+                paymentDate: i <= weeksPaid ? drawDate.toISOString() : null,
+                status: i <= weeksPaid ? 'paid' : drawDate < new Date() ? 'late' : 'unpaid',
+                amount: denomination,
+            });
+        }
+
+        const clubDetail: ClubDetail = {
+            clubId: club.clubId,
+            contractNumber: club.contractNumber || '',
+            customerId: club.customerId || '',
+            customerName: club.customerName || 'Sin nombre',
+            share: club.share || 0,
+            denomination,
+            clubType: club.clubTypeId || '',
+            clubTypeName: club.clubTypeName || 'Club',
+            statusName: club.statusName || 'Activo',
+            balance: club.balanceAmount || 0,
+            weeksPaid,
+            weeksTotal: 52,
+            nextDrawDate: '',
+            weeks,
+        };
+
+        set({
+            clubDetail,
+            isLoadingDetail: false,
+            detailError: null,
+            selectedWeeks: [],
+        });
     },
 
     toggleWeekSelection: (weekNumber: number) => {
