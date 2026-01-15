@@ -7,7 +7,6 @@ import {
     ScrollView,
     TextInput,
     TouchableOpacity,
-    Alert,
     ActivityIndicator,
     Platform,
 } from 'react-native';
@@ -16,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS } from '../../../src/constants/colors';
 import { customersApi } from '../../../src/api/customers.api';
+import { CustomAlert } from '../../../src/components/ui/CustomAlert';
+import { useAlert } from '../../../src/hooks/useAlert';
 import {
     UpdateParticularDTO,
     CUSTOMER_TYPE_IDS,
@@ -31,6 +32,7 @@ import {
 } from '../../../src/types/clubs';
 
 export default function EditParticularScreen() {
+    const alert = useAlert();
     const { id } = useLocalSearchParams();
     const customerId = Array.isArray(id) ? id[0] : id;
 
@@ -97,8 +99,8 @@ export default function EditParticularScreen() {
             });
         } catch (error: any) {
             console.error('Error loading customer:', error);
-            Alert.alert('Error', 'No se pudo cargar los datos del cliente');
-            router.back();
+            alert.showError('Error', 'No se pudo cargar los datos del cliente');
+            setTimeout(() => router.back(), 1500);
         } finally {
             setLoading(false);
         }
@@ -113,27 +115,27 @@ export default function EditParticularScreen() {
 
     const validateForm = (): boolean => {
         if (!firstName.trim()) {
-            Alert.alert('Error', 'El nombre es requerido');
+            alert.showError('Error', 'El nombre es requerido');
             return false;
         }
         if (!lastName.trim()) {
-            Alert.alert('Error', 'El apellido es requerido');
+            alert.showError('Error', 'El apellido es requerido');
             return false;
         }
         if (!idNumber.trim()) {
-            Alert.alert('Error', 'La cédula es requerida');
+            alert.showError('Error', 'La cédula es requerida');
             return false;
         }
         if (!phoneNumber.trim()) {
-            Alert.alert('Error', 'El teléfono es requerido');
+            alert.showError('Error', 'El teléfono es requerido');
             return false;
         }
         if (!email.trim()) {
-            Alert.alert('Error', 'El correo electrónico es requerido');
+            alert.showError('Error', 'El correo electrónico es requerido');
             return false;
         }
         if (!email.includes('@')) {
-            Alert.alert('Error', 'El correo electrónico no es válido');
+            alert.showError('Error', 'El correo electrónico no es válido');
             return false;
         }
         return true;
@@ -202,22 +204,11 @@ export default function EditParticularScreen() {
 
             await customersApi.updateParticular(updateData);
 
-            Alert.alert(
-                'Éxito',
-                'Cliente actualizado exitosamente',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => router.back(),
-                    },
-                ]
-            );
+            alert.showSuccess('Éxito', 'Cliente actualizado exitosamente');
+            setTimeout(() => router.back(), 1500);
         } catch (error: any) {
             console.error('Error updating customer:', error);
-            Alert.alert(
-                'Error',
-                error.message || 'No se pudo actualizar el cliente'
-            );
+            alert.showError('Error', error.message || 'No se pudo actualizar el cliente');
         } finally {
             setSubmitting(false);
         }
@@ -439,6 +430,14 @@ export default function EditParticularScreen() {
                     <View style={styles.bottomSpacer} />
                 </View>
             </ScrollView>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </>
     );
 }

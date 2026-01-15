@@ -10,6 +10,9 @@ interface PaymentState {
     isLoadingDetail: boolean;
     detailError: string | null;
 
+    // Customer identification (cédula) para filtrar búsquedas
+    currentCustomerIdentification: string | null;
+
     // Selected weeks for payment
     selectedWeeks: number[];
 
@@ -28,7 +31,7 @@ interface PaymentState {
     cancelError: string | null;
 
     // Actions
-    fetchClubDetail: (clubId: string) => Promise<void>;
+    fetchClubDetail: (clubId: string, customerIdentification?: string) => Promise<void>;
     setClubDetailFromCache: (club: any) => void;
     toggleWeekSelection: (weekNumber: number) => void;
     selectAllUnpaidWeeks: () => void;
@@ -49,6 +52,7 @@ const initialState = {
     clubDetail: null,
     isLoadingDetail: false,
     detailError: null,
+    currentCustomerIdentification: null,
     selectedWeeks: [],
     isProcessingPayment: false,
     paymentError: null,
@@ -61,15 +65,21 @@ const initialState = {
 export const usePaymentStore = create<PaymentState>((set, get) => ({
     ...initialState,
 
-    fetchClubDetail: async (clubId: string) => {
+    fetchClubDetail: async (clubId: string, customerIdentification?: string) => {
         set({ isLoadingDetail: true, detailError: null });
 
+        // Usar la cédula proporcionada o la guardada anteriormente
+        const { currentCustomerIdentification } = get();
+        const identificationToUse = customerIdentification || currentCustomerIdentification || undefined;
+
         try {
-            const detail = await paymentsApi.getClubDetail(clubId);
+            const detail = await paymentsApi.getClubDetail(clubId, identificationToUse);
             set({
                 clubDetail: detail,
                 isLoadingDetail: false,
                 selectedWeeks: [], // Reset selection when loading new club
+                // Guardar la cédula del club cargado para futuras recargas
+                currentCustomerIdentification: detail.customerIdentification || identificationToUse || null,
             });
         } catch (error: any) {
             console.error('❌ Error fetching club detail:', error);
@@ -101,11 +111,14 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
             });
         }
 
+        const customerIdentification = club.customerIdentification || club.numberId || club.NumberId || '';
+
         const clubDetail: ClubDetail = {
             clubId: club.clubId,
             contractNumber: club.contractNumber || '',
             customerId: club.customerId || '',
             customerName: club.customerName || 'Sin nombre',
+            customerIdentification,
             share: club.share || 0,
             denomination,
             clubType: club.clubTypeId || '',
@@ -123,6 +136,8 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
             isLoadingDetail: false,
             detailError: null,
             selectedWeeks: [],
+            // Guardar la cédula para futuras recargas
+            currentCustomerIdentification: customerIdentification || null,
         });
     },
 

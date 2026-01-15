@@ -1,10 +1,12 @@
 // src/components/settings/EnvironmentSelector.tsx
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { COLORS } from '../../constants/colors';
 import { Environment, useSettingsStore } from '../../stores/settingsStore';
 import { logApiConfig } from '../../services/api.config';
+import { CustomAlert } from '../ui/CustomAlert';
+import { useAlert } from '../../hooks/useAlert';
 
 const ENVIRONMENTS: { key: Environment; label: string; color: string; icon: string }[] = [
     { key: 'dev', label: 'Development', color: '#f59e0b', icon: 'code-slash' },
@@ -17,26 +19,24 @@ interface Props {
 }
 
 export function EnvironmentSelector({ showWarning = true }: Props) {
+    const alert = useAlert();
     const { environment, setEnvironment } = useSettingsStore();
 
     const handleSelect = (env: Environment) => {
         if (env === environment) return;
 
         if (showWarning && env === 'prod') {
-            Alert.alert(
-                '⚠️ Producción',
+            alert.showConfirm(
+                'Producción',
                 '¿Estás seguro de cambiar a producción? Los datos serán reales.',
-                [
-                    { text: 'Cancelar', style: 'cancel' },
-                    {
-                        text: 'Cambiar',
-                        style: 'destructive',
-                        onPress: () => {
-                            setEnvironment(env);
-                            logApiConfig();
-                        },
-                    },
-                ]
+                () => {
+                    setEnvironment(env);
+                    logApiConfig();
+                    alert.showSuccess('Entorno cambiado', `Ahora estás en: ${env.toUpperCase()}`);
+                },
+                undefined,
+                'Cambiar',
+                'Cancelar'
             );
             return;
         }
@@ -44,7 +44,7 @@ export function EnvironmentSelector({ showWarning = true }: Props) {
         setEnvironment(env);
         logApiConfig();
 
-        Alert.alert('✅ Entorno cambiado', `Ahora estás en: ${env.toUpperCase()}`);
+        alert.showSuccess('Entorno cambiado', `Ahora estás en: ${env.toUpperCase()}`);
     };
 
     return (
@@ -91,6 +91,14 @@ export function EnvironmentSelector({ showWarning = true }: Props) {
                     Conectado a: {environment}-apim.aludra.cloud
                 </Text>
             </View>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }

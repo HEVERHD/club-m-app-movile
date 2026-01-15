@@ -10,6 +10,7 @@ export default function DrawLayout() {
         >
             <Stack.Screen name="[id]" />
             <Stack.Screen name="execute" />
+            <Stack.Screen name="winners-report" />
         </Stack>
     );
 }

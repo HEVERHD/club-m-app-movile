@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity, TextInput,
-    StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform
+    StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,10 +10,13 @@ import { COLORS } from '../../src/constants/colors';
 import { useExchangeStore } from '../../src/stores/exchange-store';
 import { ClubExchangeCard } from '../../src/components/exchange/ClubExchangeCard';
 import { ExchangeSummary } from '../../src/components/exchange/ExchangeSummary';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 
 export default function ExchangeScreen() {
-    // Puede recibir un monto inicial desde otra pantalla
-    const { amount: initialAmount } = useLocalSearchParams<{ amount?: string }>();
+    const alert = useAlert();
+    // Puede recibir un monto inicial y customerId (cédula) desde otra pantalla
+    const { amount: initialAmount, customerId } = useLocalSearchParams<{ amount?: string; customerId?: string }>();
     const [inputAmount, setInputAmount] = useState(initialAmount || '');
 
     const {
@@ -41,9 +44,10 @@ export default function ExchangeScreen() {
     } = useExchangeStore();
 
     useEffect(() => {
-        fetchAvailableClubs();
+        // Pasar customerId (cédula) para filtrar y acelerar la búsqueda
+        fetchAvailableClubs(customerId);
         return () => reset();
-    }, []);
+    }, [customerId]);
 
     useEffect(() => {
         if (initialAmount) {
@@ -56,7 +60,7 @@ export default function ExchangeScreen() {
 
     useEffect(() => {
         if (processError) {
-            Alert.alert('Error', processError);
+            alert.showError('Error', processError);
         }
     }, [processError]);
 
@@ -65,23 +69,11 @@ export default function ExchangeScreen() {
             const totalUsed = exchangeResults.reduce((sum, r) => sum + r.amountUsed, 0);
             const clubsUsed = exchangeResults.filter(r => r.amountUsed > 0).length;
 
-            Alert.alert(
-                '✅ Consumo Exitoso',
-                `Se utilizaron $${totalUsed.toFixed(2)} de ${clubsUsed} club(s)`,
-                [
-                    {
-                        text: 'Ver Detalle',
-                        onPress: () => {
-                            // Podrías navegar a una pantalla de recibo
-                            router.back();
-                        },
-                    },
-                    {
-                        text: 'OK',
-                        onPress: () => router.back(),
-                    },
-                ]
+            alert.showSuccess(
+                'Consumo Exitoso',
+                `Se utilizaron $${totalUsed.toFixed(2)} de ${clubsUsed} club(s)`
             );
+            setTimeout(() => router.back(), 2000);
         }
     }, [isSuccess, exchangeResults]);
 
@@ -105,7 +97,7 @@ export default function ExchangeScreen() {
 
     const handleAutoSelect = () => {
         if (amountToPay <= 0) {
-            Alert.alert('Atención', 'Ingresa un monto a pagar primero');
+            alert.showWarning('Atención', 'Ingresa un monto a pagar primero');
             return;
         }
         autoSelectClubs();
@@ -113,25 +105,22 @@ export default function ExchangeScreen() {
 
     const handleProcess = () => {
         if (selectedClubs.length === 0) {
-            Alert.alert('Atención', 'Selecciona al menos un club');
+            alert.showWarning('Atención', 'Selecciona al menos un club');
             return;
         }
 
         if (!canCoverAmount) {
-            Alert.alert('Atención', 'El monto seleccionado no cubre el total a pagar');
+            alert.showWarning('Atención', 'El monto seleccionado no cubre el total a pagar');
             return;
         }
 
-        Alert.alert(
+        alert.showConfirm(
             'Confirmar Consumo',
             `¿Usar $${totalSelected.toFixed(2)} de ${selectedClubs.length} club(s)?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Confirmar',
-                    onPress: () => processExchange('Consumo desde app'),
-                },
-            ]
+            () => processExchange('Consumo desde app'),
+            undefined,
+            'Confirmar',
+            'Cancelar'
         );
     };
 
@@ -153,7 +142,7 @@ export default function ExchangeScreen() {
             <View style={styles.errorContainer}>
                 <Ionicons name="alert-circle" size={48} color={COLORS.status.error} />
                 <Text style={styles.errorText}>{clubsError}</Text>
-                <TouchableOpacity style={styles.retryBtn} onPress={() => fetchAvailableClubs()}>
+                <TouchableOpacity style={styles.retryBtn} onPress={() => fetchAvailableClubs(customerId)}>
                     <Text style={styles.retryText}>Reintentar</Text>
                 </TouchableOpacity>
             </View>
@@ -258,6 +247,14 @@ export default function ExchangeScreen() {
                     onCancel={clearSelection}
                 />
             )}
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </KeyboardAvoidingView>
     );
 }

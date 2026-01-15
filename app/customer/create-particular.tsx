@@ -7,13 +7,14 @@ import {
     ScrollView,
     TextInput,
     TouchableOpacity,
-    Alert,
     ActivityIndicator,
     Platform,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { customersApi } from '../../src/api/customers.api';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 import {
     RegisterParticularDTO,
     CUSTOMER_TYPE_IDS,
@@ -27,6 +28,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function CreateParticularScreen() {
+    const alert = useAlert();
     const [loading, setLoading] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -55,30 +57,30 @@ export default function CreateParticularScreen() {
 
     const validateForm = (): boolean => {
         if (!formData.firstName.trim()) {
-            Alert.alert('Error', 'El nombre es requerido');
+            alert.showError('Error', 'El nombre es requerido');
             return false;
         }
         if (!formData.lastName.trim()) {
-            Alert.alert('Error', 'El apellido es requerido');
+            alert.showError('Error', 'El apellido es requerido');
             return false;
         }
         if (!formData.idNumber.trim()) {
-            Alert.alert('Error', 'El número de cédula es requerido');
+            alert.showError('Error', 'El número de cédula es requerido');
             return false;
         }
         if (!formData.phone.trim()) {
-            Alert.alert('Error', 'El teléfono es requerido');
+            alert.showError('Error', 'El teléfono es requerido');
             return false;
         }
         if (!formData.email.trim()) {
-            Alert.alert('Error', 'El email es requerido');
+            alert.showError('Error', 'El email es requerido');
             return false;
         }
 
         // Validar formato de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
-            Alert.alert('Error', 'El formato del email no es válido');
+            alert.showError('Error', 'El formato del email no es válido');
             return false;
         }
 
@@ -150,18 +152,10 @@ export default function CreateParticularScreen() {
 
             await customersApi.registerParticular(registerData);
 
-            Alert.alert(
-                'Éxito',
-                'Cliente registrado exitosamente',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => router.back(),
-                    },
-                ]
-            );
+            alert.showSuccess('Éxito', 'Cliente registrado exitosamente');
+            setTimeout(() => router.back(), 1500);
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Error al registrar cliente');
+            alert.showError('Error', error.message || 'Error al registrar cliente');
         } finally {
             setLoading(false);
         }
@@ -350,6 +344,14 @@ export default function CreateParticularScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </>
     );
 }

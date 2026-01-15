@@ -19,6 +19,7 @@ export interface ClubDetail {
     contractNumber: string;
     customerId: string;
     customerName: string;
+    customerIdentification: string;
     share: number;
     denomination: number;
     clubType: string;
@@ -85,6 +86,7 @@ const mapClubDetailResponse = (data: any): ClubDetail => {
         contractNumber: club.ContractNumber || club.contractNumber || '',
         customerId: club.CustomerId || club.customerId || '',
         customerName: club.CustomerName || club.customerName || 'Sin nombre',
+        customerIdentification: club.NumberId || club.IDNumber || club.customerIdentification || '',
         share: club.Share || club.share || 0,
         denomination: denomination,
         clubType: club.ClubTypeId || club.clubTypeId || '',
@@ -105,12 +107,15 @@ export const paymentsApi = {
     /**
      * Obtener detalle del club con semanas
      * Intenta primero el endpoint de detalle, si falla usa getClub + genera semanas
+     * @param clubId - ID del club a buscar
+     * @param customerIdentification - Cédula del cliente para filtrar y acelerar la búsqueda
      */
-    async getClubDetail(clubId: string): Promise<ClubDetail> {
+    async getClubDetail(clubId: string, customerIdentification?: string): Promise<ClubDetail> {
         try {
             // Usar el endpoint de history para buscar el club por ID
+            // Si tenemos la cédula, filtrar por ella para acelerar la búsqueda
             const { data: response } = await mdl05Client.post(`${BASE}/club/history`, {
-                SearchText: '',
+                SearchText: customerIdentification || '',
                 PageNumber: 1,
                 PageSize: 100,
                 Status: null,
@@ -153,6 +158,7 @@ export const paymentsApi = {
                 contractNumber: club.ContractNumber || club.contractNumber || '',
                 customerId: club.CustomerId || club.customerId || '',
                 customerName: club.CustomerName || club.customerName || 'Sin nombre',
+                customerIdentification: club.NumberId || club.IDNumber || club.customerIdentification || '',
                 share: club.Share || club.share || 0,
                 denomination,
                 clubType: club.ClubTypeId || club.clubTypeId || '',

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, ActivityIndicator,
-    KeyboardAvoidingView, Platform, Alert, StyleSheet, StatusBar, Image,
+    KeyboardAvoidingView, Platform, StyleSheet, StatusBar, Image,
     ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -10,8 +10,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { COLORS } from '../../src/constants/colors';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 
 export default function LoginScreen() {
+    const alert = useAlert();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -38,11 +41,11 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!email.trim() || !password.trim()) {
-            Alert.alert('Error', 'Completa todos los campos');
+            alert.showError('Error', 'Completa todos los campos');
             return;
         }
         if (!currentTenantId) {
-            Alert.alert('Error', 'Selecciona una compañía primero');
+            alert.showError('Error', 'Selecciona una compañía primero');
             router.replace('/(auth)/company');
             return;
         }
@@ -50,7 +53,7 @@ export default function LoginScreen() {
             await login({ email: email.trim(), password, tenantId: currentTenantId });
             router.replace('/(tabs)/home');
         } catch (e: any) {
-            Alert.alert('Error', e.message || 'Credenciales inválidas');
+            alert.showError('Error', e.message || 'Credenciales inválidas');
         }
     };
 
@@ -206,6 +209,14 @@ export default function LoginScreen() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }

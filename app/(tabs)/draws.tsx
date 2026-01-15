@@ -8,18 +8,20 @@ import {
     RefreshControl,
     TouchableOpacity,
     ActivityIndicator,
-    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useDrawStore } from '../../src/stores/draw-store';
 import { DrawCard } from '../../src/components/draws/DrawCard';
 import { COLORS } from '../../src/constants/colors';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 import type { DrawFilters } from '../../src/types/clubs';
 // Importar funciones de debug para poder usarlas en consola
 import '../../src/utils/debugDrawWinners';
 
 export default function DrawsScreen() {
+    const alert = useAlert();
     const {
         draws,
         pagination,
@@ -70,6 +72,10 @@ export default function DrawsScreen() {
 
     const handleExecuteDraw = () => {
         router.push('/draw/execute');
+    };
+
+    const handleViewWinnersReport = () => {
+        router.push('/draw/winners-report');
     };
 
     const renderEmpty = () => {
@@ -256,14 +262,14 @@ export default function DrawsScreen() {
                                 {/* Note: You'll need to add club types dynamically from an API or store */}
                                 <TouchableOpacity
                                     style={[styles.filterChip]}
-                                    onPress={() => Alert.alert('Info', 'Filtros por tipo próximamente')}
+                                    onPress={() => alert.show('Info', 'Filtros por tipo próximamente', undefined, 'info')}
                                 >
                                     <Text style={[styles.filterChipText]}>Miércoles</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
                                     style={[styles.filterChip]}
-                                    onPress={() => Alert.alert('Info', 'Filtros por tipo próximamente')}
+                                    onPress={() => alert.show('Info', 'Filtros por tipo próximamente', undefined, 'info')}
                                 >
                                     <Text style={[styles.filterChipText]}>Domingo</Text>
                                 </TouchableOpacity>
@@ -314,6 +320,15 @@ export default function DrawsScreen() {
                 onEndReachedThreshold={0.5}
             />
 
+            {/* FAB - Reporte de Ganadores */}
+            <TouchableOpacity
+                style={styles.fabSecondary}
+                onPress={handleViewWinnersReport}
+                activeOpacity={0.85}
+            >
+                <Ionicons name="trophy" size={22} color={COLORS.accent.orange} />
+            </TouchableOpacity>
+
             {/* FAB - Ejecutar sorteo */}
             <TouchableOpacity
                 style={styles.fab}
@@ -322,6 +337,16 @@ export default function DrawsScreen() {
             >
                 <Ionicons name="dice" size={24} color={COLORS.white} />
             </TouchableOpacity>
+
+            {/* Custom Alert */}
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }
@@ -520,5 +545,23 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 8,
+    },
+    fabSecondary: {
+        position: 'absolute',
+        right: 20,
+        bottom: 160,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: COLORS.bg.card,
+        borderWidth: 2,
+        borderColor: COLORS.accent.orange,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
     },
 });

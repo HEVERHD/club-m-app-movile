@@ -1,6 +1,6 @@
 // app/(tabs)/profile.tsx
 import { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
@@ -10,8 +10,11 @@ import { useAuthStore } from '../../src/stores/auth-store';
 import { useDashboardStore } from '../../src/stores/dashboard-store';
 import { EnvironmentSelector } from '../../src/components/settings/EnvironmentSelector';
 import { clearClubsCache } from '../../src/api/clubs.api';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 
 export default function ProfileScreen() {
+    const alert = useAlert();
     const queryClient = useQueryClient();
     const { environment } = useSettingsStore();
     const { user, tenantName, logout } = useAuthStore();
@@ -21,20 +24,16 @@ export default function ProfileScreen() {
     const [isClearing, setIsClearing] = useState(false);
 
     const handleLogout = () => {
-        Alert.alert(
+        alert.showConfirm(
             'Cerrar Sesión',
             '¿Estás seguro de que deseas cerrar sesión?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Cerrar Sesión',
-                    style: 'destructive',
-                    onPress: async () => {
-                        await logout();
-                        router.replace('/(auth)/company');
-                    },
-                },
-            ]
+            async () => {
+                await logout();
+                router.replace('/(auth)/company');
+            },
+            undefined,
+            'Cerrar Sesión',
+            'Cancelar'
         );
     };
 
@@ -46,41 +45,37 @@ export default function ProfileScreen() {
             // Recargar dashboard
             await resetDashboard();
 
-            Alert.alert('✅ Sincronizado', 'Los datos se han actualizado correctamente');
+            alert.showSuccess('Sincronizado', 'Los datos se han actualizado correctamente');
         } catch (error) {
-            Alert.alert('Error', 'No se pudieron sincronizar los datos');
+            alert.showError('Error', 'No se pudieron sincronizar los datos');
         } finally {
             setIsSyncing(false);
         }
     };
 
     const handleClearCache = () => {
-        Alert.alert(
+        alert.showConfirm(
             'Limpiar Cache',
             '¿Estás seguro? Esto eliminará los datos almacenados temporalmente y tendrás que volver a cargarlos.',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Limpiar',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsClearing(true);
-                        try {
-                            // Limpiar cache de React Query
-                            queryClient.clear();
+            async () => {
+                setIsClearing(true);
+                try {
+                    // Limpiar cache de React Query
+                    queryClient.clear();
 
-                            // Limpiar cache de clubes
-                            clearClubsCache();
+                    // Limpiar cache de clubes
+                    clearClubsCache();
 
-                            Alert.alert('✅ Cache Limpiado', 'El cache ha sido eliminado. Los datos se cargarán nuevamente.');
-                        } catch (error) {
-                            Alert.alert('Error', 'No se pudo limpiar el cache');
-                        } finally {
-                            setIsClearing(false);
-                        }
-                    },
-                },
-            ]
+                    alert.showSuccess('Cache Limpiado', 'El cache ha sido eliminado. Los datos se cargarán nuevamente.');
+                } catch (error) {
+                    alert.showError('Error', 'No se pudo limpiar el cache');
+                } finally {
+                    setIsClearing(false);
+                }
+            },
+            undefined,
+            'Limpiar',
+            'Cancelar'
         );
     };
 
@@ -212,6 +207,14 @@ export default function ProfileScreen() {
                 <Text style={styles.footerText}>Club de Mercancías © {currentYear}</Text>
                 <Text style={styles.footerText}>Powered by Aludra</Text>
             </View>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </ScrollView>
     );
 }

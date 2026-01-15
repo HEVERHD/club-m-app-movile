@@ -7,16 +7,18 @@ import {
     StyleSheet,
     TouchableOpacity,
     ActivityIndicator,
-    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useDrawStore } from '../../src/stores/draw-store';
 import { WinnersList } from '../../src/components/draws/WinnersList';
 import { COLORS } from '../../src/constants/colors';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 
 export default function DrawDetailScreen() {
     const router = useRouter();
+    const alert = useAlert();
     const { id, drawData } = useLocalSearchParams<{ id: string; drawData?: string }>();
 
     const {
@@ -69,40 +71,27 @@ export default function DrawDetailScreen() {
     };
 
     const handleCancelDraw = () => {
-        Alert.alert(
+        alert.showConfirm(
             'Cancelar Sorteo',
-            '¿Estás seguro de que deseas cancelar este sorteo? Esta acción no se puede deshacer.',
-            [
-                { text: 'No', style: 'cancel' },
-                {
-                    text: 'Sí, Cancelar',
-                    style: 'destructive',
-                    onPress: async () => {
-                        Alert.prompt(
-                            'Motivo de Cancelación',
-                            'Por favor ingresa el motivo de la cancelación:',
-                            async (reason) => {
-                                if (!reason || reason.trim() === '') {
-                                    Alert.alert('Error', 'Debes ingresar un motivo');
-                                    return;
-                                }
-
-                                try {
-                                    setIsCancelling(true);
-                                    await cancelDraw(id!, reason);
-                                    Alert.alert('Éxito', 'Sorteo cancelado correctamente');
-                                    router.back();
-                                } catch (error: any) {
-                                    Alert.alert('Error', error.message);
-                                } finally {
-                                    setIsCancelling(false);
-                                }
-                            },
-                            'plain-text'
-                        );
-                    },
-                },
-            ]
+            '¿Estás seguro de que deseas cancelar este sorteo? Esta acción no se puede deshacer.\n\nSe cancelará con motivo: "Cancelado desde la aplicación"',
+            async () => {
+                try {
+                    setIsCancelling(true);
+                    await cancelDraw(id!, 'Cancelado desde la aplicación');
+                    alert.showSuccess(
+                        'Sorteo Cancelado',
+                        'El sorteo ha sido cancelado correctamente',
+                        () => router.back()
+                    );
+                } catch (error: any) {
+                    alert.showError('Error', error.message);
+                } finally {
+                    setIsCancelling(false);
+                }
+            },
+            undefined,
+            'Sí, Cancelar',
+            'No'
         );
     };
 
@@ -352,6 +341,16 @@ export default function DrawDetailScreen() {
                     </TouchableOpacity>
                 )} */}
             </ScrollView>
+
+            {/* Custom Alert */}
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }

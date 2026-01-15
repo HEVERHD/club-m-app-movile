@@ -1,15 +1,18 @@
 // app/club/[id].tsx - Pantalla de detalle del club con pagos y consumo
-import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../src/constants/colors';
 import { usePaymentStore } from '../../src/stores/payment-store';
 import { WeekSelector } from '../../src/components/payments/WeekSelector';
 import { PaymentSummary } from '../../src/components/payments/PaymentSummary';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 
 export default function ClubDetailScreen() {
     const { id, clubData } = useLocalSearchParams<{ id: string; clubData?: string }>();
+    const alert = useAlert();
 
     const {
         clubDetail,
@@ -55,74 +58,72 @@ export default function ClubDetailScreen() {
 
     useEffect(() => {
         if (paymentSuccess && lastPaymentResult) {
-            Alert.alert(
-                '✅ Pago Exitoso',
-                `Se registraron ${lastPaymentResult.weeksCount} semana(s)\nMonto: $${lastPaymentResult.amount.toFixed(2)}`,
-                [{ text: 'OK' }]
+            alert.showSuccess(
+                'Pago Exitoso',
+                `Se registraron ${lastPaymentResult.weeksCount} semana(s)\nMonto: $${lastPaymentResult.amount.toFixed(2)}`
             );
         }
     }, [paymentSuccess]);
 
     useEffect(() => {
         if (paymentError) {
-            Alert.alert('Error', paymentError);
+            alert.showError('Error', paymentError);
         }
     }, [paymentError]);
 
     useEffect(() => {
         if (cancelError) {
-            Alert.alert('Error', cancelError);
+            alert.showError('Error', cancelError);
         }
     }, [cancelError]);
 
     const handlePayment = async () => {
         if (selectedWeeks.length === 0) {
-            Alert.alert('Atención', 'Selecciona al menos una semana para pagar');
+            alert.showWarning('Atención', 'Selecciona al menos una semana para pagar');
             return;
         }
 
-        Alert.alert(
+        alert.showConfirm(
             'Confirmar Pago',
             `¿Deseas pagar ${selectedWeeks.length} semana(s) por $${getSelectedAmount().toFixed(2)}?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Confirmar', onPress: () => processPayment(id!) },
-            ]
+            () => processPayment(id!),
+            undefined,
+            'Confirmar',
+            'Cancelar'
         );
     };
 
     const handleCancelClub = () => {
         if (clubDetail?.statusName?.toLowerCase() === 'cancelado') {
-            Alert.alert('Aviso', 'Este club ya está cancelado');
+            alert.showWarning('Aviso', 'Este club ya está cancelado');
             return;
         }
 
-        Alert.alert(
-            '⚠️ Cancelar Club',
+        alert.showConfirm(
+            'Cancelar Club',
             `¿Estás seguro de que deseas cancelar el club #${clubDetail?.contractNumber}?\n\nEsta acción no se puede deshacer.`,
-            [
-                { text: 'No', style: 'cancel' },
-                {
-                    text: 'Sí, Cancelar',
-                    style: 'destructive',
-                    onPress: async () => {
-                        const success = await cancelClub(id!);
-                        if (success) {
-                            Alert.alert(
-                                '✅ Club Cancelado',
-                                'El club ha sido cancelado exitosamente',
-                                [{ text: 'OK', onPress: () => router.back() }]
-                            );
-                        }
-                    }
-                },
-            ]
+            async () => {
+                const success = await cancelClub(id!);
+                if (success) {
+                    alert.showSuccess(
+                        'Club Cancelado',
+                        'El club ha sido cancelado exitosamente',
+                        () => router.back()
+                    );
+                }
+            },
+            undefined,
+            'Sí, Cancelar',
+            'No'
         );
     };
 
     // Navegar a la pantalla de consumo de saldo
     const handleExchange = () => {
-        router.push('/club/exchange');
+        router.push({
+            pathname: '/club/exchange',
+            params: { customerId: clubDetail?.customerIdentification || '' }
+        });
     };
 
     if (isLoadingDetail) {
@@ -314,6 +315,16 @@ export default function ClubDetailScreen() {
                     onCancel={clearSelection}
                 />
             )}
+
+            {/* Custom Alert */}
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }

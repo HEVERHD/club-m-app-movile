@@ -7,13 +7,14 @@ import {
     ScrollView,
     TextInput,
     TouchableOpacity,
-    Alert,
     ActivityIndicator,
 } from 'react-native';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../../src/constants/colors';
 import { customersApi } from '../../../src/api/customers.api';
+import { CustomAlert } from '../../../src/components/ui/CustomAlert';
+import { useAlert } from '../../../src/hooks/useAlert';
 import {
     UpdateEmpresaDTO,
     CUSTOMER_TYPE_IDS,
@@ -29,6 +30,7 @@ import {
 } from '../../../src/types/clubs';
 
 export default function EditEmpresaScreen() {
+    const alert = useAlert();
     const { id } = useLocalSearchParams();
     const customerId = Array.isArray(id) ? id[0] : id;
 
@@ -111,8 +113,8 @@ export default function EditEmpresaScreen() {
             });
         } catch (error: any) {
             console.error('Error loading customer:', error);
-            Alert.alert('Error', 'No se pudo cargar los datos del cliente');
-            router.back();
+            alert.showError('Error', 'No se pudo cargar los datos del cliente');
+            setTimeout(() => router.back(), 1500);
         } finally {
             setLoading(false);
         }
@@ -120,47 +122,47 @@ export default function EditEmpresaScreen() {
 
     const validateForm = (): boolean => {
         if (!legalName.trim()) {
-            Alert.alert('Error', 'El nombre legal es requerido');
+            alert.showError('Error', 'El nombre legal es requerido');
             return false;
         }
         if (!comercialName.trim()) {
-            Alert.alert('Error', 'El nombre comercial es requerido');
+            alert.showError('Error', 'El nombre comercial es requerido');
             return false;
         }
         if (!ruc.trim()) {
-            Alert.alert('Error', 'El RUC es requerido');
+            alert.showError('Error', 'El RUC es requerido');
             return false;
         }
         if (!dv.trim()) {
-            Alert.alert('Error', 'El DV es requerido');
+            alert.showError('Error', 'El DV es requerido');
             return false;
         }
         if (!phoneNumber.trim()) {
-            Alert.alert('Error', 'El teléfono es requerido');
+            alert.showError('Error', 'El teléfono es requerido');
             return false;
         }
         if (!email.trim()) {
-            Alert.alert('Error', 'El correo electrónico es requerido');
+            alert.showError('Error', 'El correo electrónico es requerido');
             return false;
         }
         if (!email.includes('@')) {
-            Alert.alert('Error', 'El correo electrónico no es válido');
+            alert.showError('Error', 'El correo electrónico no es válido');
             return false;
         }
         if (!storeName.trim()) {
-            Alert.alert('Error', 'El nombre de la tienda es requerido');
+            alert.showError('Error', 'El nombre de la tienda es requerido');
             return false;
         }
         if (!storePhone.trim()) {
-            Alert.alert('Error', 'El teléfono de la tienda es requerido');
+            alert.showError('Error', 'El teléfono de la tienda es requerido');
             return false;
         }
         if (!storeEmail.trim()) {
-            Alert.alert('Error', 'El correo de la tienda es requerido');
+            alert.showError('Error', 'El correo de la tienda es requerido');
             return false;
         }
         if (!storeEmail.includes('@')) {
-            Alert.alert('Error', 'El correo de la tienda no es válido');
+            alert.showError('Error', 'El correo de la tienda no es válido');
             return false;
         }
         return true;
@@ -256,22 +258,11 @@ export default function EditEmpresaScreen() {
 
             await customersApi.updateEmpresa(updateData);
 
-            Alert.alert(
-                'Éxito',
-                'Cliente empresa actualizado exitosamente',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => router.back(),
-                    },
-                ]
-            );
+            alert.showSuccess('Éxito', 'Cliente empresa actualizado exitosamente');
+            setTimeout(() => router.back(), 1500);
         } catch (error: any) {
             console.error('Error updating empresa:', error);
-            Alert.alert(
-                'Error',
-                error.message || 'No se pudo actualizar el cliente'
-            );
+            alert.showError('Error', error.message || 'No se pudo actualizar el cliente');
         } finally {
             setSubmitting(false);
         }
@@ -508,6 +499,14 @@ export default function EditEmpresaScreen() {
                     <View style={styles.bottomSpacer} />
                 </View>
             </ScrollView>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </>
     );
 }

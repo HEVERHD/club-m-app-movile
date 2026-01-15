@@ -7,7 +7,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     TextInput,
-    Alert,
     ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,11 +14,14 @@ import { useRouter } from 'expo-router';
 import { useDrawStore } from '../../src/stores/draw-store';
 import { clubApi } from '../../src/api/clubs.api';
 import { COLORS } from '../../src/constants/colors';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 import type { ClubType } from '../../src/types/clubs';
 
 export default function ExecuteDrawScreen() {
     const router = useRouter();
     const { executeDraw } = useDrawStore();
+    const alert = useAlert();
 
     const [clubTypes, setClubTypes] = useState<ClubType[]>([]);
     const [selectedClubTypeId, setSelectedClubTypeId] = useState<string>('');
@@ -42,7 +44,7 @@ export default function ExecuteDrawScreen() {
                 setSelectedClubTypeId(types[0].clubTypeId);
             }
         } catch (error: any) {
-            Alert.alert('Error', 'No se pudieron cargar los tipos de club');
+            alert.showError('Error', 'No se pudieron cargar los tipos de club');
             console.error(error);
         } finally {
             setIsLoadingTypes(false);
@@ -56,18 +58,18 @@ export default function ExecuteDrawScreen() {
     const handleExecute = async () => {
         // Validaciones
         if (!selectedClubTypeId) {
-            Alert.alert('Error', 'Debes seleccionar un tipo de club');
+            alert.showError('Error', 'Debes seleccionar un tipo de club');
             return;
         }
 
         // Validar número ganador
         const number = parseInt(winningNumber);
         if (!winningNumber || isNaN(number)) {
-            Alert.alert('Error', 'Debes ingresar el número ganador');
+            alert.showError('Error', 'Debes ingresar el número ganador');
             return;
         }
         if (number < 0 || number > 99) {
-            Alert.alert('Error', 'El número debe estar entre 0 y 99');
+            alert.showError('Error', 'El número debe estar entre 0 y 99');
             return;
         }
 
@@ -75,14 +77,10 @@ export default function ExecuteDrawScreen() {
         const selectedType = clubTypes.find(t => t.clubTypeId === selectedClubTypeId);
         const confirmMessage = `¿Estás seguro de que deseas ejecutar el sorteo para ${selectedType?.name || 'este tipo de club'}?\n\nNúmero ganador: ${winningNumber}`;
 
-        Alert.alert(
+        alert.showConfirm(
             'Confirmar Sorteo',
             confirmMessage,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Ejecutar',
-                    onPress: async () => {
+            async () => {
                         try {
                             setIsExecuting(true);
 
@@ -100,39 +98,37 @@ export default function ExecuteDrawScreen() {
                             console.log('🎯 DESPUÉS DE executeDraw - draw.drawId:', draw.drawId);
                             console.log('🎯 DESPUÉS DE executeDraw - draw.status:', draw.status);
 
-                            const alertMessage = `El sorteo se ha ejecutado exitosamente.\n\nNúmero ganador: ${draw.numberPlayed}${draw.totalWinners ? `\nGanadores: ${draw.totalWinners}` : ''}`;
-                            console.log('🎯 MENSAJE DEL ALERT:', alertMessage);
+                            const successMessage = `El sorteo se ha ejecutado exitosamente.\n\nNúmero ganador: ${draw.numberPlayed}${draw.totalWinners ? `\nGanadores: ${draw.totalWinners}` : ''}`;
+                            console.log('🎯 MENSAJE DEL ALERT:', successMessage);
 
-                            Alert.alert(
-                                '¡Sorteo Ejecutado!',
-                                alertMessage,
+                            alert.show(
+                                'Sorteo Ejecutado',
+                                successMessage,
                                 [
                                     {
                                         text: 'Volver a Sorteos',
                                         style: 'cancel',
-                                        onPress: () => {
-                                            router.back();
-                                        },
+                                        onPress: () => router.back(),
                                     },
                                     {
                                         text: 'Ver Detalles',
-                                        onPress: () => {
-                                            router.replace(`/draw/${draw.drawId}`);
-                                        },
+                                        onPress: () => router.replace(`/draw/${draw.drawId}`),
                                     },
-                                ]
+                                ],
+                                'success'
                             );
                         } catch (error: any) {
-                            Alert.alert(
+                            alert.showError(
                                 'Error al Ejecutar Sorteo',
                                 error.message || 'Ocurrió un error inesperado'
                             );
                         } finally {
                             setIsExecuting(false);
                         }
-                    },
-                },
-            ]
+            },
+            undefined,
+            'Ejecutar',
+            'Cancelar'
         );
     };
 
@@ -324,6 +320,16 @@ export default function ExecuteDrawScreen() {
                     )}
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* Custom Alert */}
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }

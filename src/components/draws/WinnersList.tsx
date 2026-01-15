@@ -1,10 +1,12 @@
 // src/components/draws/WinnersList.tsx
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS } from '../../constants/colors';
 import type { DrawWinner } from '../../types/clubs';
 import { useDrawStore } from '../../stores/draw-store';
+import { CustomAlert } from '../ui/CustomAlert';
+import { useAlert } from '../../hooks/useAlert';
 
 interface WinnersListProps {
     winners: DrawWinner[];
@@ -13,6 +15,7 @@ interface WinnersListProps {
 }
 
 export function WinnersList({ winners, drawId, canMarkActions = false }: WinnersListProps) {
+    const alert = useAlert();
     const router = useRouter();
     const { markWinnerNotified, markPrizeClaimed } = useDrawStore();
 
@@ -34,44 +37,38 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
     };
 
     const handleMarkNotified = async (clubId: string, customerName: string) => {
-        Alert.alert(
+        alert.showConfirm(
             'Marcar como Notificado',
             `¿Confirmas que ${customerName} ha sido notificado de su premio?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Confirmar',
-                    onPress: async () => {
-                        try {
-                            await markWinnerNotified(drawId, clubId);
-                            Alert.alert('Éxito', 'Ganador marcado como notificado');
-                        } catch (error: any) {
-                            Alert.alert('Error', error.message);
-                        }
-                    },
-                },
-            ]
+            async () => {
+                try {
+                    await markWinnerNotified(drawId, clubId);
+                    alert.showSuccess('Éxito', 'Ganador marcado como notificado');
+                } catch (error: any) {
+                    alert.showError('Error', error.message);
+                }
+            },
+            undefined,
+            'Confirmar',
+            'Cancelar'
         );
     };
 
     const handleMarkClaimed = async (clubId: string, customerName: string) => {
-        Alert.alert(
+        alert.showConfirm(
             'Marcar Premio Reclamado',
             `¿Confirmas que ${customerName} ha reclamado su premio?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Confirmar',
-                    onPress: async () => {
-                        try {
-                            await markPrizeClaimed(drawId, clubId);
-                            Alert.alert('Éxito', 'Premio marcado como reclamado');
-                        } catch (error: any) {
-                            Alert.alert('Error', error.message);
-                        }
-                    },
-                },
-            ]
+            async () => {
+                try {
+                    await markPrizeClaimed(drawId, clubId);
+                    alert.showSuccess('Éxito', 'Premio marcado como reclamado');
+                } catch (error: any) {
+                    alert.showError('Error', error.message);
+                }
+            },
+            undefined,
+            'Confirmar',
+            'Cancelar'
         );
     };
 
@@ -224,6 +221,14 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
                     )}
                 </View>
             ))}
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }

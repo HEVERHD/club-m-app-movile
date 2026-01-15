@@ -1,5 +1,9 @@
 // src/api/draws.api.ts
-import { mdl05Client } from './client';
+import { mdl05Client, STORAGE_KEYS } from './client';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as SecureStore from 'expo-secure-store';
+import { getBaseUrl, getApiKey } from '../services/api.config';
 import type {
     Draw,
     DrawWinner,
@@ -323,5 +327,117 @@ export const drawsApi = {
         console.log('📅 Obteniendo próximos sorteos...', clubTypeId);
         console.log('⚠️ Funcionalidad no disponible todavía');
         return [];
+    },
+
+    /**
+     * Obtener reporte PDF de ganadores por fecha
+     * Descarga el PDF y lo guarda localmente
+     * @param lotteryDate - Fecha del sorteo en formato ISO
+     * @returns Ruta local del archivo PDF descargado
+     */
+    async getWinnersReportPdf(lotteryDate: Date): Promise<string> {
+        try {
+            console.log('📄 Descargando reporte de ganadores...');
+
+            // Formatear la fecha para el API
+            const isoDate = lotteryDate.toISOString();
+            console.log('📅 Fecha del sorteo:', isoDate);
+
+            // Obtener token de autenticación
+            const token = await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+            if (!token) {
+                throw new Error('No hay sesión activa. Por favor inicia sesión nuevamente.');
+            }
+
+            // Construir URL del endpoint
+            const baseUrl = getBaseUrl();
+            const apiKey = getApiKey();
+            const url = `${baseUrl}${BASE}/GetReport1`;
+
+            console.log('📤 URL del reporte:', url);
+
+            // Hacer la petición con fetch para obtener el PDF como blob
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/pdf',
+                    'Ocp-Apim-Subscription-Key': apiKey,
+                },
+                body: JSON.stringify({
+                    LotteryDate: isoDate,
+                }),
+            });
+
+            console.log('📥 Respuesta del servidor:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`Error al descargar el reporte. Código: ${response.status}`);
+            }
+
+            // Obtener el blob del PDF
+            const pdfBlob = await response.blob();
+            console.log('📦 Tamaño del PDF:', pdfBlob.size, 'bytes');
+
+            // Convertir blob a base64 usando FileReader (compatible con React Native)
+            const base64Data = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    if (typeof reader.result === 'string') {
+                        // Remover el prefijo "data:application/pdf;base64,"
+                        const base64 = reader.result.split(',')[1];
+                        resolve(base64);
+                    } else {
+                        reject(new Error('Error al convertir el PDF'));
+                    }
+                };
+                reader.onerror = () => reject(new Error('Error al leer el PDF'));
+                reader.readAsDataURL(pdfBlob);
+            });
+
+            console.log('📝 PDF convertido a base64, longitud:', base64Data.length);
+
+            // Crear archivo en el directorio cache usando la nueva API de expo-file-system
+            const timestamp = Date.now();
+            const fileName = `ganadores_${lotteryDate.toISOString().split('T')[0]}_${timestamp}.pdf`;
+            const file = new FileSystem.File(FileSystem.Paths.cache, fileName);
+
+            // Escribir el archivo desde base64
+            await file.write(base64Data, { encoding: 'base64' });
+
+            console.log('✅ Reporte descargado exitosamente:', {
+                uri: file.uri,
+                size: pdfBlob.size,
+            });
+
+            return file.uri;
+        } catch (error: any) {
+            console.error('❌ Error descargando reporte:', error);
+            throw new Error(error.message || 'Error al descargar el reporte de ganadores');
+        }
+    },
+
+    /**
+     * Compartir el reporte PDF de ganadores
+     * @param fileUri - Ruta local del archivo PDF
+     */
+    async shareWinnersReport(fileUri: string): Promise<void> {
+        try {
+            const isAvailable = await Sharing.isAvailableAsync();
+            if (!isAvailable) {
+                throw new Error('La función de compartir no está disponible en este dispositivo');
+            }
+
+            await Sharing.shareAsync(fileUri, {
+                mimeType: 'application/pdf',
+                dialogTitle: 'Compartir Reporte de Ganadores',
+            });
+
+            console.log('✅ Reporte compartido exitosamente');
+        } catch (error: any) {
+            console.error('❌ Error compartiendo reporte:', error);
+            throw new Error(error.message || 'Error al compartir el reporte');
+        }
     },
 };

@@ -2,29 +2,32 @@
 import { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, ActivityIndicator,
-    KeyboardAvoidingView, Platform, Alert, StyleSheet, StatusBar, Image,
+    KeyboardAvoidingView, Platform, StyleSheet, StatusBar, Image,
     ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { COLORS } from '../../src/constants/colors';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 
 export default function CompanyScreen() {
+    const alert = useAlert();
     const [company, setCompany] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const { checkCompany, isLoading, error, clearError } = useAuthStore();
 
     const handleContinue = async () => {
         if (!company.trim()) {
-            Alert.alert('Error', 'Ingresa el nombre de la compañía');
+            alert.showError('Error', 'Ingresa el nombre de la compañía');
             return;
         }
         try {
             await checkCompany(company.trim());
             router.push('/(auth)/login');
         } catch (e: any) {
-            Alert.alert('Error', e.message || 'Compañía no encontrada');
+            alert.showError('Error', e.message || 'Compañía no encontrada');
         }
     };
 
@@ -149,6 +152,14 @@ export default function CompanyScreen() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </View>
     );
 }

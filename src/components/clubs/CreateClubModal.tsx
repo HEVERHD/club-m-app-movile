@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import {
     View, Text, Modal, TouchableOpacity, ScrollView, TextInput,
-    ActivityIndicator, StyleSheet, Alert, KeyboardAvoidingView, Platform
+    ActivityIndicator, StyleSheet, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useForm, Controller } from 'react-hook-form';
@@ -13,6 +13,8 @@ import { COLORS } from '../../constants/colors';
 import { DEFAULT_VALUES } from '../../data/mockData';
 import { CustomerSearchSelect } from './CustomerSearchSelect';
 import { CustomerSearchResult } from '../../services/customerSearch';
+import { CustomAlert } from '../ui/CustomAlert';
+import { useAlert } from '../../hooks/useAlert';
 
 interface Props {
     visible: boolean;
@@ -69,6 +71,7 @@ function ShareLimitAlert({ share, onClose, onChangeShare }: {
 }
 
 export function CreateClubModal({ visible, onClose }: Props) {
+    const alert = useAlert();
     const { data: clubTypes, isLoading: loadingTypes } = useClubTypes();
     const { data: denominations, isLoading: loadingDenoms } = useDenominations();
     const createMutation = useCreateClub();
@@ -149,12 +152,12 @@ export function CreateClubModal({ visible, onClose }: Props) {
 
             await createMutation.mutateAsync(payload);
 
-            Alert.alert('✅ Éxito', 'Club creado exitosamente', [
-                { text: 'OK', onPress: onClose }
-            ]);
-
-            reset();
-            setSelectedCustomer(null);
+            alert.showSuccess('Éxito', 'Club creado exitosamente');
+            setTimeout(() => {
+                reset();
+                setSelectedCustomer(null);
+                onClose();
+            }, 1500);
         } catch (error: any) {
             console.error('❌ Error creando club:', error);
 
@@ -166,7 +169,7 @@ export function CreateClubModal({ visible, onClose }: Props) {
                 setShowShareLimitError(true);
             } else {
                 // Mostrar alerta genérica para otros errores
-                Alert.alert('Error', parsedError.message);
+                alert.showError('Error', parsedError.message);
             }
         }
     };
@@ -415,6 +418,14 @@ export function CreateClubModal({ visible, onClose }: Props) {
                     />
                 )}
             </KeyboardAvoidingView>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </Modal>
     );
 }

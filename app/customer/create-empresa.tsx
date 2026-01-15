@@ -7,12 +7,13 @@ import {
     ScrollView,
     TextInput,
     TouchableOpacity,
-    Alert,
     ActivityIndicator,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { customersApi } from '../../src/api/customers.api';
+import { CustomAlert } from '../../src/components/ui/CustomAlert';
+import { useAlert } from '../../src/hooks/useAlert';
 import {
     RegisterEmpresaDTO,
     CUSTOMER_TYPE_IDS,
@@ -26,6 +27,7 @@ import {
 } from '../../src/types/clubs';
 
 export default function CreateEmpresaScreen() {
+    const alert = useAlert();
     const [loading, setLoading] = useState(false);
 
     // Form state
@@ -46,38 +48,38 @@ export default function CreateEmpresaScreen() {
 
     const validateForm = (): boolean => {
         if (!formData.legalName.trim()) {
-            Alert.alert('Error', 'El nombre legal es requerido');
+            alert.showError('Error', 'El nombre legal es requerido');
             return false;
         }
         if (!formData.comercialName.trim()) {
-            Alert.alert('Error', 'El nombre comercial es requerido');
+            alert.showError('Error', 'El nombre comercial es requerido');
             return false;
         }
         if (!formData.ruc.trim()) {
-            Alert.alert('Error', 'El RUC es requerido');
+            alert.showError('Error', 'El RUC es requerido');
             return false;
         }
         if (!formData.dv.trim()) {
-            Alert.alert('Error', 'El DV es requerido');
+            alert.showError('Error', 'El DV es requerido');
             return false;
         }
         if (!formData.phone.trim()) {
-            Alert.alert('Error', 'El teléfono es requerido');
+            alert.showError('Error', 'El teléfono es requerido');
             return false;
         }
         if (!formData.email.trim()) {
-            Alert.alert('Error', 'El email es requerido');
+            alert.showError('Error', 'El email es requerido');
             return false;
         }
         if (!formData.storeName.trim()) {
-            Alert.alert('Error', 'El nombre de la tienda es requerido');
+            alert.showError('Error', 'El nombre de la tienda es requerido');
             return false;
         }
 
         // Validar formato de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
-            Alert.alert('Error', 'El formato del email no es válido');
+            alert.showError('Error', 'El formato del email no es válido');
             return false;
         }
 
@@ -187,18 +189,10 @@ export default function CreateEmpresaScreen() {
 
             await customersApi.registerEmpresa(registerData);
 
-            Alert.alert(
-                'Éxito',
-                'Cliente empresa registrado exitosamente',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => router.back(),
-                    },
-                ]
-            );
+            alert.showSuccess('Éxito', 'Cliente empresa registrado exitosamente');
+            setTimeout(() => router.back(), 1500);
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Error al registrar cliente empresa');
+            alert.showError('Error', error.message || 'Error al registrar cliente empresa');
         } finally {
             setLoading(false);
         }
@@ -365,6 +359,14 @@ export default function CreateEmpresaScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            <CustomAlert
+                visible={alert.visible}
+                type={alert.config.type}
+                title={alert.config.title}
+                message={alert.config.message}
+                buttons={alert.config.buttons}
+                onDismiss={alert.hide}
+            />
         </>
     );
 }
