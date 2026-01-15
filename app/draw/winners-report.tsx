@@ -7,18 +7,15 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Platform,
-    Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import Pdf from 'react-native-pdf';
+import { WebView } from 'react-native-webview';
 import { COLORS } from '../../src/constants/colors';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 import { drawsApi } from '../../src/api/draws.api';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function WinnersReportScreen() {
     const router = useRouter();
@@ -27,24 +24,21 @@ export default function WinnersReportScreen() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [pdfBase64, setPdfBase64] = useState<string | null>(null);
     const [pdfUri, setPdfUri] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [pdfLoading, setPdfLoading] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
 
     const handleBack = () => {
-        if (pdfUri) {
+        if (pdfBase64) {
+            setPdfBase64(null);
             setPdfUri(null);
             setError(null);
-            setCurrentPage(1);
-            setTotalPages(0);
         } else {
             router.back();
         }
     };
 
-    const handleDateChange = (event: DateTimePickerEvent, date?: Date) => {
+    const handleDateChange = (_event: DateTimePickerEvent, date?: Date) => {
         setShowDatePicker(Platform.OS === 'ios');
         if (date) {
             setSelectedDate(date);
@@ -55,14 +49,17 @@ export default function WinnersReportScreen() {
         try {
             setIsLoading(true);
             setError(null);
+            setPdfBase64(null);
             setPdfUri(null);
 
             console.log('Descargando reporte para fecha:', selectedDate);
 
-            const fileUri = await drawsApi.getWinnersReportPdf(selectedDate);
-            console.log('PDF descargado en:', fileUri);
+            // Obtener el PDF y su base64
+            const result = await drawsApi.getWinnersReportPdfWithBase64(selectedDate);
+            console.log('PDF descargado, base64 length:', result.base64.length);
 
-            setPdfUri(fileUri);
+            setPdfBase64(result.base64);
+            setPdfUri(result.uri);
         } catch (err: any) {
             console.error('Error descargando reporte:', err);
             setError(err.message || 'Error al descargar el reporte');
@@ -99,6 +96,172 @@ export default function WinnersReportScreen() {
         });
     };
 
+    // HTML que renderiza el PDF usando PDF.js de Mozilla
+    const getPdfHtml = (base64: string) => `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=4.0, user-scalable=yes">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                html, body {
+                    width: 100%;
+                    height: 100%;
+                    background-color: #242832;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                }
+                #pdf-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 10px;
+                    gap: 10px;
+                }
+                canvas {
+                    display: block;
+                    margin: 0 auto;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                    background: white;
+                }
+                #loading {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: #94a3b8;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-size: 16px;
+                    text-align: center;
+                }
+                #loading .spinner {
+                    width: 40px;
+                    height: 40px;
+                    border: 3px solid #3a4150;
+                    border-top-color: #3b82f6;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 15px;
+                }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                #error {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: #ef4444;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-size: 14px;
+                    text-align: center;
+                    padding: 20px;
+                    display: none;
+                }
+                #page-info {
+                    position: fixed;
+                    bottom: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0,0,0,0.7);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-size: 12px;
+                    z-index: 100;
+                }
+            </style>
+        </head>
+        <body>
+            <div id="loading">
+                <div class="spinner"></div>
+                Cargando PDF...
+            </div>
+            <div id="error"></div>
+            <div id="pdf-container"></div>
+            <div id="page-info" style="display:none;"></div>
+
+            <script>
+                const pdfData = atob('${base64}');
+                const pdfjsLib = window['pdfjs-dist/build/pdf'];
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+                const loadingEl = document.getElementById('loading');
+                const errorEl = document.getElementById('error');
+                const container = document.getElementById('pdf-container');
+                const pageInfo = document.getElementById('page-info');
+
+                async function renderPDF() {
+                    try {
+                        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                        const pdf = await loadingTask.promise;
+
+                        loadingEl.style.display = 'none';
+                        const totalPages = pdf.numPages;
+                        pageInfo.textContent = totalPages + ' página' + (totalPages > 1 ? 's' : '');
+                        pageInfo.style.display = 'block';
+
+                        const screenWidth = window.innerWidth - 20;
+                        // Factor de alta resolución para mejor calidad al hacer zoom
+                        const pixelRatio = window.devicePixelRatio || 2;
+                        const hiResScale = Math.max(pixelRatio, 2.5);
+
+                        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                            const page = await pdf.getPage(pageNum);
+                            const viewport = page.getViewport({ scale: 1 });
+
+                            // Calcular escala para ajustar al ancho de pantalla
+                            const displayScale = screenWidth / viewport.width;
+                            // Viewport de alta resolución para renderizar
+                            const hiResViewport = page.getViewport({ scale: displayScale * hiResScale });
+                            // Viewport para display
+                            const displayViewport = page.getViewport({ scale: displayScale });
+
+                            const canvas = document.createElement('canvas');
+                            const context = canvas.getContext('2d');
+
+                            // Canvas en alta resolución
+                            canvas.height = hiResViewport.height;
+                            canvas.width = hiResViewport.width;
+
+                            // Mostrar en tamaño de pantalla (CSS)
+                            canvas.style.width = displayViewport.width + 'px';
+                            canvas.style.height = displayViewport.height + 'px';
+
+                            await page.render({
+                                canvasContext: context,
+                                viewport: hiResViewport
+                            }).promise;
+
+                            container.appendChild(canvas);
+                        }
+
+                        // Ocultar info de páginas después de 3 segundos
+                        setTimeout(() => {
+                            pageInfo.style.opacity = '0';
+                            pageInfo.style.transition = 'opacity 0.5s';
+                        }, 3000);
+
+                    } catch (error) {
+                        console.error('Error rendering PDF:', error);
+                        loadingEl.style.display = 'none';
+                        errorEl.style.display = 'block';
+                        errorEl.textContent = 'Error al cargar el PDF: ' + error.message;
+                    }
+                }
+
+                renderPDF();
+            </script>
+        </body>
+        </html>
+    `;
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -108,15 +271,15 @@ export default function WinnersReportScreen() {
                 </TouchableOpacity>
                 <View style={styles.headerCenter}>
                     <Text style={styles.headerTitle}>
-                        {pdfUri ? 'Reporte de Ganadores' : 'Seleccionar Fecha'}
+                        {pdfBase64 ? 'Reporte de Ganadores' : 'Seleccionar Fecha'}
                     </Text>
-                    {pdfUri && totalPages > 0 && (
+                    {pdfBase64 && (
                         <Text style={styles.headerSubtitle}>
-                            {formatShortDate(selectedDate)} - Pág. {currentPage}/{totalPages}
+                            {formatShortDate(selectedDate)}
                         </Text>
                     )}
                 </View>
-                {pdfUri ? (
+                {pdfBase64 ? (
                     <TouchableOpacity style={styles.shareBtn} onPress={handleShareReport}>
                         <Ionicons name="share-outline" size={24} color={COLORS.accent.blue} />
                     </TouchableOpacity>
@@ -126,7 +289,7 @@ export default function WinnersReportScreen() {
             </View>
 
             {/* Content */}
-            {!pdfUri ? (
+            {!pdfBase64 ? (
                 // Date Selector View
                 <View style={styles.selectorContainer}>
                     <View style={styles.card}>
@@ -200,44 +363,30 @@ export default function WinnersReportScreen() {
                     </View>
                 </View>
             ) : (
-                // PDF Viewer
+                // PDF Viewer con WebView
                 <View style={styles.pdfContainer}>
-                    {pdfLoading && (
-                        <View style={styles.pdfLoadingOverlay}>
-                            <ActivityIndicator size="large" color={COLORS.accent.blue} />
-                            <Text style={styles.pdfLoadingText}>Cargando PDF...</Text>
-                        </View>
-                    )}
-
-                    <Pdf
-                        source={{ uri: pdfUri }}
-                        style={styles.pdf}
-                        onLoadComplete={(numberOfPages) => {
-                            console.log(`PDF cargado: ${numberOfPages} páginas`);
-                            setTotalPages(numberOfPages);
-                            setPdfLoading(false);
+                    <WebView
+                        source={{ html: getPdfHtml(pdfBase64) }}
+                        style={styles.webview}
+                        originWhitelist={['*']}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        startInLoadingState={true}
+                        scalesPageToFit={true}
+                        allowFileAccess={true}
+                        allowFileAccessFromFileURLs={true}
+                        allowUniversalAccessFromFileURLs={true}
+                        mixedContentMode="always"
+                        renderLoading={() => (
+                            <View style={styles.loadingOverlay}>
+                                <ActivityIndicator size="large" color={COLORS.accent.blue} />
+                                <Text style={styles.loadingText}>Cargando PDF...</Text>
+                            </View>
+                        )}
+                        onError={(syntheticEvent) => {
+                            const { nativeEvent } = syntheticEvent;
+                            console.error('WebView error:', nativeEvent);
                         }}
-                        onPageChanged={(page) => {
-                            console.log(`Página actual: ${page}`);
-                            setCurrentPage(page);
-                        }}
-                        onError={(error) => {
-                            console.error('Error cargando PDF:', error);
-                            setPdfLoading(false);
-                            setError('Error al mostrar el PDF');
-                            alert.showError('Error', 'No se pudo cargar el PDF. Intenta de nuevo.');
-                        }}
-                        onLoadProgress={(percent) => {
-                            if (percent < 1) {
-                                setPdfLoading(true);
-                            }
-                        }}
-                        enablePaging={true}
-                        horizontal={false}
-                        fitPolicy={0}
-                        spacing={10}
-                        enableAntialiasing={true}
-                        enableAnnotationRendering={true}
                     />
 
                     {/* Bottom Actions */}
@@ -253,10 +402,9 @@ export default function WinnersReportScreen() {
                         <TouchableOpacity
                             style={[styles.actionButton, styles.actionButtonSecondary]}
                             onPress={() => {
+                                setPdfBase64(null);
                                 setPdfUri(null);
                                 setError(null);
-                                setCurrentPage(1);
-                                setTotalPages(0);
                             }}
                         >
                             <Ionicons name="calendar-outline" size={20} color={COLORS.accent.blue} />
@@ -446,12 +594,11 @@ const styles = StyleSheet.create({
     pdfContainer: {
         flex: 1,
     },
-    pdf: {
+    webview: {
         flex: 1,
-        width: SCREEN_WIDTH,
         backgroundColor: COLORS.bg.secondary,
     },
-    pdfLoadingOverlay: {
+    loadingOverlay: {
         position: 'absolute',
         top: 0,
         left: 0,
@@ -460,9 +607,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: COLORS.bg.primary,
-        zIndex: 10,
     },
-    pdfLoadingText: {
+    loadingText: {
         marginTop: 12,
         fontSize: 14,
         color: COLORS.text.secondary,

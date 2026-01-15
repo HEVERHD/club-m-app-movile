@@ -419,6 +419,84 @@ export const drawsApi = {
     },
 
     /**
+     * Obtener reporte PDF de ganadores con base64 para renderizar en WebView
+     * @param lotteryDate - Fecha del sorteo
+     * @returns Objeto con base64 del PDF y uri del archivo guardado
+     */
+    async getWinnersReportPdfWithBase64(lotteryDate: Date): Promise<{ base64: string; uri: string }> {
+        try {
+            console.log('📄 Descargando reporte de ganadores (con base64)...');
+
+            const isoDate = lotteryDate.toISOString();
+            console.log('📅 Fecha del sorteo:', isoDate);
+
+            const token = await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN);
+            if (!token) {
+                throw new Error('No hay sesión activa. Por favor inicia sesión nuevamente.');
+            }
+
+            const baseUrl = getBaseUrl();
+            const apiKey = getApiKey();
+            const url = `${baseUrl}${BASE}/GetReport1`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/pdf',
+                    'Ocp-Apim-Subscription-Key': apiKey,
+                },
+                body: JSON.stringify({
+                    LotteryDate: isoDate,
+                }),
+            });
+
+            console.log('📥 Respuesta del servidor:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`Error al descargar el reporte. Código: ${response.status}`);
+            }
+
+            const pdfBlob = await response.blob();
+            console.log('📦 Tamaño del PDF:', pdfBlob.size, 'bytes');
+
+            // Convertir blob a base64
+            const base64Data = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    if (typeof reader.result === 'string') {
+                        const base64 = reader.result.split(',')[1];
+                        resolve(base64);
+                    } else {
+                        reject(new Error('Error al convertir el PDF'));
+                    }
+                };
+                reader.onerror = () => reject(new Error('Error al leer el PDF'));
+                reader.readAsDataURL(pdfBlob);
+            });
+
+            console.log('📝 PDF convertido a base64, longitud:', base64Data.length);
+
+            // Guardar archivo para compartir
+            const timestamp = Date.now();
+            const fileName = `ganadores_${lotteryDate.toISOString().split('T')[0]}_${timestamp}.pdf`;
+            const file = new FileSystem.File(FileSystem.Paths.cache, fileName);
+            await file.write(base64Data, { encoding: 'base64' });
+
+            console.log('✅ Reporte listo:', { uri: file.uri });
+
+            return {
+                base64: base64Data,
+                uri: file.uri,
+            };
+        } catch (error: any) {
+            console.error('❌ Error descargando reporte:', error);
+            throw new Error(error.message || 'Error al descargar el reporte de ganadores');
+        }
+    },
+
+    /**
      * Compartir el reporte PDF de ganadores
      * @param fileUri - Ruta local del archivo PDF
      */
