@@ -6,6 +6,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '../src/stores/auth-store';
+import { OfflineBanner } from '../src/components/ui/OfflineBanner';
+import { ThemeProvider, useTheme } from '../src/contexts/ThemeContext';
+import { COLORS } from '../src/constants/colors';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -16,9 +19,9 @@ const queryClient = new QueryClient({
     },
 });
 
-import { COLORS } from '../src/constants/colors';
-
-export default function RootLayout() {
+// Componente interno que usa el tema
+function AppContent() {
+    const { colors, isDark } = useTheme();
     const [isReady, setIsReady] = useState(false);
     const loadStoredAuth = useAuthStore((state) => state.loadStoredAuth);
 
@@ -32,35 +35,47 @@ export default function RootLayout() {
 
     if (!isReady) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.accent.blue} />
+            <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
+                <ActivityIndicator size="large" color={colors.accent.blue} />
             </View>
         );
     }
 
-
     return (
-        <SafeAreaProvider>
-            <QueryClientProvider client={queryClient}>
-                <StatusBar style="light" backgroundColor={COLORS.bg.primary} />
-                <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="club/[id]" options={{ headerShown: false }} />
-                    <Stack.Screen name="search" />
-                    <Stack.Screen name="draw" />
-                </Stack>
-            </QueryClientProvider>
-        </SafeAreaProvider>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
+            <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.bg.primary} />
+            <OfflineBanner />
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="club/[id]" options={{ headerShown: false }} />
+                <Stack.Screen name="search" />
+                <Stack.Screen name="draw" />
+            </Stack>
+        </View>
+    );
+}
+
+export default function RootLayout() {
+    return (
+        <ThemeProvider>
+            <SafeAreaProvider>
+                <QueryClientProvider client={queryClient}>
+                    <AppContent />
+                </QueryClientProvider>
+            </SafeAreaProvider>
+        </ThemeProvider>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.primary,
     },
 });

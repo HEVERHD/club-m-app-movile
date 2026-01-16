@@ -3,11 +3,12 @@ import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 
 export default function TabsLayout() {
     const insets = useSafeAreaInsets();
-    
+    const { colors } = useTheme();
+
     // Calcular altura del tab bar considerando safe area
     const tabBarHeight = Platform.OS === 'ios' ? 50 + insets.bottom : 60 + insets.bottom;
 
@@ -16,8 +17,8 @@ export default function TabsLayout() {
             screenOptions={{
                 headerShown: false,
                 tabBarStyle: {
-                    backgroundColor: COLORS.bg.card,
-                    borderTopColor: COLORS.border.light,
+                    backgroundColor: colors.bg.card,
+                    borderTopColor: colors.border.light,
                     borderTopWidth: 1,
                     height: tabBarHeight,
                     paddingBottom: insets.bottom + 5,
@@ -28,8 +29,8 @@ export default function TabsLayout() {
                     shadowOpacity: 0.1,
                     shadowRadius: 8,
                 },
-                tabBarActiveTintColor: COLORS.accent.blue,
-                tabBarInactiveTintColor: COLORS.text.secondary,
+                tabBarActiveTintColor: colors.accent.blue,
+                tabBarInactiveTintColor: colors.text.secondary,
                 tabBarLabelStyle: {
                     fontSize: 11,
                     fontWeight: '600',

@@ -9,11 +9,12 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../src/stores/auth-store';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 
 export default function LoginScreen() {
+    const { colors, isDark } = useTheme();
     const alert = useAlert();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -62,11 +63,11 @@ export default function LoginScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#0a0f1a" />
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
+            <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.bg.primary} />
 
             {/* Fondo con gradiente sutil */}
-            <View style={styles.backgroundGlow} />
+            <View style={[styles.backgroundGlow, { backgroundColor: colors.accent.blue + '15' }]} />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -87,40 +88,41 @@ export default function LoginScreen() {
                             />
                         </View>
 
-                        <Text style={styles.brandName}>Clubes de Mercancías</Text>
+                        <Text style={[styles.brandName, { color: colors.text.primary }]}>Clubes de Mercancías</Text>
 
                         <TouchableOpacity
                             onPress={handleChangeCompany}
-                            style={styles.tenantPill}
+                            style={[styles.tenantPill, { backgroundColor: colors.bg.elevated, borderColor: colors.border.default }]}
                             activeOpacity={0.7}
                         >
-                            <View style={styles.tenantDot} />
-                            <Text style={styles.tenantText}>{currentTenantName || 'Seleccionar empresa'}</Text>
-                            <Ionicons name="chevron-down" size={16} color={COLORS.text.muted} />
+                            <View style={[styles.tenantDot, { backgroundColor: colors.accent.green }]} />
+                            <Text style={[styles.tenantText, { color: colors.text.primary }]}>{currentTenantName || 'Seleccionar empresa'}</Text>
+                            <Ionicons name="chevron-down" size={16} color={colors.text.muted} />
                         </TouchableOpacity>
                     </View>
 
                     {/* Card del formulario */}
-                    <View style={styles.formCard}>
-                        <Text style={styles.formTitle}>Iniciar Sesión</Text>
-                        <Text style={styles.formSubtitle}>Ingresa tus credenciales para acceder</Text>
+                    <View style={[styles.formCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                        <Text style={[styles.formTitle, { color: colors.text.primary }]}>Iniciar Sesión</Text>
+                        <Text style={[styles.formSubtitle, { color: colors.text.muted }]}>Ingresa tus credenciales para acceder</Text>
 
                         {/* Email */}
                         <View style={styles.inputWrapper}>
-                            <Text style={styles.inputLabel}>Email</Text>
+                            <Text style={[styles.inputLabel, { color: colors.text.secondary }]}>Email</Text>
                             <View style={[
                                 styles.inputContainer,
-                                focusedInput === 'email' && styles.inputFocused
+                                { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                focusedInput === 'email' && { borderColor: colors.accent.blue, backgroundColor: colors.accent.blue + '10' }
                             ]}>
                                 <Ionicons
                                     name="mail-outline"
                                     size={20}
-                                    color={focusedInput === 'email' ? COLORS.accent.blue : COLORS.text.muted}
+                                    color={focusedInput === 'email' ? colors.accent.blue : colors.text.muted}
                                 />
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { color: colors.text.primary }]}
                                     placeholder="correo@ejemplo.com"
-                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    placeholderTextColor={colors.text.muted}
                                     value={email}
                                     onChangeText={(text) => { setEmail(text); if (error) clearError(); }}
                                     onFocus={() => setFocusedInput('email')}
@@ -134,20 +136,21 @@ export default function LoginScreen() {
 
                         {/* Password */}
                         <View style={styles.inputWrapper}>
-                            <Text style={styles.inputLabel}>Contraseña</Text>
+                            <Text style={[styles.inputLabel, { color: colors.text.secondary }]}>Contraseña</Text>
                             <View style={[
                                 styles.inputContainer,
-                                focusedInput === 'password' && styles.inputFocused
+                                { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                focusedInput === 'password' && { borderColor: colors.accent.blue, backgroundColor: colors.accent.blue + '10' }
                             ]}>
                                 <Ionicons
                                     name="lock-closed-outline"
                                     size={20}
-                                    color={focusedInput === 'password' ? COLORS.accent.blue : COLORS.text.muted}
+                                    color={focusedInput === 'password' ? colors.accent.blue : colors.text.muted}
                                 />
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { color: colors.text.primary }]}
                                     placeholder="••••••••"
-                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    placeholderTextColor={colors.text.muted}
                                     value={password}
                                     onChangeText={(text) => { setPassword(text); if (error) clearError(); }}
                                     onFocus={() => setFocusedInput('password')}
@@ -161,7 +164,7 @@ export default function LoginScreen() {
                                     <Ionicons
                                         name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                                         size={20}
-                                        color={COLORS.text.muted}
+                                        color={colors.text.muted}
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -169,31 +172,31 @@ export default function LoginScreen() {
 
                         {/* Error */}
                         {error && (
-                            <View style={styles.errorBox}>
-                                <Ionicons name="alert-circle" size={18} color="#ef4444" />
-                                <Text style={styles.errorText}>{error}</Text>
+                            <View style={[styles.errorBox, { backgroundColor: colors.status.errorBg }]}>
+                                <Ionicons name="alert-circle" size={18} color={colors.status.error} />
+                                <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>
                             </View>
                         )}
 
                         {/* Forgot password */}
                         <TouchableOpacity style={styles.forgotBtn}>
-                            <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+                            <Text style={[styles.forgotText, { color: colors.accent.blue }]}>¿Olvidaste tu contraseña?</Text>
                         </TouchableOpacity>
 
                         {/* Login Button */}
                         <TouchableOpacity
-                            style={[styles.loginBtn, isLoading && styles.loginBtnDisabled]}
+                            style={[styles.loginBtn, { backgroundColor: colors.accent.blue }, isLoading && styles.loginBtnDisabled]}
                             onPress={handleLogin}
                             disabled={isLoading}
                             activeOpacity={0.85}
                         >
                             {isLoading ? (
-                                <ActivityIndicator color="#fff" size="small" />
+                                <ActivityIndicator color={colors.white} size="small" />
                             ) : (
                                 <>
-                                    <Text style={styles.loginBtnText}>Entrar</Text>
+                                    <Text style={[styles.loginBtnText, { color: colors.white }]}>Entrar</Text>
                                     <View style={styles.loginBtnIcon}>
-                                        <Ionicons name="arrow-forward" size={18} color="#fff" />
+                                        <Ionicons name="arrow-forward" size={18} color={colors.white} />
                                     </View>
                                 </>
                             )}
@@ -203,8 +206,8 @@ export default function LoginScreen() {
                     {/* Footer */}
                     <View style={styles.footer}>
                         <View style={styles.securityIndicator}>
-                            <View style={styles.securityDot} />
-                            <Text style={styles.securityText}>HypernovaLabs</Text>
+                            <View style={[styles.securityDot, { backgroundColor: colors.accent.green }]} />
+                            <Text style={[styles.securityText, { color: colors.text.muted }]}>HypernovaLabs</Text>
                         </View>
                     </View>
                 </ScrollView>
@@ -224,7 +227,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0f1a',
     },
     backgroundGlow: {
         position: 'absolute',
@@ -234,7 +236,6 @@ const styles = StyleSheet.create({
         width: 400,
         height: 400,
         borderRadius: 200,
-        backgroundColor: 'rgba(59, 130, 246, 0.08)',
     },
     keyboardView: {
         flex: 1,
@@ -261,50 +262,41 @@ const styles = StyleSheet.create({
     brandName: {
         fontSize: 20,
         fontWeight: '600',
-        color: '#fff',
         marginBottom: 16,
         letterSpacing: -0.3,
     },
     tenantPill: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.06)',
         paddingVertical: 10,
         paddingHorizontal: 16,
         borderRadius: 100,
         gap: 8,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
     },
     tenantDot: {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: COLORS.accent.green,
     },
     tenantText: {
-        color: '#fff',
         fontSize: 14,
         fontWeight: '500',
     },
 
     // Form Card
     formCard: {
-        backgroundColor: 'rgba(255,255,255,0.03)',
         borderRadius: 24,
         padding: 24,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.06)',
     },
     formTitle: {
         fontSize: 24,
         fontWeight: '700',
-        color: '#fff',
         marginBottom: 6,
     },
     formSubtitle: {
         fontSize: 14,
-        color: COLORS.text.muted,
         marginBottom: 28,
     },
 
@@ -315,29 +307,21 @@ const styles = StyleSheet.create({
     inputLabel: {
         fontSize: 13,
         fontWeight: '500',
-        color: COLORS.text.secondary,
         marginBottom: 8,
         marginLeft: 4,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.04)',
         borderRadius: 14,
         paddingHorizontal: 16,
         paddingVertical: 14,
         gap: 12,
         borderWidth: 1.5,
-        borderColor: 'rgba(255,255,255,0.06)',
-    },
-    inputFocused: {
-        borderColor: COLORS.accent.blue,
-        backgroundColor: 'rgba(59, 130, 246, 0.06)',
     },
     input: {
         flex: 1,
         fontSize: 16,
-        color: '#fff',
         padding: 0,
     },
 
@@ -345,14 +329,12 @@ const styles = StyleSheet.create({
     errorBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
         padding: 12,
         borderRadius: 12,
         gap: 10,
         marginBottom: 8,
     },
     errorText: {
-        color: '#ef4444',
         fontSize: 13,
         flex: 1,
     },
@@ -363,14 +345,12 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     forgotText: {
-        color: COLORS.accent.blue,
         fontSize: 13,
         fontWeight: '500',
     },
 
     // Login Button
     loginBtn: {
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 14,
         paddingVertical: 16,
         flexDirection: 'row',
@@ -382,7 +362,6 @@ const styles = StyleSheet.create({
         opacity: 0.6,
     },
     loginBtnText: {
-        color: '#fff',
         fontSize: 16,
         fontWeight: '600',
     },
@@ -409,10 +388,8 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: COLORS.accent.green,
     },
     securityText: {
-        color: COLORS.text.muted,
         fontSize: 12,
         fontWeight: '500',
     },

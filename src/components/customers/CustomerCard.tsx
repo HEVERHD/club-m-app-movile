@@ -4,13 +4,15 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Customer } from '../../types/clubs';
-import { COLORS } from '../../constants/colors';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface CustomerCardProps {
     customer: Customer;
 }
 
 export function CustomerCard({ customer }: CustomerCardProps) {
+    const { colors } = useTheme();
+
     const handlePress = () => {
         router.push(`/customer/${customer.customerId}`);
     };
@@ -18,13 +20,13 @@ export function CustomerCard({ customer }: CustomerCardProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'active':
-                return COLORS.status.success;
+                return colors.status.success;
             case 'suspended':
-                return COLORS.status.warning;
+                return colors.status.warning;
             case 'inactive':
-                return COLORS.text.muted;
+                return colors.text.muted;
             default:
-                return COLORS.text.secondary;
+                return colors.text.secondary;
         }
     };
 
@@ -57,14 +59,14 @@ export function CustomerCard({ customer }: CustomerCardProps) {
 
     return (
         <TouchableOpacity
-            style={styles.card}
+            style={[styles.card, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}
             onPress={handlePress}
             activeOpacity={0.7}
         >
             {/* Header: Nombre y Status */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
-                    <Text style={styles.name} numberOfLines={1}>
+                    <Text style={[styles.name, { color: colors.text.primary }]} numberOfLines={1}>
                         {customer.fullName}
                     </Text>
                     <View
@@ -87,13 +89,13 @@ export function CustomerCard({ customer }: CustomerCardProps) {
             </View>
 
             {/* Grid de Información Principal */}
-            <View style={styles.infoGrid}>
+            <View style={[styles.infoGrid, { borderTopColor: colors.border.default, borderBottomColor: colors.border.default }]}>
                 {/* Documento */}
                 {customer.identificationNumber && (
                     <View style={styles.infoRow}>
-                        <Ionicons name="id-card-outline" size={16} color={COLORS.text.secondary} />
-                        <Text style={styles.infoLabel}>Documento:</Text>
-                        <Text style={styles.infoValue} numberOfLines={1}>
+                        <Ionicons name="id-card-outline" size={16} color={colors.text.secondary} />
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Documento:</Text>
+                        <Text style={[styles.infoValue, { color: colors.text.primary }]} numberOfLines={1}>
                             {customer.identificationNumber}
                         </Text>
                     </View>
@@ -102,9 +104,9 @@ export function CustomerCard({ customer }: CustomerCardProps) {
                 {/* Tipo de Cliente */}
                 {customer.customerTypeName && (
                     <View style={styles.infoRow}>
-                        <Ionicons name="person-outline" size={16} color={COLORS.text.secondary} />
-                        <Text style={styles.infoLabel}>Tipo:</Text>
-                        <Text style={styles.infoValue} numberOfLines={1}>
+                        <Ionicons name="person-outline" size={16} color={colors.text.secondary} />
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Tipo:</Text>
+                        <Text style={[styles.infoValue, { color: colors.text.primary }]} numberOfLines={1}>
                             {customer.customerTypeName}
                         </Text>
                     </View>
@@ -113,9 +115,9 @@ export function CustomerCard({ customer }: CustomerCardProps) {
                 {/* Email */}
                 {customer.email && (
                     <View style={styles.infoRow}>
-                        <Ionicons name="mail-outline" size={16} color={COLORS.text.secondary} />
-                        <Text style={styles.infoLabel}>Email:</Text>
-                        <Text style={styles.infoValue} numberOfLines={1}>
+                        <Ionicons name="mail-outline" size={16} color={colors.text.secondary} />
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Email:</Text>
+                        <Text style={[styles.infoValue, { color: colors.text.primary }]} numberOfLines={1}>
                             {customer.email}
                         </Text>
                     </View>
@@ -124,9 +126,9 @@ export function CustomerCard({ customer }: CustomerCardProps) {
                 {/* Teléfono */}
                 {customer.phone && (
                     <View style={styles.infoRow}>
-                        <Ionicons name="call-outline" size={16} color={COLORS.text.secondary} />
-                        <Text style={styles.infoLabel}>Teléfono:</Text>
-                        <Text style={styles.infoValue} numberOfLines={1}>
+                        <Ionicons name="call-outline" size={16} color={colors.text.secondary} />
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Teléfono:</Text>
+                        <Text style={[styles.infoValue, { color: colors.text.primary }]} numberOfLines={1}>
                             {customer.phone}
                         </Text>
                     </View>
@@ -135,9 +137,9 @@ export function CustomerCard({ customer }: CustomerCardProps) {
                 {/* Ubicación */}
                 {(customer.city || customer.state) && (
                     <View style={styles.infoRow}>
-                        <Ionicons name="location-outline" size={16} color={COLORS.text.secondary} />
-                        <Text style={styles.infoLabel}>Ubicación:</Text>
-                        <Text style={styles.infoValue} numberOfLines={1}>
+                        <Ionicons name="location-outline" size={16} color={colors.text.secondary} />
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Ubicación:</Text>
+                        <Text style={[styles.infoValue, { color: colors.text.primary }]} numberOfLines={1}>
                             {[customer.city, customer.state].filter(Boolean).join(', ')}
                         </Text>
                     </View>
@@ -147,15 +149,15 @@ export function CustomerCard({ customer }: CustomerCardProps) {
             {/* Footer con Metadata */}
             <View style={styles.footer}>
                 {customer.tierName && (
-                    <View style={styles.tierBadge}>
-                        <Ionicons name="ribbon-outline" size={12} color={COLORS.accent.purple} />
-                        <Text style={styles.tierText}>{customer.tierName}</Text>
+                    <View style={[styles.tierBadge, { backgroundColor: colors.accent.purple + '15' }]}>
+                        <Ionicons name="ribbon-outline" size={12} color={colors.accent.purple} />
+                        <Text style={[styles.tierText, { color: colors.accent.purple }]}>{customer.tierName}</Text>
                     </View>
                 )}
 
                 <View style={styles.footerRight}>
-                    <Ionicons name="calendar-outline" size={12} color={COLORS.text.muted} />
-                    <Text style={styles.dateText}>
+                    <Ionicons name="calendar-outline" size={12} color={colors.text.muted} />
+                    <Text style={[styles.dateText, { color: colors.text.muted }]}>
                         Registro: {formatDate(customer.registrationDate)}
                     </Text>
                 </View>
@@ -163,7 +165,7 @@ export function CustomerCard({ customer }: CustomerCardProps) {
 
             {/* Chevron */}
             <View style={styles.chevron}>
-                <Ionicons name="chevron-forward" size={20} color={COLORS.text.muted} />
+                <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
             </View>
         </TouchableOpacity>
     );
@@ -171,12 +173,10 @@ export function CustomerCard({ customer }: CustomerCardProps) {
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
     },
 
     // Header
@@ -193,7 +193,6 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 17,
         fontWeight: '600',
-        color: COLORS.text.primary,
         marginBottom: 2,
     },
     statusBadge: {
@@ -220,9 +219,7 @@ const styles = StyleSheet.create({
         gap: 10,
         paddingVertical: 12,
         borderTopWidth: 1,
-        borderTopColor: COLORS.border.default,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border.default,
     },
     infoRow: {
         flexDirection: 'row',
@@ -233,12 +230,10 @@ const styles = StyleSheet.create({
     infoLabel: {
         fontSize: 13,
         fontWeight: '500',
-        color: COLORS.text.secondary,
         width: 80,
     },
     infoValue: {
         fontSize: 13,
-        color: COLORS.text.primary,
         flex: 1,
     },
 
@@ -258,13 +253,11 @@ const styles = StyleSheet.create({
         gap: 4,
         paddingHorizontal: 8,
         paddingVertical: 4,
-        backgroundColor: COLORS.accent.purple + '15',
         borderRadius: 6,
     },
     tierText: {
         fontSize: 11,
         fontWeight: '600',
-        color: COLORS.accent.purple,
     },
     footerRight: {
         flexDirection: 'row',
@@ -273,7 +266,6 @@ const styles = StyleSheet.create({
     },
     dateText: {
         fontSize: 11,
-        color: COLORS.text.muted,
     },
 
     // Chevron

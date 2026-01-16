@@ -8,15 +8,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import { CreateClubModal } from '../../src/components/clubs/CreateClubModal';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import type { Club, ClubFilters as IClubFilters } from '../../src/types/clubs';
 import { useClubs } from '../../src/hooks/useClubs';
 import { ClubFilters } from '../../src/components/clubs/ClubFilters';
 import { ClubCard } from '../../src/components/clubs/ClubCard';
+import { SkeletonList } from '../../src/components/ui/Skeleton';
 
 export default function ClubsScreen() {
-    // Inicializar con "Vencido" para carga más rápida
-    const [filters, setFilters] = useState<IClubFilters>({ status: 'Vencido' });
+    const { colors } = useTheme();
+    // Inicializar sin filtro de status para mostrar todos los clubes
+    const [filters, setFilters] = useState<IClubFilters>({});
     const [page, setPage] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -61,44 +63,61 @@ export default function ClubsScreen() {
 
     if (isLoading && page === 1) {
         return (
-            <View style={styles.loadingContainer}>
-                <View style={styles.loadingContent}>
-                    <View style={styles.loadingIcon}>
-                        <ActivityIndicator size="large" color={COLORS.accent.blue} />
+            <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <View>
+                        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Mis Clubes</Text>
+                        <Text style={[styles.headerSubtitle, { color: colors.text.secondary }]}>Cargando...</Text>
                     </View>
-                    <Text style={styles.loadingTitle}>Cargando clubes...</Text>
-                    <Text style={styles.loadingSubtitle}>Esto puede tardar un momento</Text>
                 </View>
+
+                {/* Search Bar placeholder */}
+                <View style={[styles.searchContainer, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
+                    <TextInput
+                        style={[styles.searchInput, { color: colors.text.primary }]}
+                        placeholder="Buscar por cédula, nombre, contrato..."
+                        placeholderTextColor={colors.text.muted}
+                        editable={false}
+                    />
+                </View>
+
+                {/* Filters placeholder */}
+                <ClubFilters filters={filters} onChange={handleFilterChange} />
+
+                {/* Skeleton List */}
+                <SkeletonList count={6} type="club" />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
             {/* Header */}
             <View style={styles.header}>
                 <View>
-                    <Text style={styles.headerTitle}>Mis Clubes</Text>
-                    <Text style={styles.headerSubtitle}>
+                    <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Mis Clubes</Text>
+                    <Text style={[styles.headerSubtitle, { color: colors.text.secondary }]}>
                         {data?.total || 0} clubes encontrados
                     </Text>
                 </View>
                 <TouchableOpacity
-                    style={[styles.refreshBtn, isFetching && styles.refreshBtnDisabled]}
+                    style={[styles.refreshBtn, { backgroundColor: colors.bg.card, borderColor: colors.border.default }, isFetching && styles.refreshBtnDisabled]}
                     onPress={handleRefresh}
                     disabled={isFetching}
                 >
-                    <Ionicons name="refresh" size={18} color={isFetching ? COLORS.text.muted : COLORS.accent.blue} />
+                    <Ionicons name="refresh" size={18} color={isFetching ? colors.text.muted : colors.accent.blue} />
                 </TouchableOpacity>
             </View>
 
             {/* Search Bar */}
-            <View style={styles.searchContainer}>
-                <Ionicons name="search" size={20} color={COLORS.text.secondary} style={styles.searchIcon} />
+            <View style={[styles.searchContainer, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
                 <TextInput
-                    style={styles.searchInput}
+                    style={[styles.searchInput, { color: colors.text.primary }]}
                     placeholder="Buscar por cédula, nombre, contrato..."
-                    placeholderTextColor={COLORS.text.muted}
+                    placeholderTextColor={colors.text.muted}
                     value={searchText}
                     onChangeText={handleSearch}
                     returnKeyType="search"
@@ -108,7 +127,7 @@ export default function ClubsScreen() {
                         onPress={() => handleSearch('')}
                         style={styles.clearButton}
                     >
-                        <Ionicons name="close-circle" size={20} color={COLORS.text.secondary} />
+                        <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
                     </TouchableOpacity>
                 )}
             </View>
@@ -127,34 +146,34 @@ export default function ClubsScreen() {
                     <RefreshControl
                         refreshing={isFetching && page === 1}
                         onRefresh={handleRefresh}
-                        tintColor={COLORS.accent.blue}
+                        tintColor={colors.accent.blue}
                     />
                 }
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.3}
                 ListFooterComponent={
                     isFetching && page > 1 ? (
-                        <ActivityIndicator style={styles.footer} color={COLORS.accent.blue} />
+                        <ActivityIndicator style={styles.footer} color={colors.accent.blue} />
                     ) : null
                 }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <View style={styles.emptyIcon}>
-                            <Ionicons name="folder-open-outline" size={40} color={COLORS.text.muted} />
+                        <View style={[styles.emptyIcon, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                            <Ionicons name="folder-open-outline" size={40} color={colors.text.muted} />
                         </View>
-                        <Text style={styles.emptyTitle}>No hay clubes</Text>
-                        <Text style={styles.emptySubtitle}>Crea tu primer club para comenzar</Text>
-                        <TouchableOpacity style={styles.emptyBtn} onPress={() => setShowCreateModal(true)}>
-                            <Ionicons name="add" size={18} color={COLORS.white} />
-                            <Text style={styles.emptyBtnText}>Nuevo Club</Text>
+                        <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No hay clubes</Text>
+                        <Text style={[styles.emptySubtitle, { color: colors.text.muted }]}>Crea tu primer club para comenzar</Text>
+                        <TouchableOpacity style={[styles.emptyBtn, { backgroundColor: colors.accent.blue }]} onPress={() => setShowCreateModal(true)}>
+                            <Ionicons name="add" size={18} color={colors.white} />
+                            <Text style={[styles.emptyBtnText, { color: colors.white }]}>Nuevo Club</Text>
                         </TouchableOpacity>
                     </View>
                 }
             />
 
             {/* FAB */}
-            <TouchableOpacity style={styles.fab} onPress={() => setShowCreateModal(true)}>
-                <Ionicons name="add" size={26} color={COLORS.white} />
+            <TouchableOpacity style={[styles.fab, { backgroundColor: colors.accent.blue, shadowColor: colors.accent.blue }]} onPress={() => setShowCreateModal(true)}>
+                <Ionicons name="add" size={26} color={colors.white} />
             </TouchableOpacity>
 
             {/* Create Modal */}
@@ -164,28 +183,28 @@ export default function ClubsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.bg.primary },
+    container: { flex: 1 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56, paddingBottom: 16 },
-    headerTitle: { fontSize: 24, fontWeight: '700', color: COLORS.text.primary },
-    headerSubtitle: { fontSize: 13, color: COLORS.text.secondary, marginTop: 4 },
-    refreshBtn: { width: 42, height: 42, borderRadius: 12, backgroundColor: COLORS.bg.card, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.border.default },
+    headerTitle: { fontSize: 24, fontWeight: '700' },
+    headerSubtitle: { fontSize: 13, marginTop: 4 },
+    refreshBtn: { width: 42, height: 42, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
     refreshBtnDisabled: { opacity: 0.6 },
-    searchContainer: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginTop: 4, marginBottom: 12, backgroundColor: COLORS.bg.card, borderRadius: 12, paddingHorizontal: 12, borderWidth: 1, borderColor: COLORS.border.default },
+    searchContainer: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginTop: 4, marginBottom: 12, borderRadius: 12, paddingHorizontal: 12, borderWidth: 1 },
     searchIcon: { marginRight: 8 },
-    searchInput: { flex: 1, fontSize: 15, color: COLORS.text.primary, paddingVertical: 12, fontWeight: '500' },
+    searchInput: { flex: 1, fontSize: 15, paddingVertical: 12, fontWeight: '500' },
     clearButton: { marginLeft: 8, padding: 4 },
     listContent: { paddingHorizontal: 20, paddingBottom: 100 },
     footer: { paddingVertical: 20 },
-    loadingContainer: { flex: 1, backgroundColor: COLORS.bg.primary, justifyContent: 'center', alignItems: 'center' },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingContent: { alignItems: 'center' },
-    loadingIcon: { width: 80, height: 80, borderRadius: 24, backgroundColor: COLORS.bg.card, justifyContent: 'center', alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: COLORS.border.default },
-    loadingTitle: { fontSize: 16, fontWeight: '600', color: COLORS.text.primary, marginBottom: 4 },
-    loadingSubtitle: { fontSize: 13, color: COLORS.text.muted },
+    loadingIcon: { width: 80, height: 80, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 20, borderWidth: 1 },
+    loadingTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+    loadingSubtitle: { fontSize: 13 },
     emptyContainer: { alignItems: 'center', paddingVertical: 60 },
-    emptyIcon: { width: 80, height: 80, borderRadius: 24, backgroundColor: COLORS.bg.card, justifyContent: 'center', alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: COLORS.border.default },
-    emptyTitle: { fontSize: 17, fontWeight: '600', color: COLORS.text.primary, marginBottom: 4 },
-    emptySubtitle: { fontSize: 14, color: COLORS.text.muted, marginBottom: 24 },
-    emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: COLORS.accent.blue, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12 },
-    emptyBtnText: { color: COLORS.white, fontSize: 14, fontWeight: '600' },
-    fab: { position: 'absolute', bottom: 24, right: 20, width: 56, height: 56, borderRadius: 16, backgroundColor: COLORS.accent.blue, justifyContent: 'center', alignItems: 'center', shadowColor: COLORS.accent.blue, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 8 },
+    emptyIcon: { width: 80, height: 80, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 20, borderWidth: 1 },
+    emptyTitle: { fontSize: 17, fontWeight: '600', marginBottom: 4 },
+    emptySubtitle: { fontSize: 14, marginBottom: 24 },
+    emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12 },
+    emptyBtnText: { fontSize: 14, fontWeight: '600' },
+    fab: { position: 'absolute', bottom: 24, right: 20, width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 8 },
 });

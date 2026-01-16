@@ -15,10 +15,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCustomerStore } from '../../src/stores/customer-store';
 import { CustomerCard } from '../../src/components/customers/CustomerCard';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomerStatus } from '../../src/types/clubs';
+import { SkeletonList } from '../../src/components/ui/Skeleton';
 
 export default function CustomersScreen() {
+    const { colors } = useTheme();
     const {
         customers,
         total,
@@ -71,21 +73,21 @@ export default function CustomersScreen() {
 
     const renderEmpty = () => {
         if (isLoading && customers.length === 0) {
-            return null;
+            return <SkeletonList count={6} type="customer" />;
         }
 
         return (
             <View style={styles.emptyContainer}>
-                <Ionicons name="people-outline" size={64} color={COLORS.text.muted} />
-                <Text style={styles.emptyTitle}>No hay clientes</Text>
-                <Text style={styles.emptySubtitle}>
+                <Ionicons name="people-outline" size={64} color={colors.text.muted} />
+                <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No hay clientes</Text>
+                <Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>
                     {filters.search
                         ? 'No se encontraron clientes con ese criterio'
                         : 'Comienza agregando tu primer cliente'}
                 </Text>
                 {!filters.search && (
-                    <TouchableOpacity style={styles.emptyButton} onPress={handleCreateCustomer}>
-                        <Text style={styles.emptyButtonText}>Agregar Cliente</Text>
+                    <TouchableOpacity style={[styles.emptyButton, { backgroundColor: colors.accent.blue }]} onPress={handleCreateCustomer}>
+                        <Text style={[styles.emptyButtonText, { color: colors.white }]}>Agregar Cliente</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -97,43 +99,43 @@ export default function CustomersScreen() {
 
         return (
             <View style={styles.footer}>
-                <ActivityIndicator size="small" color={COLORS.accent.blue} />
+                <ActivityIndicator size="small" color={colors.accent.blue} />
             </View>
         );
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: colors.bg.card, borderBottomColor: colors.border.default }]}>
                 <View style={styles.headerTop}>
                     <View>
-                        <Text style={styles.headerTitle}>Clientes</Text>
-                        <Text style={styles.headerSubtitle}>
+                        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Clientes</Text>
+                        <Text style={[styles.headerSubtitle, { color: colors.text.secondary }]}>
                             {total} {total === 1 ? 'cliente' : 'clientes'} registrados
                         </Text>
                     </View>
 
                     <TouchableOpacity
-                        style={styles.filterBtn}
+                        style={[styles.filterBtn, { backgroundColor: colors.bg.elevated }]}
                         onPress={() => setShowFilters(!showFilters)}
                     >
                         <Ionicons
                             name={showFilters ? 'close' : 'filter'}
                             size={20}
-                            color={COLORS.text.primary}
+                            color={colors.text.primary}
                         />
                     </TouchableOpacity>
                 </View>
 
                 {/* Barra de búsqueda */}
                 <View style={styles.searchContainer}>
-                    <View style={styles.searchInputContainer}>
-                        <Ionicons name="search" size={20} color={COLORS.text.muted} />
+                    <View style={[styles.searchInputContainer, { backgroundColor: colors.bg.elevated }]}>
+                        <Ionicons name="search" size={20} color={colors.text.muted} />
                         <TextInput
-                            style={styles.searchInput}
+                            style={[styles.searchInput, { color: colors.text.primary }]}
                             placeholder="Buscar por nombre, email o documento..."
-                            placeholderTextColor={COLORS.text.muted}
+                            placeholderTextColor={colors.text.muted}
                             value={searchText}
                             onChangeText={setSearchText}
                             onSubmitEditing={handleSearch}
@@ -141,7 +143,7 @@ export default function CustomersScreen() {
                         />
                         {searchText.length > 0 && (
                             <TouchableOpacity onPress={handleClearSearch}>
-                                <Ionicons name="close-circle" size={20} color={COLORS.text.muted} />
+                                <Ionicons name="close-circle" size={20} color={colors.text.muted} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -150,19 +152,21 @@ export default function CustomersScreen() {
                 {/* Panel de filtros */}
                 {showFilters && (
                     <View style={styles.filtersPanel}>
-                        <Text style={styles.filterLabel}>Estado:</Text>
+                        <Text style={[styles.filterLabel, { color: colors.text.secondary }]}>Estado:</Text>
                         <View style={styles.filterButtons}>
                             <TouchableOpacity
                                 style={[
                                     styles.filterChip,
-                                    !filters.status && styles.filterChipActive,
+                                    { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                    !filters.status && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                 ]}
                                 onPress={() => handleFilterStatus(undefined)}
                             >
                                 <Text
                                     style={[
                                         styles.filterChipText,
-                                        !filters.status && styles.filterChipTextActive,
+                                        { color: colors.text.secondary },
+                                        !filters.status && { color: colors.white },
                                     ]}
                                 >
                                     Todos
@@ -172,17 +176,19 @@ export default function CustomersScreen() {
                             <TouchableOpacity
                                 style={[
                                     styles.filterChip,
-                                    filters.status === 'active' && styles.filterChipActive,
+                                    { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                    filters.status === 'active' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                 ]}
                                 onPress={() => handleFilterStatus('active')}
                             >
                                 <View
-                                    style={[styles.filterDot, { backgroundColor: COLORS.status.success }]}
+                                    style={[styles.filterDot, { backgroundColor: colors.status.success }]}
                                 />
                                 <Text
                                     style={[
                                         styles.filterChipText,
-                                        filters.status === 'active' && styles.filterChipTextActive,
+                                        { color: colors.text.secondary },
+                                        filters.status === 'active' && { color: colors.white },
                                     ]}
                                 >
                                     Activos
@@ -192,17 +198,19 @@ export default function CustomersScreen() {
                             <TouchableOpacity
                                 style={[
                                     styles.filterChip,
-                                    filters.status === 'suspended' && styles.filterChipActive,
+                                    { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                    filters.status === 'suspended' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                 ]}
                                 onPress={() => handleFilterStatus('suspended')}
                             >
                                 <View
-                                    style={[styles.filterDot, { backgroundColor: COLORS.status.warning }]}
+                                    style={[styles.filterDot, { backgroundColor: colors.status.warning }]}
                                 />
                                 <Text
                                     style={[
                                         styles.filterChipText,
-                                        filters.status === 'suspended' && styles.filterChipTextActive,
+                                        { color: colors.text.secondary },
+                                        filters.status === 'suspended' && { color: colors.white },
                                     ]}
                                 >
                                     Suspendidos
@@ -212,17 +220,19 @@ export default function CustomersScreen() {
                             <TouchableOpacity
                                 style={[
                                     styles.filterChip,
-                                    filters.status === 'inactive' && styles.filterChipActive,
+                                    { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                    filters.status === 'inactive' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                 ]}
                                 onPress={() => handleFilterStatus('inactive')}
                             >
                                 <View
-                                    style={[styles.filterDot, { backgroundColor: COLORS.text.muted }]}
+                                    style={[styles.filterDot, { backgroundColor: colors.text.muted }]}
                                 />
                                 <Text
                                     style={[
                                         styles.filterChipText,
-                                        filters.status === 'inactive' && styles.filterChipTextActive,
+                                        { color: colors.text.secondary },
+                                        filters.status === 'inactive' && { color: colors.white },
                                     ]}
                                 >
                                     Inactivos
@@ -235,9 +245,9 @@ export default function CustomersScreen() {
 
             {/* Error */}
             {error && (
-                <View style={styles.errorContainer}>
-                    <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
-                    <Text style={styles.errorText}>{error}</Text>
+                <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+                    <Ionicons name="alert-circle" size={20} color={colors.status.error} />
+                    <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>
                 </View>
             )}
 
@@ -252,7 +262,7 @@ export default function CustomersScreen() {
                     <RefreshControl
                         refreshing={isLoading && page === 1}
                         onRefresh={handleRefresh}
-                        tintColor={COLORS.accent.blue}
+                        tintColor={colors.accent.blue}
                     />
                 }
                 ListEmptyComponent={renderEmpty}
@@ -263,11 +273,11 @@ export default function CustomersScreen() {
 
             {/* FAB - Agregar cliente */}
             <TouchableOpacity
-                style={styles.fab}
+                style={[styles.fab, { backgroundColor: colors.accent.blue }]}
                 onPress={handleCreateCustomer}
                 activeOpacity={0.85}
             >
-                <Ionicons name="person-add" size={24} color={COLORS.white} />
+                <Ionicons name="person-add" size={24} color={colors.white} />
             </TouchableOpacity>
         </View>
     );
@@ -276,17 +286,14 @@ export default function CustomersScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bg.primary,
     },
 
     // Header
     header: {
-        backgroundColor: COLORS.bg.card,
         paddingTop: 56,
         paddingHorizontal: 20,
         paddingBottom: 16,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border.default,
     },
     headerTop: {
         flexDirection: 'row',
@@ -297,18 +304,15 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 24,
         fontWeight: '700',
-        color: COLORS.text.primary,
     },
     headerSubtitle: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         marginTop: 2,
     },
     filterBtn: {
         width: 44,
         height: 44,
         borderRadius: 12,
-        backgroundColor: COLORS.bg.elevated,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -320,7 +324,6 @@ const styles = StyleSheet.create({
     searchInputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.elevated,
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
@@ -329,7 +332,6 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 15,
-        color: COLORS.text.primary,
     },
 
     // Filters
@@ -340,7 +342,6 @@ const styles = StyleSheet.create({
     filterLabel: {
         fontSize: 13,
         fontWeight: '600',
-        color: COLORS.text.secondary,
         marginBottom: 10,
     },
     filterButtons: {
@@ -354,22 +355,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: COLORS.bg.elevated,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
         gap: 6,
-    },
-    filterChipActive: {
-        backgroundColor: COLORS.accent.blue,
-        borderColor: COLORS.accent.blue,
     },
     filterChipText: {
         fontSize: 13,
         fontWeight: '500',
-        color: COLORS.text.secondary,
-    },
-    filterChipTextActive: {
-        color: COLORS.white,
     },
     filterDot: {
         width: 8,
@@ -382,7 +373,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: COLORS.status.errorBg,
         padding: 12,
         marginHorizontal: 20,
         marginTop: 16,
@@ -391,7 +381,6 @@ const styles = StyleSheet.create({
     errorText: {
         flex: 1,
         fontSize: 13,
-        color: COLORS.status.error,
     },
 
     // List
@@ -409,19 +398,16 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: COLORS.text.primary,
         marginTop: 16,
     },
     emptySubtitle: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         marginTop: 8,
         textAlign: 'center',
         paddingHorizontal: 40,
     },
     emptyButton: {
         marginTop: 24,
-        backgroundColor: COLORS.accent.blue,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 12,
@@ -429,7 +415,6 @@ const styles = StyleSheet.create({
     emptyButtonText: {
         fontSize: 15,
         fontWeight: '600',
-        color: COLORS.white,
     },
 
     // Footer
@@ -446,7 +431,6 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: COLORS.accent.blue,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',

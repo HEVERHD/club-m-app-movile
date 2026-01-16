@@ -349,14 +349,15 @@ export async function getCustomerGeneralInfo(customerId: string, customerTypeId?
 /**
  * Obtener estadísticas de un cliente
  * Delega al clubsApi para evitar dependencia circular
+ * @param identificationNumber - Cédula del cliente (ej: "9-777-7777")
  */
-export async function getCustomerStats(customerId: string): Promise<CustomerStats> {
+export async function getCustomerStats(identificationNumber: string): Promise<CustomerStats> {
     try {
-        console.log('📊 [customers.api] Obteniendo estadísticas para cliente:', customerId);
+        console.log('📊 [customers.api] Obteniendo estadísticas para cédula:', identificationNumber);
 
         // Usar la función del clubsApi para evitar dependencia circular
         const { clubApi } = await import('./clubs.api');
-        const stats = await clubApi.getCustomerClubStats(customerId);
+        const stats = await clubApi.getCustomerClubStats(identificationNumber);
 
         console.log(`✅ [customers.api] Estadísticas obtenidas correctamente`);
 

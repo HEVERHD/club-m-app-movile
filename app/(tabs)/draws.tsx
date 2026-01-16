@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useDrawStore } from '../../src/stores/draw-store';
 import { DrawCard } from '../../src/components/draws/DrawCard';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 import type { DrawFilters } from '../../src/types/clubs';
@@ -21,6 +21,7 @@ import type { DrawFilters } from '../../src/types/clubs';
 import '../../src/utils/debugDrawWinners';
 
 export default function DrawsScreen() {
+    const { colors } = useTheme();
     const alert = useAlert();
     const {
         draws,
@@ -85,16 +86,16 @@ export default function DrawsScreen() {
 
         return (
             <View style={styles.emptyContainer}>
-                <Ionicons name="trophy-outline" size={64} color={COLORS.text.muted} />
-                <Text style={styles.emptyTitle}>No hay sorteos registrados</Text>
-                <Text style={styles.emptySubtitle}>
+                <Ionicons name="trophy-outline" size={64} color={colors.text.muted} />
+                <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No hay sorteos registrados</Text>
+                <Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>
                     {filters.status || filters.clubTypeId
                         ? 'No se encontraron sorteos con ese criterio'
                         : 'Ejecuta tu primer sorteo para comenzar'}
                 </Text>
                 {!filters.status && !filters.clubTypeId && (
-                    <TouchableOpacity style={styles.emptyButton} onPress={handleExecuteDraw}>
-                        <Text style={styles.emptyButtonText}>Ejecutar Sorteo</Text>
+                    <TouchableOpacity style={[styles.emptyButton, { backgroundColor: colors.accent.blue }]} onPress={handleExecuteDraw}>
+                        <Text style={[styles.emptyButtonText, { color: colors.white }]}>Ejecutar Sorteo</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -106,7 +107,7 @@ export default function DrawsScreen() {
 
         return (
             <View style={styles.footer}>
-                <ActivityIndicator size="small" color={COLORS.accent.blue} />
+                <ActivityIndicator size="small" color={colors.accent.blue} />
             </View>
         );
     };
@@ -114,29 +115,29 @@ export default function DrawsScreen() {
     const activeFiltersCount = [filters.status, filters.clubTypeId].filter(Boolean).length;
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: colors.bg.card, borderBottomColor: colors.border.default }]}>
                 <View style={styles.headerTop}>
                     <View>
-                        <Text style={styles.headerTitle}>Sorteos</Text>
-                        <Text style={styles.headerSubtitle}>
+                        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Sorteos</Text>
+                        <Text style={[styles.headerSubtitle, { color: colors.text.secondary }]}>
                             {pagination.total} {pagination.total === 1 ? 'sorteo' : 'sorteos'} registrados
                         </Text>
                     </View>
 
                     <TouchableOpacity
-                        style={styles.filterBtn}
+                        style={[styles.filterBtn, { backgroundColor: colors.bg.elevated }]}
                         onPress={() => setShowFilters(!showFilters)}
                     >
                         <Ionicons
                             name={showFilters ? 'close' : 'filter'}
                             size={20}
-                            color={COLORS.text.primary}
+                            color={colors.text.primary}
                         />
                         {activeFiltersCount > 0 && (
-                            <View style={styles.filterBadge}>
-                                <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
+                            <View style={[styles.filterBadge, { backgroundColor: colors.accent.blue }]}>
+                                <Text style={[styles.filterBadgeText, { color: colors.white }]}>{activeFiltersCount}</Text>
                             </View>
                         )}
                     </TouchableOpacity>
@@ -146,19 +147,21 @@ export default function DrawsScreen() {
                 {showFilters && (
                     <View style={styles.filtersPanel}>
                         <View style={styles.filterSection}>
-                            <Text style={styles.filterLabel}>Estado:</Text>
+                            <Text style={[styles.filterLabel, { color: colors.text.secondary }]}>Estado:</Text>
                             <View style={styles.filterButtons}>
                                 <TouchableOpacity
                                     style={[
                                         styles.filterChip,
-                                        !filters.status && styles.filterChipActive,
+                                        { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                        !filters.status && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                     ]}
                                     onPress={() => handleFilterStatus(undefined)}
                                 >
                                     <Text
                                         style={[
                                             styles.filterChipText,
-                                            !filters.status && styles.filterChipTextActive,
+                                            { color: colors.text.secondary },
+                                            !filters.status && { color: colors.white },
                                         ]}
                                     >
                                         Todos
@@ -168,21 +171,22 @@ export default function DrawsScreen() {
                                 <TouchableOpacity
                                     style={[
                                         styles.filterChip,
-                                        filters.status === 'completed' && styles.filterChipActive,
+                                        { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                        filters.status === 'completed' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                     ]}
                                     onPress={() => handleFilterStatus('completed')}
                                 >
                                     <View
                                         style={[
                                             styles.filterDot,
-                                            { backgroundColor: COLORS.status.successText },
+                                            { backgroundColor: colors.status.success },
                                         ]}
                                     />
                                     <Text
                                         style={[
                                             styles.filterChipText,
-                                            filters.status === 'completed' &&
-                                                styles.filterChipTextActive,
+                                            { color: colors.text.secondary },
+                                            filters.status === 'completed' && { color: colors.white },
                                         ]}
                                     >
                                         Completados
@@ -192,21 +196,22 @@ export default function DrawsScreen() {
                                 <TouchableOpacity
                                     style={[
                                         styles.filterChip,
-                                        filters.status === 'pending' && styles.filterChipActive,
+                                        { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                        filters.status === 'pending' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                     ]}
                                     onPress={() => handleFilterStatus('pending')}
                                 >
                                     <View
                                         style={[
                                             styles.filterDot,
-                                            { backgroundColor: COLORS.status.warningText },
+                                            { backgroundColor: colors.status.warning },
                                         ]}
                                     />
                                     <Text
                                         style={[
                                             styles.filterChipText,
-                                            filters.status === 'pending' &&
-                                                styles.filterChipTextActive,
+                                            { color: colors.text.secondary },
+                                            filters.status === 'pending' && { color: colors.white },
                                         ]}
                                     >
                                         Pendientes
@@ -216,21 +221,22 @@ export default function DrawsScreen() {
                                 <TouchableOpacity
                                     style={[
                                         styles.filterChip,
-                                        filters.status === 'cancelled' && styles.filterChipActive,
+                                        { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                        filters.status === 'cancelled' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                     ]}
                                     onPress={() => handleFilterStatus('cancelled')}
                                 >
                                     <View
                                         style={[
                                             styles.filterDot,
-                                            { backgroundColor: COLORS.status.errorText },
+                                            { backgroundColor: colors.status.error },
                                         ]}
                                     />
                                     <Text
                                         style={[
                                             styles.filterChipText,
-                                            filters.status === 'cancelled' &&
-                                                styles.filterChipTextActive,
+                                            { color: colors.text.secondary },
+                                            filters.status === 'cancelled' && { color: colors.white },
                                         ]}
                                     >
                                         Cancelados
@@ -240,19 +246,21 @@ export default function DrawsScreen() {
                         </View>
 
                         <View style={styles.filterSection}>
-                            <Text style={styles.filterLabel}>Tipo de Club:</Text>
+                            <Text style={[styles.filterLabel, { color: colors.text.secondary }]}>Tipo de Club:</Text>
                             <View style={styles.filterButtons}>
                                 <TouchableOpacity
                                     style={[
                                         styles.filterChip,
-                                        !filters.clubTypeId && styles.filterChipActive,
+                                        { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                        !filters.clubTypeId && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                                     ]}
                                     onPress={() => handleFilterClubType(undefined)}
                                 >
                                     <Text
                                         style={[
                                             styles.filterChipText,
-                                            !filters.clubTypeId && styles.filterChipTextActive,
+                                            { color: colors.text.secondary },
+                                            !filters.clubTypeId && { color: colors.white },
                                         ]}
                                     >
                                         Todos
@@ -261,17 +269,17 @@ export default function DrawsScreen() {
 
                                 {/* Note: You'll need to add club types dynamically from an API or store */}
                                 <TouchableOpacity
-                                    style={[styles.filterChip]}
+                                    style={[styles.filterChip, { backgroundColor: colors.bg.elevated, borderColor: colors.border.default }]}
                                     onPress={() => alert.show('Info', 'Filtros por tipo próximamente', undefined, 'info')}
                                 >
-                                    <Text style={[styles.filterChipText]}>Miércoles</Text>
+                                    <Text style={[styles.filterChipText, { color: colors.text.secondary }]}>Miércoles</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
-                                    style={[styles.filterChip]}
+                                    style={[styles.filterChip, { backgroundColor: colors.bg.elevated, borderColor: colors.border.default }]}
                                     onPress={() => alert.show('Info', 'Filtros por tipo próximamente', undefined, 'info')}
                                 >
-                                    <Text style={[styles.filterChipText]}>Domingo</Text>
+                                    <Text style={[styles.filterChipText, { color: colors.text.secondary }]}>Domingo</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -281,8 +289,8 @@ export default function DrawsScreen() {
                                 style={styles.clearFiltersBtn}
                                 onPress={handleClearFilters}
                             >
-                                <Ionicons name="close-circle" size={16} color={COLORS.accent.blue} />
-                                <Text style={styles.clearFiltersText}>Limpiar Filtros</Text>
+                                <Ionicons name="close-circle" size={16} color={colors.accent.blue} />
+                                <Text style={[styles.clearFiltersText, { color: colors.accent.blue }]}>Limpiar Filtros</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -291,11 +299,11 @@ export default function DrawsScreen() {
 
             {/* Error */}
             {error && (
-                <View style={styles.errorContainer}>
-                    <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
-                    <Text style={styles.errorText}>{error}</Text>
+                <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+                    <Ionicons name="alert-circle" size={20} color={colors.status.error} />
+                    <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>
                     <TouchableOpacity onPress={clearError}>
-                        <Ionicons name="close" size={20} color={COLORS.status.error} />
+                        <Ionicons name="close" size={20} color={colors.status.error} />
                     </TouchableOpacity>
                 </View>
             )}
@@ -311,7 +319,7 @@ export default function DrawsScreen() {
                     <RefreshControl
                         refreshing={isLoading && pagination.page === 1}
                         onRefresh={handleRefresh}
-                        tintColor={COLORS.accent.blue}
+                        tintColor={colors.accent.blue}
                     />
                 }
                 ListEmptyComponent={renderEmpty}
@@ -322,20 +330,20 @@ export default function DrawsScreen() {
 
             {/* FAB - Reporte de Ganadores */}
             <TouchableOpacity
-                style={styles.fabSecondary}
+                style={[styles.fabSecondary, { backgroundColor: colors.bg.card, borderColor: colors.accent.orange }]}
                 onPress={handleViewWinnersReport}
                 activeOpacity={0.85}
             >
-                <Ionicons name="trophy" size={22} color={COLORS.accent.orange} />
+                <Ionicons name="trophy" size={22} color={colors.accent.orange} />
             </TouchableOpacity>
 
             {/* FAB - Ejecutar sorteo */}
             <TouchableOpacity
-                style={styles.fab}
+                style={[styles.fab, { backgroundColor: colors.accent.blue }]}
                 onPress={handleExecuteDraw}
                 activeOpacity={0.85}
             >
-                <Ionicons name="dice" size={24} color={COLORS.white} />
+                <Ionicons name="dice" size={24} color={colors.white} />
             </TouchableOpacity>
 
             {/* Custom Alert */}
@@ -354,17 +362,14 @@ export default function DrawsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bg.primary,
     },
 
     // Header
     header: {
-        backgroundColor: COLORS.bg.card,
         paddingTop: 56,
         paddingHorizontal: 20,
         paddingBottom: 16,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border.default,
     },
     headerTop: {
         flexDirection: 'row',
@@ -375,18 +380,15 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 24,
         fontWeight: '700',
-        color: COLORS.text.primary,
     },
     headerSubtitle: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         marginTop: 2,
     },
     filterBtn: {
         width: 44,
         height: 44,
         borderRadius: 12,
-        backgroundColor: COLORS.bg.elevated,
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
@@ -395,7 +397,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -4,
         right: -4,
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 10,
         width: 20,
         height: 20,
@@ -405,7 +406,6 @@ const styles = StyleSheet.create({
     filterBadgeText: {
         fontSize: 10,
         fontWeight: '700',
-        color: COLORS.white,
     },
 
     // Filters
@@ -420,7 +420,6 @@ const styles = StyleSheet.create({
     filterLabel: {
         fontSize: 13,
         fontWeight: '600',
-        color: COLORS.text.secondary,
     },
     filterButtons: {
         flexDirection: 'row',
@@ -433,22 +432,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: COLORS.bg.elevated,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
         gap: 6,
-    },
-    filterChipActive: {
-        backgroundColor: COLORS.accent.blue,
-        borderColor: COLORS.accent.blue,
     },
     filterChipText: {
         fontSize: 13,
         fontWeight: '500',
-        color: COLORS.text.secondary,
-    },
-    filterChipTextActive: {
-        color: COLORS.white,
     },
     filterDot: {
         width: 8,
@@ -465,7 +454,6 @@ const styles = StyleSheet.create({
     clearFiltersText: {
         fontSize: 13,
         fontWeight: '600',
-        color: COLORS.accent.blue,
     },
 
     // Error
@@ -473,7 +461,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: COLORS.status.errorBg,
         padding: 12,
         marginHorizontal: 20,
         marginTop: 16,
@@ -482,7 +469,6 @@ const styles = StyleSheet.create({
     errorText: {
         flex: 1,
         fontSize: 13,
-        color: COLORS.status.error,
     },
 
     // List
@@ -500,19 +486,16 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: COLORS.text.primary,
         marginTop: 16,
     },
     emptySubtitle: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         marginTop: 8,
         textAlign: 'center',
         paddingHorizontal: 40,
     },
     emptyButton: {
         marginTop: 24,
-        backgroundColor: COLORS.accent.blue,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 12,
@@ -520,7 +503,6 @@ const styles = StyleSheet.create({
     emptyButtonText: {
         fontSize: 15,
         fontWeight: '600',
-        color: COLORS.white,
     },
 
     // Footer
@@ -537,7 +519,6 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: COLORS.accent.blue,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
@@ -553,9 +534,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: COLORS.bg.card,
         borderWidth: 2,
-        borderColor: COLORS.accent.orange,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',

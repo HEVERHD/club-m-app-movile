@@ -12,13 +12,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useDrawStore } from '../../src/stores/draw-store';
 import { WinnersList } from '../../src/components/draws/WinnersList';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 
 export default function DrawDetailScreen() {
     const router = useRouter();
     const alert = useAlert();
+    const { colors } = useTheme();
     const { id, drawData } = useLocalSearchParams<{ id: string; drawData?: string }>();
 
     const {
@@ -108,13 +109,13 @@ export default function DrawDetailScreen() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'completed':
-                return COLORS.status.successText;
+                return colors.status.successText;
             case 'pending':
-                return COLORS.status.warningText;
+                return colors.status.warningText;
             case 'cancelled':
-                return COLORS.status.errorText;
+                return colors.status.errorText;
             default:
-                return COLORS.text.secondary;
+                return colors.text.secondary;
         }
     };
 
@@ -146,43 +147,43 @@ export default function DrawDetailScreen() {
 
     if (isLoading && !selectedDraw) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.accent.blue} />
-                <Text style={styles.loadingText}>Cargando sorteo...</Text>
+            <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
+                <ActivityIndicator size="large" color={colors.accent.blue} />
+                <Text style={[styles.loadingText, { color: colors.text.secondary }]}>Cargando sorteo...</Text>
             </View>
         );
     }
 
     if (!selectedDraw) {
         return (
-            <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={64} color={COLORS.status.error} />
-                <Text style={styles.errorTitle}>Sorteo no encontrado</Text>
-                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                    <Text style={styles.backButtonText}>Volver</Text>
+            <View style={[styles.errorContainer, { backgroundColor: colors.bg.primary }]}>
+                <Ionicons name="alert-circle" size={64} color={colors.status.error} />
+                <Text style={[styles.errorTitle, { color: colors.text.primary }]}>Sorteo no encontrado</Text>
+                <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.accent.blue }]} onPress={handleBack}>
+                    <Text style={[styles.backButtonText, { color: colors.white }]}>Volver</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                    <Ionicons name="chevron-back" size={24} color={COLORS.text.primary} />
+            <View style={[styles.header, { backgroundColor: colors.bg.card, borderBottomColor: colors.border.default }]}>
+                <TouchableOpacity style={[styles.backBtn, { backgroundColor: colors.bg.elevated }]} onPress={handleBack}>
+                    <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Detalle del Sorteo</Text>
+                <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Detalle del Sorteo</Text>
                 <View style={{ width: 40 }} />
             </View>
 
             {/* Error */}
             {error && (
-                <View style={styles.errorBanner}>
-                    <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
-                    <Text style={styles.errorBannerText}>{error}</Text>
+                <View style={[styles.errorBanner, { backgroundColor: colors.status.errorBg }]}>
+                    <Ionicons name="alert-circle" size={20} color={colors.status.error} />
+                    <Text style={[styles.errorBannerText, { color: colors.status.error }]}>{error}</Text>
                     <TouchableOpacity onPress={clearError}>
-                        <Ionicons name="close" size={20} color={COLORS.status.error} />
+                        <Ionicons name="close" size={20} color={colors.status.error} />
                     </TouchableOpacity>
                 </View>
             )}
@@ -193,11 +194,11 @@ export default function DrawDetailScreen() {
                 contentContainerStyle={styles.scrollContent}
             >
                 {/* Card de Información Principal */}
-                <View style={styles.mainCard}>
+                <View style={[styles.mainCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                     <View style={styles.mainCardHeader}>
                         <View style={styles.typeContainer}>
-                            <Ionicons name="calendar" size={24} color={COLORS.accent.blue} />
-                            <Text style={styles.clubType}>{selectedDraw.clubTypeName || 'Club'}</Text>
+                            <Ionicons name="calendar" size={24} color={colors.accent.blue} />
+                            <Text style={[styles.clubType, { color: colors.text.primary }]}>{selectedDraw.clubTypeName || 'Club'}</Text>
                         </View>
                         <View
                             style={[
@@ -222,80 +223,80 @@ export default function DrawDetailScreen() {
                     </View>
 
                     <View style={styles.dateContainer}>
-                        <Ionicons name="calendar-outline" size={18} color={COLORS.text.secondary} />
-                        <Text style={styles.dateText}>{formatDate(selectedDraw.date)}</Text>
+                        <Ionicons name="calendar-outline" size={18} color={colors.text.secondary} />
+                        <Text style={[styles.dateText, { color: colors.text.secondary }]}>{formatDate(selectedDraw.date)}</Text>
                     </View>
 
                     {selectedDraw.status === 'completed' && (
-                        <View style={styles.winningNumberSection}>
-                            <Text style={styles.winningNumberLabel}>Número Ganador</Text>
-                            <View style={styles.winningNumberBadge}>
-                                <Text style={styles.winningNumber}>{selectedDraw.numberPlayed}</Text>
+                        <View style={[styles.winningNumberSection, { backgroundColor: colors.status.infoBg }]}>
+                            <Text style={[styles.winningNumberLabel, { color: colors.text.secondary }]}>Número Ganador</Text>
+                            <View style={[styles.winningNumberBadge, { backgroundColor: colors.accent.blue }]}>
+                                <Text style={[styles.winningNumber, { color: colors.white }]}>{selectedDraw.numberPlayed}</Text>
                             </View>
                         </View>
                     )}
 
                     {selectedDraw.notes && (
-                        <View style={styles.notesContainer}>
-                            <Ionicons name="document-text" size={16} color={COLORS.text.secondary} />
-                            <Text style={styles.notesText}>{selectedDraw.notes}</Text>
+                        <View style={[styles.notesContainer, { backgroundColor: colors.bg.elevated }]}>
+                            <Ionicons name="document-text" size={16} color={colors.text.secondary} />
+                            <Text style={[styles.notesText, { color: colors.text.secondary }]}>{selectedDraw.notes}</Text>
                         </View>
                     )}
                 </View>
 
                 {/* Card de Estadísticas */}
                 {selectedDraw.status === 'completed' && (
-                    <View style={styles.statsCard}>
-                        <Text style={styles.statsTitle}>Resumen del Sorteo</Text>
+                    <View style={[styles.statsCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                        <Text style={[styles.statsTitle, { color: colors.text.primary }]}>Resumen del Sorteo</Text>
 
                         <View style={styles.statsGrid}>
-                            <View style={styles.statBox}>
-                                <Ionicons name="trophy" size={24} color={COLORS.accent.gold} />
-                                <Text style={styles.statValue}>
+                            <View style={[styles.statBox, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="trophy" size={24} color={colors.accent.gold} />
+                                <Text style={[styles.statValue, { color: colors.text.primary }]}>
                                     {selectedDraw.totalWinners || 0}
                                 </Text>
-                                <Text style={styles.statLabel}>
+                                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
                                     {selectedDraw.totalWinners === 1 ? 'Ganador' : 'Ganadores'}
                                 </Text>
                             </View>
 
-                            <View style={styles.statBox}>
-                                <Ionicons name="cash" size={24} color={COLORS.accent.green} />
-                                <Text style={styles.statValue}>
+                            <View style={[styles.statBox, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="cash" size={24} color={colors.accent.green} />
+                                <Text style={[styles.statValue, { color: colors.text.primary }]}>
                                     ${(selectedDraw.totalPrizeAmount || 0).toFixed(2)}
                                 </Text>
-                                <Text style={styles.statLabel}>Total Premios</Text>
+                                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Total Premios</Text>
                             </View>
                         </View>
                     </View>
                 )}
 
                 {/* Card de Información del Sistema */}
-                <View style={styles.systemCard}>
-                    <Text style={styles.systemTitle}>Información del Sistema</Text>
+                <View style={[styles.systemCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    <Text style={[styles.systemTitle, { color: colors.text.primary }]}>Información del Sistema</Text>
 
                     {selectedDraw.executedBy && (
                         <View style={styles.systemRow}>
-                            <Ionicons name="person" size={16} color={COLORS.text.secondary} />
-                            <Text style={styles.systemLabel}>Ejecutado por:</Text>
-                            <Text style={styles.systemValue}>{selectedDraw.executedBy}</Text>
+                            <Ionicons name="person" size={16} color={colors.text.secondary} />
+                            <Text style={[styles.systemLabel, { color: colors.text.secondary }]}>Ejecutado por:</Text>
+                            <Text style={[styles.systemValue, { color: colors.text.primary }]}>{selectedDraw.executedBy}</Text>
                         </View>
                     )}
 
                     {selectedDraw.executedDate && (
                         <View style={styles.systemRow}>
-                            <Ionicons name="time" size={16} color={COLORS.text.secondary} />
-                            <Text style={styles.systemLabel}>Fecha de ejecución:</Text>
-                            <Text style={styles.systemValue}>
+                            <Ionicons name="time" size={16} color={colors.text.secondary} />
+                            <Text style={[styles.systemLabel, { color: colors.text.secondary }]}>Fecha de ejecución:</Text>
+                            <Text style={[styles.systemValue, { color: colors.text.primary }]}>
                                 {new Date(selectedDraw.executedDate).toLocaleString('es-PA')}
                             </Text>
                         </View>
                     )}
 
                     <View style={styles.systemRow}>
-                        <Ionicons name="key" size={16} color={COLORS.text.secondary} />
-                        <Text style={styles.systemLabel}>ID del Sorteo:</Text>
-                        <Text style={styles.systemValue} selectable>
+                        <Ionicons name="key" size={16} color={colors.text.secondary} />
+                        <Text style={[styles.systemLabel, { color: colors.text.secondary }]}>ID del Sorteo:</Text>
+                        <Text style={[styles.systemValue, { color: colors.text.primary }]} selectable>
                             {selectedDraw.drawId}
                         </Text>
                     </View>
@@ -314,32 +315,14 @@ export default function DrawDetailScreen() {
 
                 {/* Mensaje si no hay ganadores */}
                 {selectedDraw.status === 'completed' && winners.length === 0 && (
-                    <View style={styles.infoCard}>
-                        <Ionicons name="information-circle" size={24} color={COLORS.accent.blue} />
-                        <Text style={styles.infoText}>
+                    <View style={[styles.infoCard, { backgroundColor: colors.status.infoBg }]}>
+                        <Ionicons name="information-circle" size={24} color={colors.accent.blue} />
+                        <Text style={[styles.infoText, { color: colors.text.secondary }]}>
                             No hay ganadores registrados para este sorteo. Los ganadores se mostrarán
                             cuando estén disponibles en el sistema.
                         </Text>
                     </View>
                 )}
-
-                {/* Botón de Cancelar (deshabilitado temporalmente) */}
-                {/* {selectedDraw.status === 'pending' && (
-                    <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={handleCancelDraw}
-                        disabled={isCancelling}
-                    >
-                        {isCancelling ? (
-                            <ActivityIndicator size="small" color={COLORS.white} />
-                        ) : (
-                            <>
-                                <Ionicons name="close-circle" size={20} color={COLORS.white} />
-                                <Text style={styles.cancelButtonText}>Cancelar Sorteo</Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
-                )} */}
             </ScrollView>
 
             {/* Custom Alert */}
@@ -358,7 +341,6 @@ export default function DrawDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bg.primary,
     },
 
     // Header
@@ -369,22 +351,18 @@ const styles = StyleSheet.create({
         paddingTop: 56,
         paddingHorizontal: 20,
         paddingBottom: 16,
-        backgroundColor: COLORS.bg.card,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border.default,
     },
     backBtn: {
         width: 40,
         height: 40,
         borderRadius: 12,
-        backgroundColor: COLORS.bg.elevated,
         justifyContent: 'center',
         alignItems: 'center',
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: COLORS.text.primary,
     },
 
     // Loading
@@ -392,12 +370,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.primary,
         gap: 16,
     },
     loadingText: {
         fontSize: 16,
-        color: COLORS.text.secondary,
     },
 
     // Error
@@ -405,18 +381,15 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.primary,
         padding: 40,
         gap: 16,
     },
     errorTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: COLORS.text.primary,
     },
     backButton: {
         marginTop: 16,
-        backgroundColor: COLORS.accent.blue,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 12,
@@ -424,13 +397,11 @@ const styles = StyleSheet.create({
     backButtonText: {
         fontSize: 15,
         fontWeight: '600',
-        color: COLORS.white,
     },
     errorBanner: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: COLORS.status.errorBg,
         padding: 12,
         marginHorizontal: 20,
         marginTop: 16,
@@ -439,7 +410,6 @@ const styles = StyleSheet.create({
     errorBannerText: {
         flex: 1,
         fontSize: 13,
-        color: COLORS.status.error,
     },
 
     // Content
@@ -453,12 +423,10 @@ const styles = StyleSheet.create({
 
     // Main Card
     mainCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: COLORS.border,
         gap: 16,
     },
     mainCardHeader: {
@@ -474,7 +442,6 @@ const styles = StyleSheet.create({
     clubType: {
         fontSize: 20,
         fontWeight: '700',
-        color: COLORS.text.primary,
     },
     statusBadge: {
         flexDirection: 'row',
@@ -495,11 +462,9 @@ const styles = StyleSheet.create({
     },
     dateText: {
         fontSize: 15,
-        color: COLORS.text.secondary,
         textTransform: 'capitalize',
     },
     winningNumberSection: {
-        backgroundColor: COLORS.status.infoBg,
         borderRadius: 12,
         padding: 20,
         alignItems: 'center',
@@ -508,12 +473,10 @@ const styles = StyleSheet.create({
     winningNumberLabel: {
         fontSize: 13,
         fontWeight: '600',
-        color: COLORS.text.secondary,
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
     winningNumberBadge: {
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 28,
         paddingHorizontal: 32,
         paddingVertical: 12,
@@ -521,35 +484,29 @@ const styles = StyleSheet.create({
     winningNumber: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: COLORS.white,
     },
     notesContainer: {
         flexDirection: 'row',
         gap: 10,
         padding: 12,
-        backgroundColor: COLORS.bg.elevated,
         borderRadius: 8,
     },
     notesText: {
         flex: 1,
         fontSize: 14,
-        color: COLORS.text.secondary,
         lineHeight: 20,
     },
 
     // Stats Card
     statsCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: COLORS.border,
     },
     statsTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: COLORS.text.primary,
         marginBottom: 16,
     },
     statsGrid: {
@@ -558,7 +515,6 @@ const styles = StyleSheet.create({
     },
     statBox: {
         flex: 1,
-        backgroundColor: COLORS.bg.elevated,
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
@@ -567,28 +523,23 @@ const styles = StyleSheet.create({
     statValue: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: COLORS.text.primary,
     },
     statLabel: {
         fontSize: 12,
-        color: COLORS.text.secondary,
         textAlign: 'center',
     },
 
     // System Card
     systemCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: COLORS.border,
         gap: 12,
     },
     systemTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: COLORS.text.primary,
         marginBottom: 8,
     },
     systemRow: {
@@ -598,12 +549,10 @@ const styles = StyleSheet.create({
     },
     systemLabel: {
         fontSize: 13,
-        color: COLORS.text.secondary,
     },
     systemValue: {
         flex: 1,
         fontSize: 13,
-        color: COLORS.text.primary,
         fontWeight: '500',
     },
 
@@ -614,7 +563,6 @@ const styles = StyleSheet.create({
 
     // Info Card
     infoCard: {
-        backgroundColor: COLORS.status.infoBg,
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
@@ -625,13 +573,11 @@ const styles = StyleSheet.create({
     infoText: {
         flex: 1,
         fontSize: 14,
-        color: COLORS.text.secondary,
         lineHeight: 20,
     },
 
     // Cancel Button
     cancelButton: {
-        backgroundColor: COLORS.status.error,
         borderRadius: 12,
         padding: 16,
         flexDirection: 'row',
@@ -643,6 +589,5 @@ const styles = StyleSheet.create({
     cancelButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: COLORS.white,
     },
 });

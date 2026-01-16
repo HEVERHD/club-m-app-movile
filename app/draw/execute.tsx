@@ -13,13 +13,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useDrawStore } from '../../src/stores/draw-store';
 import { clubApi } from '../../src/api/clubs.api';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 import type { ClubType } from '../../src/types/clubs';
 
 export default function ExecuteDrawScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
     const { executeDraw } = useDrawStore();
     const alert = useAlert();
 
@@ -132,34 +133,23 @@ export default function ExecuteDrawScreen() {
         );
     };
 
-    const formatDateForDisplay = (dateString: string) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-PA', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    };
-
     if (isLoadingTypes) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.accent.blue} />
-                <Text style={styles.loadingText}>Cargando tipos de club...</Text>
+            <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
+                <ActivityIndicator size="large" color={colors.accent.blue} />
+                <Text style={[styles.loadingText, { color: colors.text.primary }]}>Cargando tipos de club...</Text>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                    <Ionicons name="chevron-back" size={24} color={COLORS.text.primary} />
+            <View style={[styles.header, { backgroundColor: colors.bg.card, borderBottomColor: colors.border.default }]}>
+                <TouchableOpacity style={[styles.backBtn, { backgroundColor: colors.bg.elevated }]} onPress={handleBack}>
+                    <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Ejecutar Sorteo</Text>
+                <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Ejecutar Sorteo</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -169,24 +159,24 @@ export default function ExecuteDrawScreen() {
                 contentContainerStyle={styles.scrollContent}
             >
                 {/* Información */}
-                <View style={styles.infoCard}>
+                <View style={[styles.infoCard, { backgroundColor: colors.status.infoBg }]}>
                     <View style={styles.infoHeader}>
-                        <Ionicons name="information-circle" size={24} color={COLORS.accent.blue} />
-                        <Text style={styles.infoTitle}>Importante</Text>
+                        <Ionicons name="information-circle" size={24} color={colors.accent.blue} />
+                        <Text style={[styles.infoTitle, { color: colors.accent.blue }]}>Importante</Text>
                     </View>
-                    <Text style={styles.infoText}>
+                    <Text style={[styles.infoText, { color: colors.text.primary }]}>
                         Ingresa el número ganador del sorteo (0-99). El sistema buscará todos los clubes que tengan ese número de acción asignado.
                     </Text>
                 </View>
 
                 {/* Formulario */}
-                <View style={styles.formCard}>
+                <View style={[styles.formCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                     {/* Tipo de Club */}
                     <View style={styles.formSection}>
-                        <Text style={styles.formLabel}>
-                            Tipo de Club <Text style={styles.required}>*</Text>
+                        <Text style={[styles.formLabel, { color: colors.text.primary }]}>
+                            Tipo de Club <Text style={[styles.required, { color: colors.status.error }]}>*</Text>
                         </Text>
-                        <Text style={styles.formHint}>
+                        <Text style={[styles.formHint, { color: colors.text.secondary }]}>
                             Selecciona el tipo de club para el sorteo
                         </Text>
 
@@ -196,8 +186,11 @@ export default function ExecuteDrawScreen() {
                                     key={type.clubTypeId}
                                     style={[
                                         styles.clubTypeCard,
-                                        selectedClubTypeId === type.clubTypeId &&
-                                            styles.clubTypeCardSelected,
+                                        { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                        selectedClubTypeId === type.clubTypeId && {
+                                            borderColor: colors.accent.blue,
+                                            backgroundColor: colors.accent.blue + '10',
+                                        },
                                     ]}
                                     onPress={() => setSelectedClubTypeId(type.clubTypeId)}
                                 >
@@ -212,15 +205,15 @@ export default function ExecuteDrawScreen() {
                                                 size={24}
                                                 color={
                                                     selectedClubTypeId === type.clubTypeId
-                                                        ? COLORS.accent.blue
-                                                        : COLORS.text.tertiary
+                                                        ? colors.accent.blue
+                                                        : colors.text.tertiary
                                                 }
                                             />
                                         </View>
                                         <View style={styles.clubTypeInfo}>
-                                            <Text style={styles.clubTypeName}>{type.name}</Text>
+                                            <Text style={[styles.clubTypeName, { color: colors.text.primary }]}>{type.name}</Text>
                                             {type.description && (
-                                                <Text style={styles.clubTypeDescription}>
+                                                <Text style={[styles.clubTypeDescription, { color: colors.text.secondary }]}>
                                                     {type.description}
                                                 </Text>
                                             )}
@@ -229,9 +222,9 @@ export default function ExecuteDrawScreen() {
                                                     <Ionicons
                                                         name="calendar"
                                                         size={14}
-                                                        color={COLORS.text.tertiary}
+                                                        color={colors.text.tertiary}
                                                     />
-                                                    <Text style={styles.clubTypeDetailText}>
+                                                    <Text style={[styles.clubTypeDetailText, { color: colors.text.secondary }]}>
                                                         Día de sorteo: {type.drawDay}
                                                     </Text>
                                                 </View>
@@ -244,8 +237,8 @@ export default function ExecuteDrawScreen() {
 
                         {clubTypes.length === 0 && (
                             <View style={styles.emptyTypes}>
-                                <Ionicons name="alert-circle" size={32} color={COLORS.text.muted} />
-                                <Text style={styles.emptyTypesText}>
+                                <Ionicons name="alert-circle" size={32} color={colors.text.muted} />
+                                <Text style={[styles.emptyTypesText, { color: colors.text.secondary }]}>
                                     No hay tipos de club disponibles
                                 </Text>
                             </View>
@@ -254,17 +247,17 @@ export default function ExecuteDrawScreen() {
 
                     {/* Número Ganador */}
                     <View style={styles.formSection}>
-                        <Text style={styles.formLabel}>
-                            Número Ganador <Text style={styles.required}>*</Text>
+                        <Text style={[styles.formLabel, { color: colors.text.primary }]}>
+                            Número Ganador <Text style={[styles.required, { color: colors.status.error }]}>*</Text>
                         </Text>
-                        <Text style={styles.formHint}>
+                        <Text style={[styles.formHint, { color: colors.text.secondary }]}>
                             Ingresa el número ganador del sorteo (0-99)
                         </Text>
 
                         <TextInput
-                            style={styles.numberInput}
+                            style={[styles.numberInput, { backgroundColor: colors.bg.elevated, color: colors.text.primary, borderColor: colors.accent.blue }]}
                             placeholder="Ej: 42"
-                            placeholderTextColor={COLORS.text.muted}
+                            placeholderTextColor={colors.text.muted}
                             value={winningNumber}
                             onChangeText={(text) => {
                                 // Solo permitir números
@@ -282,19 +275,19 @@ export default function ExecuteDrawScreen() {
 
                 {/* Resumen */}
                 {selectedClubTypeId && winningNumber && (
-                    <View style={styles.summaryCard}>
-                        <Text style={styles.summaryTitle}>Resumen</Text>
+                    <View style={[styles.summaryCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                        <Text style={[styles.summaryTitle, { color: colors.text.primary }]}>Resumen</Text>
 
                         <View style={styles.summaryRow}>
-                            <Text style={styles.summaryLabel}>Tipo de Club:</Text>
-                            <Text style={styles.summaryValue}>
+                            <Text style={[styles.summaryLabel, { color: colors.text.secondary }]}>Tipo de Club:</Text>
+                            <Text style={[styles.summaryValue, { color: colors.text.primary }]}>
                                 {clubTypes.find(t => t.clubTypeId === selectedClubTypeId)?.name}
                             </Text>
                         </View>
 
                         <View style={styles.summaryRow}>
-                            <Text style={styles.summaryLabel}>Número Ganador:</Text>
-                            <Text style={styles.summaryValue}>
+                            <Text style={[styles.summaryLabel, { color: colors.text.secondary }]}>Número Ganador:</Text>
+                            <Text style={[styles.summaryValue, { color: colors.text.primary }]}>
                                 {winningNumber}
                             </Text>
                         </View>
@@ -305,17 +298,18 @@ export default function ExecuteDrawScreen() {
                 <TouchableOpacity
                     style={[
                         styles.executeButton,
-                        (!selectedClubTypeId || isExecuting) && styles.executeButtonDisabled,
+                        { backgroundColor: colors.accent.blue },
+                        (!selectedClubTypeId || isExecuting) && { backgroundColor: colors.text.muted, opacity: 0.6 },
                     ]}
                     onPress={handleExecute}
                     disabled={!selectedClubTypeId || isExecuting}
                 >
                     {isExecuting ? (
-                        <ActivityIndicator size="small" color={COLORS.white} />
+                        <ActivityIndicator size="small" color={colors.white} />
                     ) : (
                         <>
-                            <Ionicons name="dice" size={24} color={COLORS.white} />
-                            <Text style={styles.executeButtonText}>Ejecutar Sorteo</Text>
+                            <Ionicons name="dice" size={24} color={colors.white} />
+                            <Text style={[styles.executeButtonText, { color: colors.white }]}>Ejecutar Sorteo</Text>
                         </>
                     )}
                 </TouchableOpacity>
@@ -337,7 +331,6 @@ export default function ExecuteDrawScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bg.primary,
     },
 
     // Header
@@ -348,22 +341,18 @@ const styles = StyleSheet.create({
         paddingTop: 56,
         paddingHorizontal: 20,
         paddingBottom: 16,
-        backgroundColor: COLORS.bg.card,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border.default,
     },
     backBtn: {
         width: 40,
         height: 40,
         borderRadius: 12,
-        backgroundColor: COLORS.bg.elevated,
         justifyContent: 'center',
         alignItems: 'center',
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: COLORS.text.primary,
     },
 
     // Loading
@@ -371,12 +360,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.primary,
         gap: 16,
     },
     loadingText: {
         fontSize: 17,
-        color: COLORS.text.primary,
         fontWeight: '600',
     },
 
@@ -391,7 +378,6 @@ const styles = StyleSheet.create({
 
     // Info Card
     infoCard: {
-        backgroundColor: COLORS.status.infoBg,
         borderRadius: 12,
         padding: 16,
         marginBottom: 20,
@@ -405,23 +391,19 @@ const styles = StyleSheet.create({
     infoTitle: {
         fontSize: 17,
         fontWeight: '700',
-        color: COLORS.accent.blue,
     },
     infoText: {
         fontSize: 15,
-        color: COLORS.text.primary,
         lineHeight: 22,
         fontWeight: '500',
     },
 
     // Form Card
     formCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 20,
         borderWidth: 1,
-        borderColor: COLORS.border,
         gap: 24,
     },
     formSection: {
@@ -430,15 +412,12 @@ const styles = StyleSheet.create({
     formLabel: {
         fontSize: 16,
         fontWeight: '700',
-        color: COLORS.text.primary,
     },
     required: {
-        color: COLORS.status.error,
         fontWeight: '700',
     },
     formHint: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         marginBottom: 8,
         fontWeight: '500',
         lineHeight: 20,
@@ -449,15 +428,9 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     clubTypeCard: {
-        backgroundColor: COLORS.bg.elevated,
         borderRadius: 12,
         padding: 16,
         borderWidth: 2,
-        borderColor: COLORS.border.default,
-    },
-    clubTypeCardSelected: {
-        borderColor: COLORS.accent.blue,
-        backgroundColor: `${COLORS.accent.blue}10`,
     },
     clubTypeHeader: {
         flexDirection: 'row',
@@ -473,11 +446,9 @@ const styles = StyleSheet.create({
     clubTypeName: {
         fontSize: 17,
         fontWeight: '700',
-        color: COLORS.text.primary,
     },
     clubTypeDescription: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         lineHeight: 20,
         fontWeight: '500',
     },
@@ -489,7 +460,6 @@ const styles = StyleSheet.create({
     },
     clubTypeDetailText: {
         fontSize: 13,
-        color: COLORS.text.secondary,
         fontWeight: '500',
     },
     emptyTypes: {
@@ -499,143 +469,30 @@ const styles = StyleSheet.create({
     },
     emptyTypesText: {
         fontSize: 15,
-        color: COLORS.text.secondary,
         fontWeight: '600',
-    },
-
-    // Date
-    dateDisplay: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        backgroundColor: COLORS.bg.elevated,
-        borderRadius: 12,
-        padding: 16,
-    },
-    dateText: {
-        flex: 1,
-        fontSize: 16,
-        color: COLORS.text.primary,
-        fontWeight: '600',
-        textTransform: 'capitalize',
-    },
-    dateSubtext: {
-        fontSize: 13,
-        color: COLORS.text.secondary,
-        marginTop: 4,
-        fontWeight: '500',
-    },
-
-    // Time Picker
-    timePickerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        backgroundColor: COLORS.bg.elevated,
-        borderRadius: 12,
-        padding: 16,
-        justifyContent: 'center',
-    },
-    timeInputWrapper: {
-        alignItems: 'center',
-        gap: 6,
-    },
-    timeInputLabel: {
-        fontSize: 11,
-        fontWeight: '600',
-        color: COLORS.text.secondary,
-        letterSpacing: 0.5,
-    },
-    timeInput: {
-        backgroundColor: COLORS.bg.card,
-        borderRadius: 8,
-        width: 60,
-        height: 60,
-        fontSize: 24,
-        fontWeight: '700',
-        color: COLORS.text.primary,
-        textAlign: 'center',
-        borderWidth: 2,
-        borderColor: COLORS.accent.blue,
-    },
-    timeSeparator: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: COLORS.text.primary,
-        marginTop: 20,
-    },
-    periodSelector: {
-        flexDirection: 'column',
-        gap: 8,
-        marginLeft: 8,
-    },
-    periodButton: {
-        backgroundColor: COLORS.bg.card,
-        borderRadius: 8,
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        borderWidth: 2,
-        borderColor: COLORS.border.default,
-        minWidth: 50,
-        alignItems: 'center',
-    },
-    periodButtonActive: {
-        backgroundColor: COLORS.accent.blue,
-        borderColor: COLORS.accent.blue,
-    },
-    periodText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: COLORS.text.secondary,
-    },
-    periodTextActive: {
-        color: COLORS.white,
     },
 
     // Number Input
     numberInput: {
-        backgroundColor: COLORS.bg.elevated,
         borderRadius: 12,
         padding: 16,
         fontSize: 32,
         fontWeight: 'bold',
-        color: COLORS.text.primary,
         textAlign: 'center',
         borderWidth: 2,
-        borderColor: COLORS.accent.blue,
-    },
-
-    // Notes
-    notesInput: {
-        backgroundColor: COLORS.bg.elevated,
-        borderRadius: 12,
-        padding: 16,
-        fontSize: 15,
-        color: COLORS.text.primary,
-        minHeight: 100,
-    },
-    charCount: {
-        fontSize: 13,
-        color: COLORS.text.secondary,
-        textAlign: 'right',
-        marginTop: 4,
-        fontWeight: '500',
     },
 
     // Summary Card
     summaryCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 20,
         borderWidth: 1,
-        borderColor: COLORS.border,
         gap: 12,
     },
     summaryTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: COLORS.text.primary,
         marginBottom: 8,
     },
     summaryRow: {
@@ -643,18 +500,15 @@ const styles = StyleSheet.create({
     },
     summaryLabel: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         fontWeight: '600',
     },
     summaryValue: {
         fontSize: 16,
-        color: COLORS.text.primary,
         fontWeight: '600',
     },
 
     // Execute Button
     executeButton: {
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 12,
         padding: 18,
         flexDirection: 'row',
@@ -662,14 +516,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 12,
     },
-    executeButtonDisabled: {
-        backgroundColor: COLORS.text.muted,
-        opacity: 0.6,
-    },
     executeButtonText: {
         fontSize: 18,
         fontWeight: '700',
-        color: COLORS.white,
         letterSpacing: 0.5,
     },
 });

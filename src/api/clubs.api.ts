@@ -286,10 +286,10 @@ export const clubApi = {
     },
 
     /**
-     * Obtener estadísticas de clubs de un cliente
-     * Esta función está aquí para evitar dependencias circulares
+     * Obtener estadísticas de clubs de un cliente por su cédula
+     * @param identificationNumber - Cédula del cliente (ej: "9-777-7777")
      */
-    async getCustomerClubStats(customerId: string): Promise<{
+    async getCustomerClubStats(identificationNumber: string): Promise<{
         totalClubs: number;
         activeClubs: number;
         totalInvested: number;
@@ -299,27 +299,34 @@ export const clubApi = {
         lastActivity?: string;
     }> {
         try {
-            console.log('📊 [clubs.api] Obteniendo estadísticas para cliente:', customerId);
+            console.log('📊 [clubs.api] Obteniendo estadísticas para cédula:', identificationNumber);
 
-            const clubsResponse = await clubsApi.getClubs({ customerId }, 1, 100);
-            const clubs = clubsResponse.data || [];
-            const activeClubs = clubs.filter((c: any) => c.active);
+            // Buscar clubes por cédula usando SearchText
+            const { data } = await mdl05Client.post('/mdl05/club/history', {
+                SearchText: identificationNumber,
+                PageNumber: 1,
+                PageSize: 100,
+                Status: null,
+            });
 
-            console.log(`✅ [clubs.api] Se encontraron ${clubs.length} clubs para el cliente`);
+            const clubs = data?.Data || [];
+            const activeClubs = clubs.filter((c: any) => c.NameStatus === 'Activo');
+
+            console.log(`✅ [clubs.api] Se encontraron ${clubs.length} clubs para cédula ${identificationNumber}`);
 
             return {
                 totalClubs: clubs.length,
                 activeClubs: activeClubs.length,
-                totalInvested: clubs.reduce((sum: number, c: any) => sum + (c.paidAmount || 0), 0),
-                totalBalance: clubs.reduce((sum: number, c: any) => sum + (c.balanceAmount || 0), 0),
-                totalRedeemed: clubs.reduce((sum: number, c: any) => sum + (c.retiredAmount || 0), 0),
+                totalInvested: clubs.reduce((sum: number, c: any) => sum + Math.abs(c.BalanceAmount || 0), 0),
+                totalBalance: clubs.reduce((sum: number, c: any) => sum + (c.BalanceAmount || 0), 0),
+                totalRedeemed: 0, // No disponible en este endpoint
                 averageShare: clubs.length > 0
-                    ? clubs.reduce((sum: number, c: any) => sum + (c.share || 0), 0) / clubs.length
+                    ? clubs.reduce((sum: number, c: any) => sum + (c.Share || 0), 0) / clubs.length
                     : 0,
                 lastActivity: clubs.length > 0
                     ? clubs.sort((a: any, b: any) =>
-                        new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
-                      )[0].createdDate
+                        new Date(b.CreatedDate).getTime() - new Date(a.CreatedDate).getTime()
+                      )[0].CreatedDate
                     : undefined,
             };
         } catch (error: any) {

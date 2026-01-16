@@ -1,7 +1,7 @@
 // src/components/clubs/ClubFilters.tsx - ARREGLADO
 import { memo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { COLORS } from '../../constants/colors';
+import { useTheme } from '../../contexts/ThemeContext';
 import type { ClubFilters as IClubFilters } from '../../types/clubs';
 
 interface Props {
@@ -12,19 +12,30 @@ interface Props {
 type FilterOption = {
     key: string | undefined;
     label: string;
-    color?: string;
+    colorKey?: 'muted' | 'green' | 'orange' | 'error';
 };
 
 const STATUS_OPTIONS: FilterOption[] = [
-    { key: 'Vencido', label: 'Vencidos (rápido)', color: COLORS.accent.orange }, // Por defecto para rendimiento
-    { key: 'Activo', label: 'Activos', color: COLORS.accent.green },
-    { key: undefined, label: 'Todos (lento)', color: COLORS.text.muted },
-    { key: 'Anulado', label: 'Anulados', color: COLORS.status.error },
+    { key: undefined, label: 'Todos', colorKey: 'muted' },
+    { key: 'Activo', label: 'Activos', colorKey: 'green' },
+    { key: 'Vencido', label: 'Vencidos', colorKey: 'orange' },
+    { key: 'Anulado', label: 'Anulados', colorKey: 'error' },
 ];
 
 export const ClubFilters = memo(function ClubFilters({ filters, onChange }: Props) {
+    const { colors } = useTheme();
+
     const handleStatusPress = (status: string | undefined) => {
         onChange({ ...filters, status });
+    };
+
+    const getColor = (colorKey?: string) => {
+        switch (colorKey) {
+            case 'green': return colors.accent.green;
+            case 'orange': return colors.accent.orange;
+            case 'error': return colors.status.error;
+            default: return colors.text.muted;
+        }
     };
 
     return (
@@ -36,20 +47,26 @@ export const ClubFilters = memo(function ClubFilters({ filters, onChange }: Prop
             >
                 {STATUS_OPTIONS.map((opt) => {
                     const isActive = filters.status === opt.key;
+                    const dotColor = getColor(opt.colorKey);
                     return (
                         <TouchableOpacity
                             key={opt.key ?? 'all'}
                             style={[
                                 styles.chip,
-                                isActive && styles.chipActive,
+                                { backgroundColor: colors.bg.card, borderColor: colors.border.default },
+                                isActive && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
                             ]}
                             onPress={() => handleStatusPress(opt.key)}
                             activeOpacity={0.7}
                         >
-                            {opt.color && (
-                                <View style={[styles.dot, { backgroundColor: isActive ? COLORS.white : opt.color }]} />
+                            {opt.colorKey && (
+                                <View style={[styles.dot, { backgroundColor: isActive ? colors.white : dotColor }]} />
                             )}
-                            <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                            <Text style={[
+                                styles.chipText,
+                                { color: colors.text.secondary },
+                                isActive && { color: colors.white, fontWeight: '600' },
+                            ]}>
                                 {opt.label}
                             </Text>
                         </TouchableOpacity>
@@ -76,23 +93,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 20,
-        backgroundColor: COLORS.bg.card,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
         marginRight: 10,
-    },
-    chipActive: {
-        backgroundColor: COLORS.accent.blue,
-        borderColor: COLORS.accent.blue,
     },
     chipText: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         fontWeight: '500',
-    },
-    chipTextActive: {
-        color: COLORS.white,
-        fontWeight: '600',
     },
     dot: {
         width: 8,

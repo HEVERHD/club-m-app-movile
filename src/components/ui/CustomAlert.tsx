@@ -9,7 +9,7 @@ import {
     Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../../constants/colors';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export type AlertType = 'success' | 'error' | 'warning' | 'info' | 'confirm';
 
@@ -38,37 +38,39 @@ export function CustomAlert({
     buttons = [{ text: 'OK', style: 'default' }],
     onDismiss,
 }: CustomAlertProps) {
+    const { colors } = useTheme();
+
     const getIconConfig = () => {
         switch (type) {
             case 'success':
                 return {
                     name: 'checkmark-circle' as const,
-                    color: COLORS.status.success,
-                    bgColor: `${COLORS.status.success}15`,
+                    color: colors.status.success,
+                    bgColor: `${colors.status.success}15`,
                 };
             case 'error':
                 return {
                     name: 'close-circle' as const,
-                    color: COLORS.status.error,
-                    bgColor: `${COLORS.status.error}15`,
+                    color: colors.status.error,
+                    bgColor: `${colors.status.error}15`,
                 };
             case 'warning':
                 return {
                     name: 'warning' as const,
-                    color: COLORS.status.warning,
-                    bgColor: `${COLORS.status.warning}15`,
+                    color: colors.status.warning,
+                    bgColor: `${colors.status.warning}15`,
                 };
             case 'confirm':
                 return {
                     name: 'help-circle' as const,
-                    color: COLORS.accent.blue,
-                    bgColor: `${COLORS.accent.blue}15`,
+                    color: colors.accent.blue,
+                    bgColor: `${colors.accent.blue}15`,
                 };
             default:
                 return {
                     name: 'information-circle' as const,
-                    color: COLORS.status.info,
-                    bgColor: `${COLORS.status.info}15`,
+                    color: colors.status.info,
+                    bgColor: `${colors.status.info}15`,
                 };
         }
     };
@@ -77,18 +79,18 @@ export function CustomAlert({
         switch (buttonStyle) {
             case 'destructive':
                 return {
-                    bg: COLORS.status.error,
-                    text: COLORS.white,
+                    bg: colors.status.error,
+                    text: colors.white,
                 };
             case 'cancel':
                 return {
-                    bg: COLORS.bg.elevated,
-                    text: COLORS.text.secondary,
+                    bg: colors.bg.elevated,
+                    text: colors.text.secondary,
                 };
             default:
                 return {
-                    bg: COLORS.accent.blue,
-                    text: COLORS.white,
+                    bg: colors.accent.blue,
+                    text: colors.white,
                 };
         }
     };
@@ -120,7 +122,7 @@ export function CustomAlert({
                     activeOpacity={1}
                     onPress={(e) => e.stopPropagation()}
                 >
-                    <View style={styles.container}>
+                    <View style={[styles.container, { backgroundColor: colors.bg.card }]}>
                         {/* Icon */}
                         <View
                             style={[
@@ -137,8 +139,8 @@ export function CustomAlert({
 
                         {/* Content */}
                         <View style={styles.content}>
-                            <Text style={styles.title}>{title}</Text>
-                            {message && <Text style={styles.message}>{message}</Text>}
+                            <Text style={[styles.title, { color: colors.text.primary }]}>{title}</Text>
+                            {message && <Text style={[styles.message, { color: colors.text.secondary }]}>{message}</Text>}
                         </View>
 
                         {/* Buttons */}
@@ -192,7 +194,6 @@ const styles = StyleSheet.create({
     },
     container: {
         width: Math.min(width - 40, 340),
-        backgroundColor: COLORS.bg.card,
         borderRadius: 20,
         padding: 24,
         alignItems: 'center',
@@ -218,13 +219,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontWeight: '700',
-        color: COLORS.text.primary,
         textAlign: 'center',
         marginBottom: 8,
     },
     message: {
         fontSize: 15,
-        color: COLORS.text.secondary,
         textAlign: 'center',
         lineHeight: 22,
     },

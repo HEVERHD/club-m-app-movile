@@ -8,11 +8,12 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/stores/auth-store';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 
 export default function CompanyScreen() {
+    const { colors, isDark } = useTheme();
     const alert = useAlert();
     const [company, setCompany] = useState('');
     const [isFocused, setIsFocused] = useState(false);
@@ -32,11 +33,11 @@ export default function CompanyScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#0a0f1a" />
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
+            <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.bg.primary} />
 
             {/* Fondo con gradiente sutil */}
-            <View style={styles.backgroundGlow} />
+            <View style={[styles.backgroundGlow, { backgroundColor: colors.accent.blue + '15' }]} />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -57,38 +58,39 @@ export default function CompanyScreen() {
                             />
                         </View>
 
-                        <Text style={styles.brandName}>Clubes de Mercancías</Text>
-                        <Text style={styles.tagline}>Sistema de gestión empresarial</Text>
+                        <Text style={[styles.brandName, { color: colors.text.primary }]}>Clubes de Mercancías</Text>
+                        <Text style={[styles.tagline, { color: colors.text.muted }]}>Sistema de gestión empresarial</Text>
                     </View>
 
                     {/* Card del formulario */}
-                    <View style={styles.formCard}>
+                    <View style={[styles.formCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                         <View style={styles.formHeader}>
-                            <View style={styles.stepIndicator}>
-                                <Text style={styles.stepNumber}>1</Text>
+                            <View style={[styles.stepIndicator, { backgroundColor: colors.accent.blue }]}>
+                                <Text style={[styles.stepNumber, { color: colors.white }]}>1</Text>
                             </View>
                             <View>
-                                <Text style={styles.formTitle}>Identifica tu empresa</Text>
-                                <Text style={styles.formSubtitle}>Ingresa el código de tu compañía</Text>
+                                <Text style={[styles.formTitle, { color: colors.text.primary }]}>Identifica tu empresa</Text>
+                                <Text style={[styles.formSubtitle, { color: colors.text.muted }]}>Ingresa el código de tu compañía</Text>
                             </View>
                         </View>
 
                         {/* Input */}
                         <View style={styles.inputWrapper}>
-                            <Text style={styles.inputLabel}>Código de empresa</Text>
+                            <Text style={[styles.inputLabel, { color: colors.text.secondary }]}>Código de empresa</Text>
                             <View style={[
                                 styles.inputContainer,
-                                isFocused && styles.inputFocused
+                                { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
+                                isFocused && { borderColor: colors.accent.blue, backgroundColor: colors.accent.blue + '10' }
                             ]}>
                                 <Ionicons
                                     name="business-outline"
                                     size={20}
-                                    color={isFocused ? COLORS.accent.blue : COLORS.text.muted}
+                                    color={isFocused ? colors.accent.blue : colors.text.muted}
                                 />
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { color: colors.text.primary }]}
                                     placeholder="Ej: cochez"
-                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    placeholderTextColor={colors.text.muted}
                                     value={company}
                                     onChangeText={(text) => {
                                         setCompany(text);
@@ -101,7 +103,7 @@ export default function CompanyScreen() {
                                 />
                                 {company.length > 0 && (
                                     <TouchableOpacity onPress={() => setCompany('')}>
-                                        <Ionicons name="close-circle" size={20} color={COLORS.text.muted} />
+                                        <Ionicons name="close-circle" size={20} color={colors.text.muted} />
                                     </TouchableOpacity>
                                 )}
                             </View>
@@ -109,26 +111,26 @@ export default function CompanyScreen() {
 
                         {/* Error */}
                         {error && (
-                            <View style={styles.errorBox}>
-                                <Ionicons name="alert-circle" size={18} color="#ef4444" />
-                                <Text style={styles.errorText}>{error}</Text>
+                            <View style={[styles.errorBox, { backgroundColor: colors.status.errorBg }]}>
+                                <Ionicons name="alert-circle" size={18} color={colors.status.error} />
+                                <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>
                             </View>
                         )}
 
                         {/* Continue Button */}
                         <TouchableOpacity
-                            style={[styles.continueBtn, isLoading && styles.continueBtnDisabled]}
+                            style={[styles.continueBtn, { backgroundColor: colors.accent.blue }, isLoading && styles.continueBtnDisabled]}
                             onPress={handleContinue}
                             disabled={isLoading}
                             activeOpacity={0.85}
                         >
                             {isLoading ? (
-                                <ActivityIndicator color="#fff" size="small" />
+                                <ActivityIndicator color={colors.white} size="small" />
                             ) : (
                                 <>
-                                    <Text style={styles.continueBtnText}>Continuar</Text>
+                                    <Text style={[styles.continueBtnText, { color: colors.white }]}>Continuar</Text>
                                     <View style={styles.continueBtnIcon}>
-                                        <Ionicons name="arrow-forward" size={18} color="#fff" />
+                                        <Ionicons name="arrow-forward" size={18} color={colors.white} />
                                     </View>
                                 </>
                             )}
@@ -136,8 +138,8 @@ export default function CompanyScreen() {
 
                         {/* Info tip */}
                         <View style={styles.infoTip}>
-                            <Ionicons name="information-circle-outline" size={16} color={COLORS.text.muted} />
-                            <Text style={styles.infoTipText}>
+                            <Ionicons name="information-circle-outline" size={16} color={colors.text.muted} />
+                            <Text style={[styles.infoTipText, { color: colors.text.muted }]}>
                                 El código fue proporcionado por tu administrador
                             </Text>
                         </View>
@@ -146,8 +148,8 @@ export default function CompanyScreen() {
                     {/* Footer */}
                     <View style={styles.footer}>
                         <View style={styles.securityIndicator}>
-                            <View style={styles.securityDot} />
-                            <Text style={styles.securityText}>Conexión cifrada SSL</Text>
+                            <View style={[styles.securityDot, { backgroundColor: colors.accent.green }]} />
+                            <Text style={[styles.securityText, { color: colors.text.muted }]}>Conexión cifrada SSL</Text>
                         </View>
                     </View>
                 </ScrollView>
@@ -167,7 +169,6 @@ export default function CompanyScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0f1a',
     },
     backgroundGlow: {
         position: 'absolute',
@@ -177,7 +178,6 @@ const styles = StyleSheet.create({
         width: 400,
         height: 400,
         borderRadius: 200,
-        backgroundColor: 'rgba(59, 130, 246, 0.08)',
     },
     keyboardView: {
         flex: 1,
@@ -204,22 +204,18 @@ const styles = StyleSheet.create({
     brandName: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#fff',
         marginBottom: 6,
         letterSpacing: -0.3,
     },
     tagline: {
         fontSize: 14,
-        color: COLORS.text.muted,
     },
 
     // Form Card
     formCard: {
-        backgroundColor: 'rgba(255,255,255,0.03)',
         borderRadius: 24,
         padding: 24,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.06)',
     },
     formHeader: {
         flexDirection: 'row',
@@ -231,24 +227,20 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 12,
-        backgroundColor: COLORS.accent.blue,
         alignItems: 'center',
         justifyContent: 'center',
     },
     stepNumber: {
-        color: '#fff',
         fontSize: 16,
         fontWeight: '700',
     },
     formTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#fff',
         marginBottom: 2,
     },
     formSubtitle: {
         fontSize: 13,
-        color: COLORS.text.muted,
     },
 
     // Inputs
@@ -258,29 +250,21 @@ const styles = StyleSheet.create({
     inputLabel: {
         fontSize: 13,
         fontWeight: '500',
-        color: COLORS.text.secondary,
         marginBottom: 8,
         marginLeft: 4,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.04)',
         borderRadius: 14,
         paddingHorizontal: 16,
         paddingVertical: 14,
         gap: 12,
         borderWidth: 1.5,
-        borderColor: 'rgba(255,255,255,0.06)',
-    },
-    inputFocused: {
-        borderColor: COLORS.accent.blue,
-        backgroundColor: 'rgba(59, 130, 246, 0.06)',
     },
     input: {
         flex: 1,
         fontSize: 16,
-        color: '#fff',
         padding: 0,
     },
 
@@ -288,21 +272,18 @@ const styles = StyleSheet.create({
     errorBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
         padding: 12,
         borderRadius: 12,
         gap: 10,
         marginBottom: 8,
     },
     errorText: {
-        color: '#ef4444',
         fontSize: 13,
         flex: 1,
     },
 
     // Continue Button
     continueBtn: {
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 14,
         paddingVertical: 16,
         flexDirection: 'row',
@@ -315,7 +296,6 @@ const styles = StyleSheet.create({
         opacity: 0.6,
     },
     continueBtnText: {
-        color: '#fff',
         fontSize: 16,
         fontWeight: '600',
     },
@@ -336,7 +316,6 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     infoTipText: {
-        color: COLORS.text.muted,
         fontSize: 12,
     },
 
@@ -354,10 +333,8 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: COLORS.accent.green,
     },
     securityText: {
-        color: COLORS.text.muted,
         fontSize: 12,
         fontWeight: '500',
     },

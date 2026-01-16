@@ -12,9 +12,11 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useCustomerStore } from '../../src/stores/customer-store';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
+import { QRCodeCard } from '../../src/components/customers/QRCodeCard';
 
 export default function CustomerDetailScreen() {
+    const { colors } = useTheme();
     const { id } = useLocalSearchParams<{ id: string }>();
     const {
         selectedCustomer: customer,
@@ -79,13 +81,13 @@ export default function CustomerDetailScreen() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'active':
-                return COLORS.status.success;
+                return colors.status.success;
             case 'suspended':
-                return COLORS.status.warning;
+                return colors.status.warning;
             case 'inactive':
-                return COLORS.text.muted;
+                return colors.text.muted;
             default:
-                return COLORS.text.secondary;
+                return colors.text.secondary;
         }
     };
 
@@ -104,43 +106,43 @@ export default function CustomerDetailScreen() {
 
     if (isLoading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.accent.blue} />
-                <Text style={styles.loadingText}>Cargando cliente...</Text>
+            <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
+                <ActivityIndicator size="large" color={colors.accent.blue} />
+                <Text style={[styles.loadingText, { color: colors.text.secondary }]}>Cargando cliente...</Text>
             </View>
         );
     }
 
     if (error || !customer) {
         return (
-            <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle-outline" size={64} color={COLORS.status.error} />
-                <Text style={styles.errorTitle}>Error</Text>
-                <Text style={styles.errorMessage}>{error || 'Cliente no encontrado'}</Text>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <Text style={styles.backButtonText}>Volver</Text>
+            <View style={[styles.errorContainer, { backgroundColor: colors.bg.primary }]}>
+                <Ionicons name="alert-circle-outline" size={64} color={colors.status.error} />
+                <Text style={[styles.errorTitle, { color: colors.text.primary }]}>Error</Text>
+                <Text style={[styles.errorMessage, { color: colors.text.secondary }]}>{error || 'Cliente no encontrado'}</Text>
+                <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.accent.blue }]} onPress={() => router.back()}>
+                    <Text style={[styles.backButtonText, { color: colors.white }]}>Volver</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: colors.bg.card, borderBottomColor: colors.border.default }]}>
                 <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
+                    <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Detalle del Cliente</Text>
+                <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Detalle del Cliente</Text>
                 <TouchableOpacity style={styles.editBtn} onPress={handleEdit}>
-                    <Ionicons name="create-outline" size={24} color={COLORS.accent.blue} />
+                    <Ionicons name="create-outline" size={24} color={colors.accent.blue} />
                 </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Perfil Card */}
-                <View style={styles.profileCard}>
-                    <Text style={styles.name}>{customer.fullName}</Text>
+                <View style={[styles.profileCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    <Text style={[styles.name, { color: colors.text.primary }]}>{customer.fullName}</Text>
 
                     <View style={styles.badgesRow}>
                         <View
@@ -161,133 +163,142 @@ export default function CustomerDetailScreen() {
                         </View>
 
                         {customer.tierName && (
-                            <View style={styles.tierBadge}>
-                                <Ionicons name="ribbon" size={14} color={COLORS.accent.purple} />
-                                <Text style={styles.tierText}>{customer.tierName}</Text>
+                            <View style={[styles.tierBadge, { backgroundColor: colors.accent.purple + '15' }]}>
+                                <Ionicons name="ribbon" size={14} color={colors.accent.purple} />
+                                <Text style={[styles.tierText, { color: colors.accent.purple }]}>{customer.tierName}</Text>
                             </View>
                         )}
                     </View>
 
                     {/* Quick Info Grid */}
-                    <View style={styles.quickInfoGrid}>
+                    <View style={[styles.quickInfoGrid, { borderTopColor: colors.border.default }]}>
                         {customer.identificationNumber && (
                             <View style={styles.quickInfoItem}>
-                                <Ionicons name="card-outline" size={16} color={COLORS.text.secondary} />
-                                <Text style={styles.quickInfoLabel}>ID:</Text>
-                                <Text style={styles.quickInfoValue}>{customer.identificationNumber}</Text>
+                                <Ionicons name="card-outline" size={16} color={colors.text.secondary} />
+                                <Text style={[styles.quickInfoLabel, { color: colors.text.secondary }]}>ID:</Text>
+                                <Text style={[styles.quickInfoValue, { color: colors.text.primary }]}>{customer.identificationNumber}</Text>
                             </View>
                         )}
                         {customer.customerTypeName && (
                             <View style={styles.quickInfoItem}>
-                                <Ionicons name="person-outline" size={16} color={COLORS.text.secondary} />
-                                <Text style={styles.quickInfoLabel}>Tipo:</Text>
-                                <Text style={styles.quickInfoValue}>{customer.customerTypeName}</Text>
+                                <Ionicons name="person-outline" size={16} color={colors.text.secondary} />
+                                <Text style={[styles.quickInfoLabel, { color: colors.text.secondary }]}>Tipo:</Text>
+                                <Text style={[styles.quickInfoValue, { color: colors.text.primary }]}>{customer.customerTypeName}</Text>
                             </View>
                         )}
                         {customer.registrationDate && (
                             <View style={styles.quickInfoItem}>
-                                <Ionicons name="calendar-outline" size={16} color={COLORS.text.secondary} />
-                                <Text style={styles.quickInfoLabel}>Registro:</Text>
-                                <Text style={styles.quickInfoValue}>{formatDate(customer.registrationDate)}</Text>
+                                <Ionicons name="calendar-outline" size={16} color={colors.text.secondary} />
+                                <Text style={[styles.quickInfoLabel, { color: colors.text.secondary }]}>Registro:</Text>
+                                <Text style={[styles.quickInfoValue, { color: colors.text.primary }]}>{formatDate(customer.registrationDate)}</Text>
                             </View>
                         )}
                     </View>
                 </View>
 
+                {/* Código QR del Miembro */}
+                {customer.identificationNumber && (
+                    <QRCodeCard
+                        customerId={customer.customerId}
+                        identificationNumber={customer.identificationNumber}
+                        customerName={customer.fullName}
+                    />
+                )}
+
                 {/* Estadísticas */}
                 {stats && (
-                    <View style={styles.statsCard}>
-                        <Text style={styles.sectionTitle}>Resumen</Text>
+                    <View style={[styles.statsCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                        <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Resumen</Text>
 
                         <View style={styles.statsGrid}>
-                            <View style={styles.statItem}>
-                                <View style={[styles.statIcon, { backgroundColor: COLORS.accent.blue + '20' }]}>
-                                    <Ionicons name="people" size={20} color={COLORS.accent.blue} />
+                            <View style={[styles.statItem, { backgroundColor: colors.bg.elevated }]}>
+                                <View style={[styles.statIcon, { backgroundColor: colors.accent.blue + '20' }]}>
+                                    <Ionicons name="people" size={20} color={colors.accent.blue} />
                                 </View>
-                                <Text style={styles.statValue}>{stats.totalClubs}</Text>
-                                <Text style={styles.statLabel}>Clubes Totales</Text>
+                                <Text style={[styles.statValue, { color: colors.text.primary }]}>{stats.totalClubs}</Text>
+                                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Clubes Totales</Text>
                             </View>
 
-                            <View style={styles.statItem}>
-                                <View style={[styles.statIcon, { backgroundColor: COLORS.status.success + '20' }]}>
-                                    <Ionicons name="checkmark-circle" size={20} color={COLORS.status.success} />
+                            <View style={[styles.statItem, { backgroundColor: colors.bg.elevated }]}>
+                                <View style={[styles.statIcon, { backgroundColor: colors.status.success + '20' }]}>
+                                    <Ionicons name="checkmark-circle" size={20} color={colors.status.success} />
                                 </View>
-                                <Text style={styles.statValue}>{stats.activeClubs}</Text>
-                                <Text style={styles.statLabel}>Clubes Activos</Text>
+                                <Text style={[styles.statValue, { color: colors.text.primary }]}>{stats.activeClubs}</Text>
+                                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Clubes Activos</Text>
                             </View>
 
-                            <View style={styles.statItem}>
-                                <View style={[styles.statIcon, { backgroundColor: COLORS.accent.green + '20' }]}>
-                                    <Ionicons name="cash" size={20} color={COLORS.accent.green} />
+                            <View style={[styles.statItem, { backgroundColor: colors.bg.elevated }]}>
+                                <View style={[styles.statIcon, { backgroundColor: colors.accent.green + '20' }]}>
+                                    <Ionicons name="cash" size={20} color={colors.accent.green} />
                                 </View>
-                                <Text style={styles.statValue}>{formatCurrency(stats.totalInvested)}</Text>
-                                <Text style={styles.statLabel}>Total Invertido</Text>
+                                <Text style={[styles.statValue, { color: colors.text.primary }]}>{formatCurrency(stats.totalInvested)}</Text>
+                                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Total Invertido</Text>
                             </View>
 
-                            <View style={styles.statItem}>
-                                <View style={[styles.statIcon, { backgroundColor: COLORS.accent.orange + '20' }]}>
-                                    <Ionicons name="wallet" size={20} color={COLORS.accent.orange} />
+                            <View style={[styles.statItem, { backgroundColor: colors.bg.elevated }]}>
+                                <View style={[styles.statIcon, { backgroundColor: colors.accent.orange + '20' }]}>
+                                    <Ionicons name="wallet" size={20} color={colors.accent.orange} />
                                 </View>
-                                <Text style={styles.statValue}>{formatCurrency(stats.totalBalance)}</Text>
-                                <Text style={styles.statLabel}>Balance Disponible</Text>
+                                <Text style={[styles.statValue, { color: colors.text.primary }]}>{formatCurrency(stats.totalBalance)}</Text>
+                                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Balance Disponible</Text>
                             </View>
                         </View>
 
-                        <TouchableOpacity style={styles.viewClubsBtn} onPress={handleViewClubs}>
-                            <Text style={styles.viewClubsBtnText}>Ver Clubes</Text>
-                            <Ionicons name="arrow-forward" size={18} color={COLORS.accent.blue} />
+                        <TouchableOpacity style={[styles.viewClubsBtn, { backgroundColor: colors.accent.blue + '15' }]} onPress={handleViewClubs}>
+                            <Text style={[styles.viewClubsBtnText, { color: colors.accent.blue }]}>Ver Clubes</Text>
+                            <Ionicons name="arrow-forward" size={18} color={colors.accent.blue} />
                         </TouchableOpacity>
                     </View>
                 )}
 
                 {/* Información de Contacto */}
-                <View style={styles.infoCard}>
-                    <Text style={styles.sectionTitle}>Información de Contacto</Text>
+                <View style={[styles.infoCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Información de Contacto</Text>
 
                     {customer.email && (
                         <View style={styles.infoRow}>
-                            <View style={styles.infoIcon}>
-                                <Ionicons name="mail" size={20} color={COLORS.accent.blue} />
+                            <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="mail" size={20} color={colors.accent.blue} />
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Email</Text>
-                                <Text style={styles.infoValue}>{customer.email}</Text>
+                                <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Email</Text>
+                                <Text style={[styles.infoValue, { color: colors.text.primary }]}>{customer.email}</Text>
                             </View>
                         </View>
                     )}
 
                     {customer.phone && (
                         <View style={styles.infoRow}>
-                            <View style={styles.infoIcon}>
-                                <Ionicons name="call" size={20} color={COLORS.accent.green} />
+                            <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="call" size={20} color={colors.accent.green} />
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Teléfono</Text>
-                                <Text style={styles.infoValue}>{customer.phone}</Text>
+                                <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Teléfono</Text>
+                                <Text style={[styles.infoValue, { color: colors.text.primary }]}>{customer.phone}</Text>
                             </View>
                         </View>
                     )}
 
                     {customer.identificationNumber && (
                         <View style={styles.infoRow}>
-                            <View style={styles.infoIcon}>
-                                <Ionicons name="card" size={20} color={COLORS.accent.purple} />
+                            <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="card" size={20} color={colors.accent.purple} />
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Documento</Text>
-                                <Text style={styles.infoValue}>{customer.identificationNumber}</Text>
+                                <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Documento</Text>
+                                <Text style={[styles.infoValue, { color: colors.text.primary }]}>{customer.identificationNumber}</Text>
                             </View>
                         </View>
                     )}
 
                     {customer.dateOfBirth && (
                         <View style={styles.infoRow}>
-                            <View style={styles.infoIcon}>
-                                <Ionicons name="calendar" size={20} color={COLORS.accent.orange} />
+                            <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="calendar" size={20} color={colors.accent.orange} />
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Fecha de Nacimiento</Text>
-                                <Text style={styles.infoValue}>{formatDate(customer.dateOfBirth)}</Text>
+                                <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Fecha de Nacimiento</Text>
+                                <Text style={[styles.infoValue, { color: colors.text.primary }]}>{formatDate(customer.dateOfBirth)}</Text>
                             </View>
                         </View>
                     )}
@@ -295,29 +306,29 @@ export default function CustomerDetailScreen() {
 
                 {/* Dirección */}
                 {(customer.address || customer.city || customer.state) && (
-                    <View style={styles.infoCard}>
-                        <Text style={styles.sectionTitle}>Dirección</Text>
+                    <View style={[styles.infoCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                        <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Dirección</Text>
 
                         {customer.address && (
                             <View style={styles.infoRow}>
-                                <View style={styles.infoIcon}>
-                                    <Ionicons name="location" size={20} color={COLORS.accent.blue} />
+                                <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                    <Ionicons name="location" size={20} color={colors.accent.blue} />
                                 </View>
                                 <View style={styles.infoContent}>
-                                    <Text style={styles.infoLabel}>Dirección</Text>
-                                    <Text style={styles.infoValue}>{customer.address}</Text>
+                                    <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Dirección</Text>
+                                    <Text style={[styles.infoValue, { color: colors.text.primary }]}>{customer.address}</Text>
                                 </View>
                             </View>
                         )}
 
                         {(customer.city || customer.state || customer.country) && (
                             <View style={styles.infoRow}>
-                                <View style={styles.infoIcon}>
-                                    <Ionicons name="business" size={20} color={COLORS.accent.green} />
+                                <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                    <Ionicons name="business" size={20} color={colors.accent.green} />
                                 </View>
                                 <View style={styles.infoContent}>
-                                    <Text style={styles.infoLabel}>Ubicación</Text>
-                                    <Text style={styles.infoValue}>
+                                    <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Ubicación</Text>
+                                    <Text style={[styles.infoValue, { color: colors.text.primary }]}>
                                         {[customer.city, customer.state, customer.country]
                                             .filter(Boolean)
                                             .join(', ')}
@@ -329,39 +340,39 @@ export default function CustomerDetailScreen() {
                 )}
 
                 {/* Información Adicional */}
-                <View style={styles.infoCard}>
-                    <Text style={styles.sectionTitle}>Información Adicional</Text>
+                <View style={[styles.infoCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Información Adicional</Text>
 
                     <View style={styles.infoRow}>
-                        <View style={styles.infoIcon}>
-                            <Ionicons name="calendar-outline" size={20} color={COLORS.text.secondary} />
+                        <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                            <Ionicons name="calendar-outline" size={20} color={colors.text.secondary} />
                         </View>
                         <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>Fecha de Registro</Text>
-                            <Text style={styles.infoValue}>{formatDate(customer.registrationDate)}</Text>
+                            <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Fecha de Registro</Text>
+                            <Text style={[styles.infoValue, { color: colors.text.primary }]}>{formatDate(customer.registrationDate)}</Text>
                         </View>
                     </View>
 
                     {customer.systemCode && (
                         <View style={styles.infoRow}>
-                            <View style={styles.infoIcon}>
-                                <Ionicons name="code-outline" size={20} color={COLORS.text.secondary} />
+                            <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="code-outline" size={20} color={colors.text.secondary} />
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Código de Sistema</Text>
-                                <Text style={styles.infoValue}>{customer.systemCode}</Text>
+                                <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Código de Sistema</Text>
+                                <Text style={[styles.infoValue, { color: colors.text.primary }]}>{customer.systemCode}</Text>
                             </View>
                         </View>
                     )}
 
                     {customer.notes && (
                         <View style={styles.infoRow}>
-                            <View style={styles.infoIcon}>
-                                <Ionicons name="document-text-outline" size={20} color={COLORS.text.secondary} />
+                            <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
+                                <Ionicons name="document-text-outline" size={20} color={colors.text.secondary} />
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Notas</Text>
-                                <Text style={styles.infoValue}>{customer.notes}</Text>
+                                <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Notas</Text>
+                                <Text style={[styles.infoValue, { color: colors.text.primary }]}>{customer.notes}</Text>
                             </View>
                         </View>
                     )}
@@ -376,7 +387,6 @@ export default function CustomerDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bg.primary,
     },
 
     // Header
@@ -387,9 +397,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 56,
         paddingBottom: 16,
-        backgroundColor: COLORS.bg.card,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border.default,
     },
     backBtn: {
         width: 40,
@@ -400,7 +408,6 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: COLORS.text.primary,
         flex: 1,
         marginLeft: 8,
     },
@@ -419,17 +426,14 @@ const styles = StyleSheet.create({
 
     // Profile Card
     profileCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 20,
         padding: 20,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
     },
     name: {
         fontSize: 22,
         fontWeight: '700',
-        color: COLORS.text.primary,
         marginBottom: 14,
     },
     badgesRow: {
@@ -461,20 +465,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 10,
         paddingVertical: 6,
-        backgroundColor: COLORS.accent.purple + '15',
         borderRadius: 12,
         gap: 4,
     },
     tierText: {
         fontSize: 12,
         fontWeight: '600',
-        color: COLORS.accent.purple,
     },
     quickInfoGrid: {
         gap: 10,
         paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: COLORS.border.default,
     },
     quickInfoItem: {
         flexDirection: 'row',
@@ -484,27 +485,22 @@ const styles = StyleSheet.create({
     quickInfoLabel: {
         fontSize: 13,
         fontWeight: '500',
-        color: COLORS.text.secondary,
     },
     quickInfoValue: {
         fontSize: 13,
-        color: COLORS.text.primary,
         flex: 1,
     },
 
     // Stats Card
     statsCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: '700',
-        color: COLORS.text.primary,
         marginBottom: 16,
     },
     statsGrid: {
@@ -518,7 +514,6 @@ const styles = StyleSheet.create({
         minWidth: '45%',
         alignItems: 'center',
         padding: 16,
-        backgroundColor: COLORS.bg.elevated,
         borderRadius: 12,
     },
     statIcon: {
@@ -532,12 +527,10 @@ const styles = StyleSheet.create({
     statValue: {
         fontSize: 18,
         fontWeight: '700',
-        color: COLORS.text.primary,
         marginBottom: 4,
     },
     statLabel: {
         fontSize: 12,
-        color: COLORS.text.secondary,
         textAlign: 'center',
     },
     viewClubsBtn: {
@@ -545,24 +538,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 14,
-        backgroundColor: COLORS.accent.blue + '15',
         borderRadius: 12,
         gap: 8,
     },
     viewClubsBtnText: {
         fontSize: 15,
         fontWeight: '600',
-        color: COLORS.accent.blue,
     },
 
     // Info Card
     infoCard: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
     },
     infoRow: {
         flexDirection: 'row',
@@ -574,7 +563,6 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 10,
-        backgroundColor: COLORS.bg.elevated,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -583,13 +571,11 @@ const styles = StyleSheet.create({
     },
     infoLabel: {
         fontSize: 12,
-        color: COLORS.text.secondary,
         marginBottom: 4,
     },
     infoValue: {
         fontSize: 15,
         fontWeight: '500',
-        color: COLORS.text.primary,
     },
 
     // Loading
@@ -597,12 +583,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.primary,
     },
     loadingText: {
         marginTop: 12,
         fontSize: 15,
-        color: COLORS.text.secondary,
     },
 
     // Error
@@ -610,31 +594,26 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.primary,
         padding: 40,
     },
     errorTitle: {
         fontSize: 22,
         fontWeight: '700',
-        color: COLORS.text.primary,
         marginTop: 16,
         marginBottom: 8,
     },
     errorMessage: {
         fontSize: 15,
-        color: COLORS.text.secondary,
         textAlign: 'center',
         marginBottom: 24,
     },
     backButton: {
         paddingHorizontal: 32,
         paddingVertical: 12,
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 12,
     },
     backButtonText: {
         fontSize: 15,
         fontWeight: '600',
-        color: COLORS.white,
     },
 });

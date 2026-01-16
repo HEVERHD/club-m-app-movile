@@ -4,11 +4,12 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { useDashboardStore } from '../../src/stores/dashboard-store';
 import { EnvironmentSelector } from '../../src/components/settings/EnvironmentSelector';
+import { ThemeSelector } from '../../src/components/ui/ThemeSelector';
 import { clearClubsCache } from '../../src/api/clubs.api';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
@@ -16,6 +17,7 @@ import { useAlert } from '../../src/hooks/useAlert';
 export default function ProfileScreen() {
     const alert = useAlert();
     const queryClient = useQueryClient();
+    const { colors } = useTheme();
     const { environment } = useSettingsStore();
     const { user, tenantName, logout } = useAuthStore();
     const resetDashboard = useDashboardStore((state) => state.fetchDashboardData);
@@ -86,40 +88,45 @@ export default function ProfileScreen() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView style={[styles.container, { backgroundColor: colors.bg.primary }]} showsVerticalScrollIndicator={false}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Perfil</Text>
-                <Text style={styles.headerSubtitle}>Configuración y preferencias</Text>
+                <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Perfil</Text>
+                <Text style={[styles.headerSubtitle, { color: colors.text.secondary }]}>Configuración y preferencias</Text>
             </View>
 
             {/* User Info Card */}
-            <View style={styles.userCard}>
-                <View style={styles.avatar}>
+            <View style={[styles.userCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                <View style={[styles.avatar, { backgroundColor: colors.accent.blue }]}>
                     <Text style={styles.avatarText}>{getInitials(user?.name || 'Usuario')}</Text>
                 </View>
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{user?.name || 'Usuario'}</Text>
-                    <Text style={styles.userEmail}>{user?.email || 'sin email'}</Text>
+                    <Text style={[styles.userName, { color: colors.text.primary }]}>{user?.name || 'Usuario'}</Text>
+                    <Text style={[styles.userEmail, { color: colors.text.secondary }]}>{user?.email || 'sin email'}</Text>
                     {tenantName && (
-                        <View style={styles.tenantBadge}>
-                            <Ionicons name="business" size={12} color={COLORS.accent.cyan} />
-                            <Text style={styles.tenantText}>{tenantName}</Text>
+                        <View style={[styles.tenantBadge, { backgroundColor: colors.accent.cyan + '20' }]}>
+                            <Ionicons name="business" size={12} color={colors.accent.cyan} />
+                            <Text style={[styles.tenantText, { color: colors.accent.cyan }]}>{tenantName}</Text>
                         </View>
                     )}
                 </View>
-                <TouchableOpacity style={styles.editBtn}>
-                    <Ionicons name="pencil" size={18} color={COLORS.accent.blue} />
+                <TouchableOpacity style={[styles.editBtn, { backgroundColor: colors.bg.elevated }]}>
+                    <Ionicons name="pencil" size={18} color={colors.accent.blue} />
                 </TouchableOpacity>
+            </View>
+
+            {/* Theme Selector */}
+            <View style={styles.section}>
+                <ThemeSelector />
             </View>
 
             {/* Environment Selector */}
             <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <Ionicons name="settings-outline" size={20} color={COLORS.text.muted} />
-                    <Text style={styles.sectionTitle}>Configuración de Desarrollo</Text>
+                <View style={[styles.sectionHeader, { borderColor: colors.border.default }]}>
+                    <Ionicons name="settings-outline" size={20} color={colors.text.muted} />
+                    <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Configuración de Desarrollo</Text>
                 </View>
-                <View style={styles.sectionContent}>
+                <View style={[styles.sectionContent, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                     <EnvironmentSelector />
                 </View>
             </View>
@@ -127,16 +134,16 @@ export default function ProfileScreen() {
             {/* App Info */}
             <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                    <Ionicons name="information-circle-outline" size={20} color={COLORS.text.muted} />
-                    <Text style={styles.sectionTitle}>Información de la App</Text>
+                    <Ionicons name="information-circle-outline" size={20} color={colors.text.muted} />
+                    <Text style={[styles.sectionTitle, { color: colors.text.muted }]}>Información de la App</Text>
                 </View>
-                <View style={styles.sectionContent}>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Versión</Text>
-                        <Text style={styles.infoValue}>1.0.0</Text>
+                <View style={[styles.sectionContent, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    <View style={[styles.infoRow, { borderBottomColor: colors.border.default }]}>
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Versión</Text>
+                        <Text style={[styles.infoValue, { color: colors.text.primary }]}>1.0.0</Text>
                     </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Entorno</Text>
+                    <View style={[styles.infoRow, { borderBottomColor: colors.border.default }]}>
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Entorno</Text>
                         <View style={[styles.envBadge, { backgroundColor: getEnvColor(environment) + '20' }]}>
                             <Text style={[styles.envBadgeText, { color: getEnvColor(environment) }]}>
                                 {environment.toUpperCase()}
@@ -144,8 +151,8 @@ export default function ProfileScreen() {
                         </View>
                     </View>
                     <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-                        <Text style={styles.infoLabel}>Build</Text>
-                        <Text style={styles.infoValue}>{__DEV__ ? 'Development' : 'Production'}</Text>
+                        <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Build</Text>
+                        <Text style={[styles.infoValue, { color: colors.text.primary }]}>{__DEV__ ? 'Development' : 'Production'}</Text>
                     </View>
                 </View>
             </View>
@@ -153,59 +160,59 @@ export default function ProfileScreen() {
             {/* Quick Actions */}
             <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                    <Ionicons name="flash-outline" size={20} color={COLORS.text.muted} />
-                    <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
+                    <Ionicons name="flash-outline" size={20} color={colors.text.muted} />
+                    <Text style={[styles.sectionTitle, { color: colors.text.muted }]}>Acciones Rápidas</Text>
                 </View>
-                <View style={styles.sectionContent}>
+                <View style={[styles.sectionContent, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                     <TouchableOpacity
-                        style={styles.actionBtn}
+                        style={[styles.actionBtn, { borderBottomColor: colors.border.default }]}
                         onPress={handleSyncData}
                         disabled={isSyncing}
                     >
-                        <View style={styles.actionIcon}>
+                        <View style={[styles.actionIcon, { backgroundColor: colors.status.infoBg }]}>
                             {isSyncing ? (
-                                <ActivityIndicator size="small" color={COLORS.accent.blue} />
+                                <ActivityIndicator size="small" color={colors.accent.blue} />
                             ) : (
-                                <Ionicons name="refresh" size={20} color={COLORS.accent.blue} />
+                                <Ionicons name="refresh" size={20} color={colors.accent.blue} />
                             )}
                         </View>
-                        <Text style={styles.actionText}>
+                        <Text style={[styles.actionText, { color: colors.text.primary }]}>
                             {isSyncing ? 'Sincronizando...' : 'Sincronizar Datos'}
                         </Text>
-                        <Ionicons name="chevron-forward" size={18} color={COLORS.text.muted} />
+                        <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.actionBtn}
+                        style={[styles.actionBtn, { borderBottomColor: colors.border.default }]}
                         onPress={handleClearCache}
                         disabled={isClearing}
                     >
-                        <View style={[styles.actionIcon, { backgroundColor: COLORS.status.warningBg }]}>
+                        <View style={[styles.actionIcon, { backgroundColor: colors.status.warningBg }]}>
                             {isClearing ? (
-                                <ActivityIndicator size="small" color={COLORS.accent.orange} />
+                                <ActivityIndicator size="small" color={colors.accent.orange} />
                             ) : (
-                                <Ionicons name="trash-outline" size={20} color={COLORS.accent.orange} />
+                                <Ionicons name="trash-outline" size={20} color={colors.accent.orange} />
                             )}
                         </View>
-                        <Text style={styles.actionText}>
+                        <Text style={[styles.actionText, { color: colors.text.primary }]}>
                             {isClearing ? 'Limpiando...' : 'Limpiar Cache'}
                         </Text>
-                        <Ionicons name="chevron-forward" size={18} color={COLORS.text.muted} />
+                        <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={[styles.actionBtn, styles.logoutBtn]} onPress={handleLogout}>
-                        <View style={[styles.actionIcon, { backgroundColor: COLORS.status.errorBg }]}>
-                            <Ionicons name="log-out-outline" size={20} color={COLORS.status.error} />
+                        <View style={[styles.actionIcon, { backgroundColor: colors.status.errorBg }]}>
+                            <Ionicons name="log-out-outline" size={20} color={colors.status.error} />
                         </View>
-                        <Text style={[styles.actionText, { color: COLORS.status.error }]}>Cerrar Sesión</Text>
-                        <Ionicons name="chevron-forward" size={18} color={COLORS.status.error} />
+                        <Text style={[styles.actionText, { color: colors.status.error }]}>Cerrar Sesión</Text>
+                        <Ionicons name="chevron-forward" size={18} color={colors.status.error} />
                     </TouchableOpacity>
                 </View>
             </View>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Club de Mercancías © {currentYear}</Text>
-                <Text style={styles.footerText}>Powered by Aludra</Text>
+                <Text style={[styles.footerText, { color: colors.text.muted }]}>Club de Mercancías © {currentYear}</Text>
+                <Text style={[styles.footerText, { color: colors.text.muted }]}>Powered by Aludra</Text>
             </View>
             <CustomAlert
                 visible={alert.visible}
@@ -229,31 +236,29 @@ const getEnvColor = (env: string) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.bg.primary },
+    container: { flex: 1 },
 
     header: { paddingHorizontal: 20, paddingTop: 56, paddingBottom: 20 },
-    headerTitle: { fontSize: 24, fontWeight: '700', color: COLORS.text.primary },
-    headerSubtitle: { fontSize: 13, color: COLORS.text.secondary, marginTop: 4 },
+    headerTitle: { fontSize: 24, fontWeight: '700' },
+    headerSubtitle: { fontSize: 13, marginTop: 4 },
 
     userCard: {
         flexDirection: 'row', alignItems: 'center',
         marginHorizontal: 20, padding: 16,
-        backgroundColor: COLORS.bg.card, borderRadius: 16,
-        borderWidth: 1, borderColor: COLORS.border.default,
+        borderRadius: 16, borderWidth: 1,
     },
     avatar: {
         width: 56, height: 56, borderRadius: 28,
-        backgroundColor: COLORS.accent.blue,
         justifyContent: 'center', alignItems: 'center',
     },
     avatarText: {
         fontSize: 18,
         fontWeight: '700',
-        color: COLORS.white,
+        color: '#ffffff',
     },
     userInfo: { flex: 1, marginLeft: 14 },
-    userName: { fontSize: 17, fontWeight: '600', color: COLORS.text.primary },
-    userEmail: { fontSize: 13, color: COLORS.text.muted, marginTop: 2 },
+    userName: { fontSize: 17, fontWeight: '600' },
+    userEmail: { fontSize: 13, marginTop: 2 },
     tenantBadge: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -261,54 +266,49 @@ const styles = StyleSheet.create({
         marginTop: 6,
         paddingHorizontal: 8,
         paddingVertical: 4,
-        backgroundColor: 'rgba(6, 182, 212, 0.1)',
         borderRadius: 6,
         alignSelf: 'flex-start',
     },
     tenantText: {
         fontSize: 11,
         fontWeight: '600',
-        color: COLORS.accent.cyan,
     },
     editBtn: {
         width: 36, height: 36, borderRadius: 10,
-        backgroundColor: COLORS.status.infoBg,
         justifyContent: 'center', alignItems: 'center',
     },
 
-    section: { marginTop: 24 },
+    section: { marginTop: 24, marginHorizontal: 20 },
     sectionHeader: {
         flexDirection: 'row', alignItems: 'center', gap: 8,
-        paddingHorizontal: 20, marginBottom: 12,
+        marginBottom: 12,
     },
-    sectionTitle: { fontSize: 13, fontWeight: '600', color: COLORS.text.muted, textTransform: 'uppercase' },
+    sectionTitle: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase' },
     sectionContent: {
-        marginHorizontal: 20, backgroundColor: COLORS.bg.card,
-        borderRadius: 16, borderWidth: 1, borderColor: COLORS.border.default,
+        borderRadius: 16, borderWidth: 1,
         overflow: 'hidden',
     },
 
     infoRow: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        padding: 16, borderBottomWidth: 1, borderBottomColor: COLORS.border.default,
+        padding: 16, borderBottomWidth: 1,
     },
-    infoLabel: { fontSize: 15, color: COLORS.text.secondary },
-    infoValue: { fontSize: 15, color: COLORS.text.primary, fontWeight: '500' },
+    infoLabel: { fontSize: 15 },
+    infoValue: { fontSize: 15, fontWeight: '500' },
     envBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
     envBadgeText: { fontSize: 12, fontWeight: '700' },
 
     actionBtn: {
         flexDirection: 'row', alignItems: 'center', padding: 16,
-        borderBottomWidth: 1, borderBottomColor: COLORS.border.default,
+        borderBottomWidth: 1,
     },
     actionIcon: {
         width: 36, height: 36, borderRadius: 10,
-        backgroundColor: COLORS.status.infoBg,
         justifyContent: 'center', alignItems: 'center', marginRight: 12,
     },
-    actionText: { flex: 1, fontSize: 15, color: COLORS.text.primary },
+    actionText: { flex: 1, fontSize: 15 },
     logoutBtn: { borderBottomWidth: 0 },
 
     footer: { alignItems: 'center', paddingVertical: 32, paddingBottom: 100 },
-    footerText: { fontSize: 12, color: COLORS.text.muted },
+    footerText: { fontSize: 12 },
 });

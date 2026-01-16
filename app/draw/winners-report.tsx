@@ -12,13 +12,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { WebView } from 'react-native-webview';
-import { COLORS } from '../../src/constants/colors';
+import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 import { drawsApi } from '../../src/api/draws.api';
 
 export default function WinnersReportScreen() {
     const router = useRouter();
+    const { colors, isDark } = useTheme();
     const alert = useAlert();
 
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -112,7 +113,7 @@ export default function WinnersReportScreen() {
                 html, body {
                     width: 100%;
                     height: 100%;
-                    background-color: #242832;
+                    background-color: ${isDark ? '#242832' : '#f5f5f5'};
                     overflow-x: hidden;
                     overflow-y: auto;
                 }
@@ -134,7 +135,7 @@ export default function WinnersReportScreen() {
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    color: #94a3b8;
+                    color: ${isDark ? '#94a3b8' : '#64748b'};
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     font-size: 16px;
                     text-align: center;
@@ -142,7 +143,7 @@ export default function WinnersReportScreen() {
                 #loading .spinner {
                     width: 40px;
                     height: 40px;
-                    border: 3px solid #3a4150;
+                    border: 3px solid ${isDark ? '#3a4150' : '#e2e8f0'};
                     border-top-color: #3b82f6;
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
@@ -263,25 +264,25 @@ export default function WinnersReportScreen() {
     `;
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                    <Ionicons name="chevron-back" size={24} color={COLORS.text.primary} />
+            <View style={[styles.header, { backgroundColor: colors.bg.card, borderBottomColor: colors.border.default }]}>
+                <TouchableOpacity style={[styles.backBtn, { backgroundColor: colors.bg.elevated }]} onPress={handleBack}>
+                    <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
                 </TouchableOpacity>
                 <View style={styles.headerCenter}>
-                    <Text style={styles.headerTitle}>
+                    <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
                         {pdfBase64 ? 'Reporte de Ganadores' : 'Seleccionar Fecha'}
                     </Text>
                     {pdfBase64 && (
-                        <Text style={styles.headerSubtitle}>
+                        <Text style={[styles.headerSubtitle, { color: colors.text.secondary }]}>
                             {formatShortDate(selectedDate)}
                         </Text>
                     )}
                 </View>
                 {pdfBase64 ? (
-                    <TouchableOpacity style={styles.shareBtn} onPress={handleShareReport}>
-                        <Ionicons name="share-outline" size={24} color={COLORS.accent.blue} />
+                    <TouchableOpacity style={[styles.shareBtn, { backgroundColor: colors.bg.elevated }]} onPress={handleShareReport}>
+                        <Ionicons name="share-outline" size={24} color={colors.accent.blue} />
                     </TouchableOpacity>
                 ) : (
                     <View style={{ width: 40 }} />
@@ -292,26 +293,26 @@ export default function WinnersReportScreen() {
             {!pdfBase64 ? (
                 // Date Selector View
                 <View style={styles.selectorContainer}>
-                    <View style={styles.card}>
-                        <View style={styles.iconContainer}>
-                            <Ionicons name="trophy" size={48} color={COLORS.accent.orange} />
+                    <View style={[styles.card, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                        <View style={[styles.iconContainer, { backgroundColor: colors.accent.orange + '25' }]}>
+                            <Ionicons name="trophy" size={48} color={colors.accent.orange} />
                         </View>
 
-                        <Text style={styles.title}>Ganadores de Club de Mercancía</Text>
-                        <Text style={styles.subtitle}>
+                        <Text style={[styles.title, { color: colors.text.primary }]}>Ganadores de Club de Mercancía</Text>
+                        <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
                             Selecciona la fecha del sorteo para ver el reporte de ganadores
                         </Text>
 
                         {/* Date Picker Button */}
                         <TouchableOpacity
-                            style={styles.dateButton}
+                            style={[styles.dateButton, { backgroundColor: colors.bg.elevated }]}
                             onPress={() => setShowDatePicker(true)}
                         >
-                            <Ionicons name="calendar" size={20} color={COLORS.accent.blue} />
-                            <Text style={styles.dateButtonText}>
+                            <Ionicons name="calendar" size={20} color={colors.accent.blue} />
+                            <Text style={[styles.dateButtonText, { color: colors.text.primary }]}>
                                 {formatDate(selectedDate)}
                             </Text>
-                            <Ionicons name="chevron-down" size={20} color={COLORS.text.secondary} />
+                            <Ionicons name="chevron-down" size={20} color={colors.text.secondary} />
                         </TouchableOpacity>
 
                         {/* Date Picker Modal */}
@@ -327,36 +328,36 @@ export default function WinnersReportScreen() {
 
                         {/* Download Button */}
                         <TouchableOpacity
-                            style={[styles.downloadButton, isLoading && styles.downloadButtonDisabled]}
+                            style={[styles.downloadButton, { backgroundColor: colors.accent.blue }, isLoading && styles.downloadButtonDisabled]}
                             onPress={handleDownloadReport}
                             disabled={isLoading}
                         >
                             {isLoading ? (
                                 <>
-                                    <ActivityIndicator size="small" color={COLORS.white} />
-                                    <Text style={styles.downloadButtonText}>Descargando...</Text>
+                                    <ActivityIndicator size="small" color={colors.white} />
+                                    <Text style={[styles.downloadButtonText, { color: colors.white }]}>Descargando...</Text>
                                 </>
                             ) : (
                                 <>
-                                    <Ionicons name="document-text" size={20} color={COLORS.white} />
-                                    <Text style={styles.downloadButtonText}>Ver Reporte</Text>
+                                    <Ionicons name="document-text" size={20} color={colors.white} />
+                                    <Text style={[styles.downloadButtonText, { color: colors.white }]}>Ver Reporte</Text>
                                 </>
                             )}
                         </TouchableOpacity>
 
                         {/* Error Message */}
                         {error && (
-                            <View style={styles.errorContainer}>
-                                <Ionicons name="alert-circle" size={16} color={COLORS.status.error} />
-                                <Text style={styles.errorText}>{error}</Text>
+                            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+                                <Ionicons name="alert-circle" size={16} color={colors.status.error} />
+                                <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>
                             </View>
                         )}
                     </View>
 
                     {/* Info Card */}
-                    <View style={styles.infoCard}>
-                        <Ionicons name="information-circle" size={20} color={COLORS.accent.blue} />
-                        <Text style={styles.infoText}>
+                    <View style={[styles.infoCard, { backgroundColor: colors.status.infoBg }]}>
+                        <Ionicons name="information-circle" size={20} color={colors.accent.blue} />
+                        <Text style={[styles.infoText, { color: colors.text.secondary }]}>
                             El reporte muestra todos los ganadores del sorteo de la fecha seleccionada,
                             incluyendo número de contrato, cliente y premio.
                         </Text>
@@ -367,7 +368,7 @@ export default function WinnersReportScreen() {
                 <View style={styles.pdfContainer}>
                     <WebView
                         source={{ html: getPdfHtml(pdfBase64) }}
-                        style={styles.webview}
+                        style={[styles.webview, { backgroundColor: colors.bg.secondary }]}
                         originWhitelist={['*']}
                         javaScriptEnabled={true}
                         domStorageEnabled={true}
@@ -378,9 +379,9 @@ export default function WinnersReportScreen() {
                         allowUniversalAccessFromFileURLs={true}
                         mixedContentMode="always"
                         renderLoading={() => (
-                            <View style={styles.loadingOverlay}>
-                                <ActivityIndicator size="large" color={COLORS.accent.blue} />
-                                <Text style={styles.loadingText}>Cargando PDF...</Text>
+                            <View style={[styles.loadingOverlay, { backgroundColor: colors.bg.primary }]}>
+                                <ActivityIndicator size="large" color={colors.accent.blue} />
+                                <Text style={[styles.loadingText, { color: colors.text.secondary }]}>Cargando PDF...</Text>
                             </View>
                         )}
                         onError={(syntheticEvent) => {
@@ -390,25 +391,25 @@ export default function WinnersReportScreen() {
                     />
 
                     {/* Bottom Actions */}
-                    <View style={styles.bottomActions}>
+                    <View style={[styles.bottomActions, { backgroundColor: colors.bg.card, borderTopColor: colors.border.default }]}>
                         <TouchableOpacity
-                            style={styles.actionButton}
+                            style={[styles.actionButton, { backgroundColor: colors.accent.blue }]}
                             onPress={handleShareReport}
                         >
-                            <Ionicons name="share-outline" size={20} color={COLORS.white} />
-                            <Text style={styles.actionButtonText}>Compartir</Text>
+                            <Ionicons name="share-outline" size={20} color={colors.white} />
+                            <Text style={[styles.actionButtonText, { color: colors.white }]}>Compartir</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.actionButton, styles.actionButtonSecondary]}
+                            style={[styles.actionButton, styles.actionButtonSecondary, { borderColor: colors.accent.blue }]}
                             onPress={() => {
                                 setPdfBase64(null);
                                 setPdfUri(null);
                                 setError(null);
                             }}
                         >
-                            <Ionicons name="calendar-outline" size={20} color={COLORS.accent.blue} />
-                            <Text style={[styles.actionButtonText, styles.actionButtonTextSecondary]}>
+                            <Ionicons name="calendar-outline" size={20} color={colors.accent.blue} />
+                            <Text style={[styles.actionButtonText, { color: colors.accent.blue }]}>
                                 Otra Fecha
                             </Text>
                         </TouchableOpacity>
@@ -432,7 +433,6 @@ export default function WinnersReportScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bg.primary,
     },
 
     // Header
@@ -443,9 +443,7 @@ const styles = StyleSheet.create({
         paddingTop: 56,
         paddingHorizontal: 20,
         paddingBottom: 12,
-        backgroundColor: COLORS.bg.card,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border.default,
     },
     headerCenter: {
         flex: 1,
@@ -455,7 +453,6 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 12,
-        backgroundColor: COLORS.bg.elevated,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -463,18 +460,15 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 12,
-        backgroundColor: COLORS.bg.elevated,
         justifyContent: 'center',
         alignItems: 'center',
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: COLORS.text.primary,
     },
     headerSubtitle: {
         fontSize: 12,
-        color: COLORS.text.secondary,
         marginTop: 2,
     },
 
@@ -487,18 +481,15 @@ const styles = StyleSheet.create({
 
     // Card
     card: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 20,
         padding: 24,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: COLORS.border.default,
     },
     iconContainer: {
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: 'rgba(245, 158, 11, 0.15)',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 20,
@@ -506,13 +497,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontWeight: '700',
-        color: COLORS.text.primary,
         textAlign: 'center',
         marginBottom: 8,
     },
     subtitle: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         textAlign: 'center',
         marginBottom: 24,
         lineHeight: 20,
@@ -523,7 +512,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        backgroundColor: COLORS.bg.elevated,
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -533,7 +521,6 @@ const styles = StyleSheet.create({
     dateButtonText: {
         flex: 1,
         fontSize: 15,
-        color: COLORS.text.primary,
         textTransform: 'capitalize',
     },
 
@@ -543,7 +530,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 12,
         paddingVertical: 16,
         width: '100%',
@@ -554,7 +540,6 @@ const styles = StyleSheet.create({
     downloadButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: COLORS.white,
     },
 
     // Error
@@ -564,21 +549,18 @@ const styles = StyleSheet.create({
         gap: 8,
         marginTop: 16,
         padding: 12,
-        backgroundColor: COLORS.status.errorBg,
         borderRadius: 8,
         width: '100%',
     },
     errorText: {
         flex: 1,
         fontSize: 13,
-        color: COLORS.status.error,
     },
 
     // Info Card
     infoCard: {
         flexDirection: 'row',
         gap: 12,
-        backgroundColor: COLORS.status.infoBg,
         borderRadius: 12,
         padding: 16,
         marginTop: 20,
@@ -586,7 +568,6 @@ const styles = StyleSheet.create({
     infoText: {
         flex: 1,
         fontSize: 13,
-        color: COLORS.text.secondary,
         lineHeight: 18,
     },
 
@@ -596,7 +577,6 @@ const styles = StyleSheet.create({
     },
     webview: {
         flex: 1,
-        backgroundColor: COLORS.bg.secondary,
     },
     loadingOverlay: {
         position: 'absolute',
@@ -606,12 +586,10 @@ const styles = StyleSheet.create({
         bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.bg.primary,
     },
     loadingText: {
         marginTop: 12,
         fontSize: 14,
-        color: COLORS.text.secondary,
     },
 
     // Bottom Actions
@@ -620,9 +598,7 @@ const styles = StyleSheet.create({
         gap: 12,
         padding: 16,
         paddingBottom: 24,
-        backgroundColor: COLORS.bg.card,
         borderTopWidth: 1,
-        borderTopColor: COLORS.border.default,
     },
     actionButton: {
         flex: 1,
@@ -630,21 +606,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 12,
         paddingVertical: 14,
     },
     actionButtonSecondary: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: COLORS.accent.blue,
     },
     actionButtonText: {
         fontSize: 15,
         fontWeight: '600',
-        color: COLORS.white,
-    },
-    actionButtonTextSecondary: {
-        color: COLORS.accent.blue,
     },
 });

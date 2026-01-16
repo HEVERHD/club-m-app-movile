@@ -9,6 +9,7 @@ import {
     UpdateCustomerDTO,
 } from '../types/clubs';
 import { customersApi } from '../api/customers.api';
+import { setCache, getCache, getCacheForOffline, CACHE_KEYS, CACHE_TTL } from '../utils/storage';
 
 interface CustomerState {
     // Lista de clientes
@@ -95,6 +96,7 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
     fetchCustomers: async (page?: number) => {
         const state = get();
         const currentPage = page || state.page;
+        const cacheKey = `${CACHE_KEYS.CUSTOMERS_LIST}_${currentPage}_${JSON.stringify(state.filters)}`;
 
         set({ isLoading: true, error: null });
 
@@ -105,6 +107,9 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
                 state.pageSize
             );
 
+            // Guardar en cache (async)
+            setCache(cacheKey, result, CACHE_TTL.MEDIUM).catch(console.error);
+
             set({
                 customers: result.data,
                 total: result.total,
@@ -113,10 +118,24 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
                 isLoading: false,
             });
         } catch (error: any) {
-            set({
-                error: error.message || 'Error al cargar clientes',
-                isLoading: false,
-            });
+            // Intentar cargar desde cache offline
+            const cached = await getCacheForOffline<PaginatedCustomers>(cacheKey);
+            if (cached) {
+                console.log('📦 Usando datos de cache offline para clientes');
+                set({
+                    customers: cached.data.data,
+                    total: cached.data.total,
+                    page: cached.data.page,
+                    totalPages: cached.data.totalPages,
+                    isLoading: false,
+                    error: cached.isStale ? 'Mostrando datos guardados (sin conexión)' : null,
+                });
+            } else {
+                set({
+                    error: error.message || 'Error al cargar clientes',
+                    isLoading: false,
+                });
+            }
         }
     },
 
@@ -172,12 +191,27 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
                 isLoadingDetail: false,
             });
 
-            // Cargar estadísticas en segundo plano (opcional)
+            // Cargar estadísticas en segundo plano usando la cédula
             try {
-                console.log('📊 Cargando estadísticas del cliente...');
-                const stats = await customersApi.getCustomerStats(customerId);
-                set({ customerStats: stats });
-                console.log('✅ Estadísticas cargadas');
+                const cedula = customer.identificationNumber;
+                if (cedula) {
+                    console.log('📊 Cargando estadísticas del cliente con cédula:', cedula);
+                    const stats = await customersApi.getCustomerStats(cedula);
+                    set({ customerStats: stats });
+                    console.log('✅ Estadísticas cargadas');
+                } else {
+                    console.warn('⚠️ Cliente sin cédula, no se pueden cargar estadísticas');
+                    set({
+                        customerStats: {
+                            totalClubs: 0,
+                            activeClubs: 0,
+                            totalInvested: 0,
+                            totalBalance: 0,
+                            totalRedeemed: 0,
+                            averageShare: 0,
+                        },
+                    });
+                }
             } catch (statsError: any) {
                 console.warn('⚠️ No se pudieron cargar las estadísticas:', statsError.message);
                 // No bloqueamos el detalle si fallan las estadísticas

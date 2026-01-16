@@ -2,7 +2,7 @@
 import { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../../constants/colors';
+import { useTheme } from '../../contexts/ThemeContext';
 import type { Club } from '../../types/clubs';
 
 interface Props {
@@ -46,17 +46,22 @@ const formatCurrency = (n: number) => {
 };
 
 export const ClubCard = memo(function ClubCard({ club, onPress }: Props) {
+    const { colors } = useTheme();
     const status = getStatusConfig(club.statusName);
     const progressPercent = Math.min((club.weeksPaid / 52) * 100, 100);
 
     return (
-        <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity
+            style={[styles.card, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
                     {/* Contract + Status */}
                     <View style={styles.titleRow}>
-                        <Text style={styles.contract}>#{club.contractNumber}</Text>
+                        <Text style={[styles.contract, { color: colors.text.primary }]}>#{club.contractNumber}</Text>
                         <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
                             <View style={[styles.statusDot, { backgroundColor: status.dotColor }]} />
                             <Text style={[styles.statusText, { color: status.text }]}>
@@ -66,45 +71,45 @@ export const ClubCard = memo(function ClubCard({ club, onPress }: Props) {
                     </View>
 
                     {/* Customer Info */}
-                    <Text style={styles.customerName} numberOfLines={1}>
+                    <Text style={[styles.customerName, { color: colors.text.secondary }]} numberOfLines={1}>
                         {club.customerName}
                     </Text>
-                    <Text style={styles.customerNumber}>{club.customerNumber}</Text>
+                    <Text style={[styles.customerNumber, { color: colors.text.muted }]}>{club.customerNumber}</Text>
                 </View>
 
                 {/* Share */}
-                <View style={styles.shareBox}>
-                    <Text style={styles.shareLabel}>Share</Text>
-                    <Text style={styles.shareValue}>{club.share}</Text>
+                <View style={[styles.shareBox, { backgroundColor: colors.bg.elevated }]}>
+                    <Text style={[styles.shareLabel, { color: colors.text.muted }]}>Share</Text>
+                    <Text style={[styles.shareValue, { color: colors.accent.blue }]}>{club.share}</Text>
                 </View>
             </View>
 
             {/* Progress */}
             <View style={styles.progressSection}>
-                <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
+                <View style={[styles.progressBar, { backgroundColor: colors.border.default }]}>
+                    <View style={[styles.progressFill, { width: `${progressPercent}%`, backgroundColor: colors.accent.blue }]} />
                 </View>
-                <Text style={styles.progressText}>
+                <Text style={[styles.progressText, { color: colors.text.muted }]}>
                     {club.weeksPaid}/{52} semanas
                 </Text>
             </View>
 
             {/* Footer */}
-            <View style={styles.footer}>
+            <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
                 <View>
-                    <Text style={styles.balanceLabel}>Balance</Text>
+                    <Text style={[styles.balanceLabel, { color: colors.text.muted }]}>Balance</Text>
                     <Text style={[
                         styles.balanceValue,
-                        { color: club.balanceAmount < 0 ? COLORS.status.error : COLORS.accent.green }
+                        { color: club.balanceAmount < 0 ? colors.status.error : colors.accent.green }
                     ]}>
                         {formatCurrency(club.balanceAmount)}
                     </Text>
                 </View>
 
                 <TouchableOpacity style={styles.detailBtn} onPress={onPress}>
-                    <Text style={styles.detailBtnText}>Ver detalle</Text>
-                    <View style={styles.detailArrow}>
-                        <Ionicons name="chevron-forward" size={14} color={COLORS.accent.blue} />
+                    <Text style={[styles.detailBtnText, { color: colors.accent.blue }]}>Ver detalle</Text>
+                    <View style={[styles.detailArrow, { backgroundColor: colors.status.infoBg }]}>
+                        <Ionicons name="chevron-forward" size={14} color={colors.accent.blue} />
                     </View>
                 </TouchableOpacity>
             </View>
@@ -114,12 +119,10 @@ export const ClubCard = memo(function ClubCard({ club, onPress }: Props) {
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: COLORS.bg.card,
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: COLORS.border.default,
     },
 
     // Header
@@ -142,7 +145,6 @@ const styles = StyleSheet.create({
     contract: {
         fontSize: 18,
         fontWeight: '700',
-        color: COLORS.text.primary,
     },
 
     // Status Badge
@@ -167,31 +169,26 @@ const styles = StyleSheet.create({
     // Customer
     customerName: {
         fontSize: 14,
-        color: COLORS.text.secondary,
         marginBottom: 2,
     },
     customerNumber: {
         fontSize: 13,
-        color: COLORS.text.muted,
     },
 
     // Share
     shareBox: {
         alignItems: 'center',
-        backgroundColor: COLORS.bg.elevated,
         paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 12,
     },
     shareLabel: {
         fontSize: 11,
-        color: COLORS.text.muted,
         marginBottom: 2,
     },
     shareValue: {
         fontSize: 22,
         fontWeight: '700',
-        color: COLORS.accent.blue,
     },
 
     // Progress
@@ -201,18 +198,15 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: 6,
-        backgroundColor: COLORS.border.default,
         borderRadius: 3,
         overflow: 'hidden',
     },
     progressFill: {
         height: '100%',
-        backgroundColor: COLORS.accent.blue,
         borderRadius: 3,
     },
     progressText: {
         fontSize: 12,
-        color: COLORS.text.muted,
         marginTop: 6,
         textAlign: 'right',
     },
@@ -224,11 +218,9 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: COLORS.border.default,
     },
     balanceLabel: {
         fontSize: 12,
-        color: COLORS.text.muted,
         marginBottom: 2,
     },
     balanceValue: {
@@ -244,14 +236,12 @@ const styles = StyleSheet.create({
     },
     detailBtnText: {
         fontSize: 14,
-        color: COLORS.accent.blue,
         fontWeight: '600',
     },
     detailArrow: {
         width: 24,
         height: 24,
         borderRadius: 8,
-        backgroundColor: COLORS.status.infoBg,
         justifyContent: 'center',
         alignItems: 'center',
     },
