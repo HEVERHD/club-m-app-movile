@@ -148,7 +148,7 @@ export default function DrawDetailScreen() {
     if (isLoading && !selectedDraw) {
         return (
             <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
-                <ActivityIndicator size="large" color={colors.accent.blue} />
+                <ActivityIndicator size="large" color={colors.brand.primary} />
                 <Text style={[styles.loadingText, { color: colors.text.secondary }]}>Cargando sorteo...</Text>
             </View>
         );
@@ -159,7 +159,7 @@ export default function DrawDetailScreen() {
             <View style={[styles.errorContainer, { backgroundColor: colors.bg.primary }]}>
                 <Ionicons name="alert-circle" size={64} color={colors.status.error} />
                 <Text style={[styles.errorTitle, { color: colors.text.primary }]}>Sorteo no encontrado</Text>
-                <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.accent.blue }]} onPress={handleBack}>
+                <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.brand.primary }]} onPress={handleBack}>
                     <Text style={[styles.backButtonText, { color: colors.white }]}>Volver</Text>
                 </TouchableOpacity>
             </View>
@@ -197,7 +197,7 @@ export default function DrawDetailScreen() {
                 <View style={[styles.mainCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                     <View style={styles.mainCardHeader}>
                         <View style={styles.typeContainer}>
-                            <Ionicons name="calendar" size={24} color={colors.accent.blue} />
+                            <Ionicons name="calendar" size={24} color={colors.brand.primary} />
                             <Text style={[styles.clubType, { color: colors.text.primary }]}>{selectedDraw.clubTypeName || 'Club'}</Text>
                         </View>
                         <View
@@ -230,7 +230,7 @@ export default function DrawDetailScreen() {
                     {selectedDraw.status === 'completed' && (
                         <View style={[styles.winningNumberSection, { backgroundColor: colors.status.infoBg }]}>
                             <Text style={[styles.winningNumberLabel, { color: colors.text.secondary }]}>Número Ganador</Text>
-                            <View style={[styles.winningNumberBadge, { backgroundColor: colors.accent.blue }]}>
+                            <View style={[styles.winningNumberBadge, { backgroundColor: colors.brand.primary }]}>
                                 <Text style={[styles.winningNumber, { color: colors.white }]}>{selectedDraw.numberPlayed}</Text>
                             </View>
                         </View>
@@ -261,7 +261,7 @@ export default function DrawDetailScreen() {
                             </View>
 
                             <View style={[styles.statBox, { backgroundColor: colors.bg.elevated }]}>
-                                <Ionicons name="cash" size={24} color={colors.accent.green} />
+                                <Ionicons name="cash" size={24} color={colors.status.success} />
                                 <Text style={[styles.statValue, { color: colors.text.primary }]}>
                                     ${(selectedDraw.totalPrizeAmount || 0).toFixed(2)}
                                 </Text>
@@ -316,7 +316,7 @@ export default function DrawDetailScreen() {
                 {/* Mensaje si no hay ganadores */}
                 {selectedDraw.status === 'completed' && winners.length === 0 && (
                     <View style={[styles.infoCard, { backgroundColor: colors.status.infoBg }]}>
-                        <Ionicons name="information-circle" size={24} color={colors.accent.blue} />
+                        <Ionicons name="information-circle" size={24} color={colors.brand.primary} />
                         <Text style={[styles.infoText, { color: colors.text.secondary }]}>
                             No hay ganadores registrados para este sorteo. Los ganadores se mostrarán
                             cuando estén disponibles en el sistema.

@@ -96,8 +96,8 @@ export function DrawCard({ draw }: DrawCardProps) {
             <View style={styles.content}>
                 {/* Header con tipo de club */}
                 <View style={styles.typeRow}>
-                    <View style={[styles.iconCircle, { backgroundColor: colors.accent.blue + '15' }]}>
-                        <Ionicons name="calendar" size={22} color={colors.accent.blue} />
+                    <View style={[styles.iconCircle, { backgroundColor: colors.brand.primary + '15' }]}>
+                        <Ionicons name="calendar" size={22} color={colors.brand.primary} />
                     </View>
                     <Text style={[styles.clubType, { color: colors.text.primary }]}>
                         {draw.clubTypeName || 'Club'}
@@ -114,9 +114,9 @@ export function DrawCard({ draw }: DrawCardProps) {
 
                 {/* Número ganador - Solo para sorteos completados */}
                 {draw.status === 'completed' && (
-                    <View style={[styles.winningSection, { backgroundColor: colors.accent.blue + '08', borderColor: colors.accent.blue + '20' }]}>
+                    <View style={[styles.winningSection, { backgroundColor: colors.brand.primary + '08', borderColor: colors.brand.primary + '20' }]}>
                         <Text style={[styles.winningLabel, { color: colors.text.secondary }]}>NÚMERO GANADOR</Text>
-                        <View style={[styles.winningBadge, { backgroundColor: colors.accent.blue }]}>
+                        <View style={[styles.winningBadge, { backgroundColor: colors.brand.primary }]}>
                             <Text style={[styles.winningNumber, { color: colors.white }]}>{draw.numberPlayed}</Text>
                         </View>
                     </View>
@@ -138,8 +138,8 @@ export function DrawCard({ draw }: DrawCardProps) {
                         </View>
                         {draw.totalPrizeAmount !== undefined && (
                             <View style={[styles.statItem, { backgroundColor: colors.bg.elevated }]}>
-                                <View style={[styles.statIconCircle, { backgroundColor: colors.accent.green + '15' }]}>
-                                    <Ionicons name="cash" size={18} color={colors.accent.green} />
+                                <View style={[styles.statIconCircle, { backgroundColor: colors.status.success + '15' }]}>
+                                    <Ionicons name="cash" size={18} color={colors.status.success} />
                                 </View>
                                 <View>
                                     <Text style={[styles.statValue, { color: colors.text.primary }]}>${draw.totalPrizeAmount.toFixed(2)}</Text>
@@ -153,8 +153,8 @@ export function DrawCard({ draw }: DrawCardProps) {
 
             {/* Footer con flecha */}
             <View style={styles.footer}>
-                <View style={[styles.arrowCircle, { backgroundColor: colors.accent.blue + '15' }]}>
-                    <Ionicons name="chevron-forward" size={20} color={colors.accent.blue} />
+                <View style={[styles.arrowCircle, { backgroundColor: colors.brand.primary + '15' }]}>
+                    <Ionicons name="chevron-forward" size={20} color={colors.brand.primary} />
                 </View>
             </View>
         </TouchableOpacity>

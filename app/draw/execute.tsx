@@ -136,7 +136,7 @@ export default function ExecuteDrawScreen() {
     if (isLoadingTypes) {
         return (
             <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
-                <ActivityIndicator size="large" color={colors.accent.blue} />
+                <ActivityIndicator size="large" color={colors.brand.primary} />
                 <Text style={[styles.loadingText, { color: colors.text.primary }]}>Cargando tipos de club...</Text>
             </View>
         );
@@ -161,8 +161,8 @@ export default function ExecuteDrawScreen() {
                 {/* Información */}
                 <View style={[styles.infoCard, { backgroundColor: colors.status.infoBg }]}>
                     <View style={styles.infoHeader}>
-                        <Ionicons name="information-circle" size={24} color={colors.accent.blue} />
-                        <Text style={[styles.infoTitle, { color: colors.accent.blue }]}>Importante</Text>
+                        <Ionicons name="information-circle" size={24} color={colors.brand.primary} />
+                        <Text style={[styles.infoTitle, { color: colors.brand.primary }]}>Importante</Text>
                     </View>
                     <Text style={[styles.infoText, { color: colors.text.primary }]}>
                         Ingresa el número ganador del sorteo (0-99). El sistema buscará todos los clubes que tengan ese número de acción asignado.
@@ -188,8 +188,8 @@ export default function ExecuteDrawScreen() {
                                         styles.clubTypeCard,
                                         { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
                                         selectedClubTypeId === type.clubTypeId && {
-                                            borderColor: colors.accent.blue,
-                                            backgroundColor: colors.accent.blue + '10',
+                                            borderColor: colors.brand.primary,
+                                            backgroundColor: colors.brand.primary + '10',
                                         },
                                     ]}
                                     onPress={() => setSelectedClubTypeId(type.clubTypeId)}
@@ -205,8 +205,8 @@ export default function ExecuteDrawScreen() {
                                                 size={24}
                                                 color={
                                                     selectedClubTypeId === type.clubTypeId
-                                                        ? colors.accent.blue
-                                                        : colors.text.tertiary
+                                                        ? colors.brand.primary
+                                                        : colors.text.muted
                                                 }
                                             />
                                         </View>
@@ -222,7 +222,7 @@ export default function ExecuteDrawScreen() {
                                                     <Ionicons
                                                         name="calendar"
                                                         size={14}
-                                                        color={colors.text.tertiary}
+                                                        color={colors.text.muted}
                                                     />
                                                     <Text style={[styles.clubTypeDetailText, { color: colors.text.secondary }]}>
                                                         Día de sorteo: {type.drawDay}
@@ -255,7 +255,7 @@ export default function ExecuteDrawScreen() {
                         </Text>
 
                         <TextInput
-                            style={[styles.numberInput, { backgroundColor: colors.bg.elevated, color: colors.text.primary, borderColor: colors.accent.blue }]}
+                            style={[styles.numberInput, { backgroundColor: colors.bg.elevated, color: colors.text.primary, borderColor: colors.brand.primary }]}
                             placeholder="Ej: 42"
                             placeholderTextColor={colors.text.muted}
                             value={winningNumber}
@@ -298,7 +298,7 @@ export default function ExecuteDrawScreen() {
                 <TouchableOpacity
                     style={[
                         styles.executeButton,
-                        { backgroundColor: colors.accent.blue },
+                        { backgroundColor: colors.brand.primary },
                         (!selectedClubTypeId || isExecuting) && { backgroundColor: colors.text.muted, opacity: 0.6 },
                     ]}
                     onPress={handleExecute}

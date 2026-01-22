@@ -3,13 +3,23 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { loginUser, checkCompany, logout as apiLogout, LoginParams, STORAGE_KEYS } from '../api/client';
 
+export type UserRole = 'admin' | 'operator' | 'analyst' | 'customer';
+
 interface User {
     id: string;
     email: string;
     name: string;
-    role: 'admin' | 'operator' | 'analyst';
+    role: UserRole;
     tenantId: string;
+    // Datos adicionales para clientes
+    customerId?: string;
+    identificationNumber?: string;
 }
+
+// Helper para determinar si es staff (admin/operator/analyst) o cliente
+export const isStaffRole = (role: UserRole): boolean => {
+    return ['admin', 'operator', 'analyst'].includes(role);
+};
 
 interface AuthState {
     user: User | null;
@@ -124,13 +134,32 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             const roles = normalizeRoles(authInfo?.UserRoles || []);
             console.log('🎭 Roles normalizados:', roles);
 
+            // ⚠️ FLAG DE DESARROLLO: Cambiar a true para forzar modo cliente
+            const FORCE_CUSTOMER_MODE = false;
+
             // Determinar rol de la app
-            let role: User['role'] = 'operator';
-            if (roles.some(r => r.toLowerCase().includes('admin'))) {
+            // Si no tiene roles de staff, es un cliente
+            let role: UserRole = 'customer';
+            if (FORCE_CUSTOMER_MODE) {
+                console.log('⚠️ MODO CLIENTE FORZADO (desarrollo)');
+                role = 'customer';
+            } else if (roles.some(r => r.toLowerCase().includes('admin') || r.toLowerCase().includes('super'))) {
                 role = 'admin';
-            } else if (roles.some(r => r.toLowerCase().includes('analyst'))) {
+            } else if (roles.some(r => r.toLowerCase().includes('operator') || r.toLowerCase().includes('operador'))) {
+                role = 'operator';
+            } else if (roles.some(r => r.toLowerCase().includes('analyst') || r.toLowerCase().includes('analista'))) {
                 role = 'analyst';
             }
+            // Si tiene algún rol de staff pero no matchea los anteriores, es operator
+            else if (roles.length > 0 && roles.some(r =>
+                r.toLowerCase().includes('staff') ||
+                r.toLowerCase().includes('employee') ||
+                r.toLowerCase().includes('empleado')
+            )) {
+                role = 'operator';
+            }
+
+            console.log('🎯 Rol determinado:', role);
 
             const user: User = {
                 id: authInfo?.UserId || '',
@@ -138,6 +167,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
                 name: customerInfo?.FullName || authInfo?.UserName || params.email,
                 role,
                 tenantId: String(currentTenantId),
+                // Datos de cliente si aplica
+                customerId: customerInfo?.CustomerId || undefined,
+                identificationNumber: customerInfo?.IdentificationNumber || undefined,
             };
 
             console.log('👤 Usuario final:', user);
@@ -147,6 +179,17 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
                 await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, authInfo.Token);
                 console.log('✅ Token guardado en SecureStore');
             }
+
+            // Guardar datos del usuario para restaurar sesión
+            await SecureStore.setItemAsync(STORAGE_KEYS.USER_DATA, JSON.stringify({
+                userId: user.id,
+                email: user.email,
+                fullName: user.name,
+                role: user.role,
+                customerId: user.customerId,
+                identificationNumber: user.identificationNumber,
+            }));
+            console.log('✅ User data guardado en SecureStore');
 
             set({
                 user,
@@ -215,8 +258,10 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
                             id: parsed.userId || parsed.customerId || '',
                             email: parsed.email || '',
                             name: parsed.fullName || parsed.email || '',
-                            role: 'operator', // Default, puedes mejorarlo
+                            role: parsed.role || 'customer', // Default a customer si no hay rol guardado
                             tenantId: tenantId,
+                            customerId: parsed.customerId,
+                            identificationNumber: parsed.identificationNumber,
                         };
                     } catch (e) {
                         console.error('Error parsing userData:', e);

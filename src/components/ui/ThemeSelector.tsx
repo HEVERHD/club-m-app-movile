@@ -38,7 +38,7 @@ export function ThemeSelector() {
     return (
         <View style={[styles.container, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
             <View style={styles.header}>
-                <Ionicons name="color-palette-outline" size={20} color={colors.accent.blue} />
+                <Ionicons name="color-palette-outline" size={20} color={colors.brand.primary} />
                 <Text style={[styles.title, { color: colors.text.primary }]}>Apariencia</Text>
             </View>
 
@@ -51,14 +51,14 @@ export function ThemeSelector() {
                             style={[
                                 styles.option,
                                 { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                isActive && { borderColor: colors.accent.blue, backgroundColor: colors.accent.blue + '15' },
+                                isActive && { borderColor: colors.brand.primary, backgroundColor: colors.brand.primary + '15' },
                             ]}
                             onPress={() => setMode(option.mode)}
                             activeOpacity={0.7}
                         >
                             <View style={[
                                 styles.iconContainer,
-                                { backgroundColor: isActive ? colors.accent.blue : colors.bg.card },
+                                { backgroundColor: isActive ? colors.brand.primary : colors.bg.card },
                             ]}>
                                 <Ionicons
                                     name={option.icon}
@@ -69,7 +69,7 @@ export function ThemeSelector() {
                             <View style={styles.optionText}>
                                 <Text style={[
                                     styles.optionLabel,
-                                    { color: isActive ? colors.accent.blue : colors.text.primary },
+                                    { color: isActive ? colors.brand.primary : colors.text.primary },
                                 ]}>
                                     {option.label}
                                 </Text>
@@ -78,7 +78,7 @@ export function ThemeSelector() {
                                 </Text>
                             </View>
                             {isActive && (
-                                <Ionicons name="checkmark-circle" size={22} color={colors.accent.blue} />
+                                <Ionicons name="checkmark-circle" size={22} color={colors.brand.primary} />
                             )}
                         </TouchableOpacity>
                     );
@@ -118,7 +118,7 @@ export function ThemeToggleButton() {
             <Ionicons
                 name={getIcon()}
                 size={20}
-                color={mode === 'auto' ? colors.accent.cyan : isDark ? colors.accent.purple : colors.accent.orange}
+                color={mode === 'auto' ? colors.brand.secondary : isDark ? colors.accent.purple : colors.accent.orange}
             />
         </TouchableOpacity>
     );

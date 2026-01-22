@@ -282,7 +282,7 @@ export default function WinnersReportScreen() {
                 </View>
                 {pdfBase64 ? (
                     <TouchableOpacity style={[styles.shareBtn, { backgroundColor: colors.bg.elevated }]} onPress={handleShareReport}>
-                        <Ionicons name="share-outline" size={24} color={colors.accent.blue} />
+                        <Ionicons name="share-outline" size={24} color={colors.brand.primary} />
                     </TouchableOpacity>
                 ) : (
                     <View style={{ width: 40 }} />
@@ -308,7 +308,7 @@ export default function WinnersReportScreen() {
                             style={[styles.dateButton, { backgroundColor: colors.bg.elevated }]}
                             onPress={() => setShowDatePicker(true)}
                         >
-                            <Ionicons name="calendar" size={20} color={colors.accent.blue} />
+                            <Ionicons name="calendar" size={20} color={colors.brand.primary} />
                             <Text style={[styles.dateButtonText, { color: colors.text.primary }]}>
                                 {formatDate(selectedDate)}
                             </Text>
@@ -328,7 +328,7 @@ export default function WinnersReportScreen() {
 
                         {/* Download Button */}
                         <TouchableOpacity
-                            style={[styles.downloadButton, { backgroundColor: colors.accent.blue }, isLoading && styles.downloadButtonDisabled]}
+                            style={[styles.downloadButton, { backgroundColor: colors.brand.primary }, isLoading && styles.downloadButtonDisabled]}
                             onPress={handleDownloadReport}
                             disabled={isLoading}
                         >
@@ -356,7 +356,7 @@ export default function WinnersReportScreen() {
 
                     {/* Info Card */}
                     <View style={[styles.infoCard, { backgroundColor: colors.status.infoBg }]}>
-                        <Ionicons name="information-circle" size={20} color={colors.accent.blue} />
+                        <Ionicons name="information-circle" size={20} color={colors.brand.primary} />
                         <Text style={[styles.infoText, { color: colors.text.secondary }]}>
                             El reporte muestra todos los ganadores del sorteo de la fecha seleccionada,
                             incluyendo número de contrato, cliente y premio.
@@ -380,7 +380,7 @@ export default function WinnersReportScreen() {
                         mixedContentMode="always"
                         renderLoading={() => (
                             <View style={[styles.loadingOverlay, { backgroundColor: colors.bg.primary }]}>
-                                <ActivityIndicator size="large" color={colors.accent.blue} />
+                                <ActivityIndicator size="large" color={colors.brand.primary} />
                                 <Text style={[styles.loadingText, { color: colors.text.secondary }]}>Cargando PDF...</Text>
                             </View>
                         )}
@@ -393,7 +393,7 @@ export default function WinnersReportScreen() {
                     {/* Bottom Actions */}
                     <View style={[styles.bottomActions, { backgroundColor: colors.bg.card, borderTopColor: colors.border.default }]}>
                         <TouchableOpacity
-                            style={[styles.actionButton, { backgroundColor: colors.accent.blue }]}
+                            style={[styles.actionButton, { backgroundColor: colors.brand.primary }]}
                             onPress={handleShareReport}
                         >
                             <Ionicons name="share-outline" size={20} color={colors.white} />
@@ -401,15 +401,15 @@ export default function WinnersReportScreen() {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.actionButton, styles.actionButtonSecondary, { borderColor: colors.accent.blue }]}
+                            style={[styles.actionButton, styles.actionButtonSecondary, { borderColor: colors.brand.primary }]}
                             onPress={() => {
                                 setPdfBase64(null);
                                 setPdfUri(null);
                                 setError(null);
                             }}
                         >
-                            <Ionicons name="calendar-outline" size={20} color={colors.accent.blue} />
-                            <Text style={[styles.actionButtonText, { color: colors.accent.blue }]}>
+                            <Ionicons name="calendar-outline" size={20} color={colors.brand.primary} />
+                            <Text style={[styles.actionButtonText, { color: colors.brand.primary }]}>
                                 Otra Fecha
                             </Text>
                         </TouchableOpacity>

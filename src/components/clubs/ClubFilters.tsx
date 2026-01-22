@@ -31,7 +31,7 @@ export const ClubFilters = memo(function ClubFilters({ filters, onChange }: Prop
 
     const getColor = (colorKey?: string) => {
         switch (colorKey) {
-            case 'green': return colors.accent.green;
+            case 'green': return colors.status.success;
             case 'orange': return colors.accent.orange;
             case 'error': return colors.status.error;
             default: return colors.text.muted;
@@ -54,7 +54,7 @@ export const ClubFilters = memo(function ClubFilters({ filters, onChange }: Prop
                             style={[
                                 styles.chip,
                                 { backgroundColor: colors.bg.card, borderColor: colors.border.default },
-                                isActive && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                isActive && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                             ]}
                             onPress={() => handleStatusPress(opt.key)}
                             activeOpacity={0.7}

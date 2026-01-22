@@ -107,7 +107,7 @@ export default function ClubsScreen() {
                     onPress={handleRefresh}
                     disabled={isFetching}
                 >
-                    <Ionicons name="refresh" size={18} color={isFetching ? colors.text.muted : colors.accent.blue} />
+                    <Ionicons name="refresh" size={18} color={isFetching ? colors.text.muted : colors.brand.primary} />
                 </TouchableOpacity>
             </View>
 
@@ -146,14 +146,14 @@ export default function ClubsScreen() {
                     <RefreshControl
                         refreshing={isFetching && page === 1}
                         onRefresh={handleRefresh}
-                        tintColor={colors.accent.blue}
+                        tintColor={colors.brand.primary}
                     />
                 }
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.3}
                 ListFooterComponent={
                     isFetching && page > 1 ? (
-                        <ActivityIndicator style={styles.footer} color={colors.accent.blue} />
+                        <ActivityIndicator style={styles.footer} color={colors.brand.primary} />
                     ) : null
                 }
                 ListEmptyComponent={
@@ -163,7 +163,7 @@ export default function ClubsScreen() {
                         </View>
                         <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No hay clubes</Text>
                         <Text style={[styles.emptySubtitle, { color: colors.text.muted }]}>Crea tu primer club para comenzar</Text>
-                        <TouchableOpacity style={[styles.emptyBtn, { backgroundColor: colors.accent.blue }]} onPress={() => setShowCreateModal(true)}>
+                        <TouchableOpacity style={[styles.emptyBtn, { backgroundColor: colors.brand.primary }]} onPress={() => setShowCreateModal(true)}>
                             <Ionicons name="add" size={18} color={colors.white} />
                             <Text style={[styles.emptyBtnText, { color: colors.white }]}>Nuevo Club</Text>
                         </TouchableOpacity>
@@ -172,7 +172,7 @@ export default function ClubsScreen() {
             />
 
             {/* FAB */}
-            <TouchableOpacity style={[styles.fab, { backgroundColor: colors.accent.blue, shadowColor: colors.accent.blue }]} onPress={() => setShowCreateModal(true)}>
+            <TouchableOpacity style={[styles.fab, { backgroundColor: colors.brand.primary, shadowColor: colors.brand.primary }]} onPress={() => setShowCreateModal(true)}>
                 <Ionicons name="add" size={26} color={colors.white} />
             </TouchableOpacity>
 

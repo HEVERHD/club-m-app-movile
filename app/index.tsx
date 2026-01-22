@@ -1,10 +1,10 @@
 // app/index.tsx
 import { View, ActivityIndicator } from 'react-native';
 import { Redirect } from 'expo-router';
-import { useAuthStore } from '../src/stores/auth-store';
+import { useAuthStore, isStaffRole } from '../src/stores/auth-store';
 
 export default function Index() {
-    const { isAuthenticated, isLoading } = useAuthStore();
+    const { isAuthenticated, isLoading, user } = useAuthStore();
 
     if (isLoading) {
         return (
@@ -15,7 +15,13 @@ export default function Index() {
     }
 
     if (isAuthenticated) {
-        return <Redirect href="/(tabs)/home" />;
+        // Redirigir según el rol del usuario
+        const isStaff = user?.role ? isStaffRole(user.role) : false;
+        if (isStaff) {
+            return <Redirect href="/(tabs)/home" />;
+        } else {
+            return <Redirect href="/(tabs)/my-home" />;
+        }
     }
 
     return <Redirect href="/(auth)/company" />;

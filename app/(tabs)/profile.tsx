@@ -1,9 +1,12 @@
 // app/(tabs)/profile.tsx
 import { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+    View, Text, ScrollView, TouchableOpacity, StyleSheet,
+    ActivityIndicator, Switch, Modal, TextInput, KeyboardAvoidingView, Platform
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useAuthStore } from '../../src/stores/auth-store';
@@ -13,17 +16,71 @@ import { ThemeSelector } from '../../src/components/ui/ThemeSelector';
 import { clearClubsCache } from '../../src/api/clubs.api';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
+import { useBiometrics, getBiometricIcon, getBiometricLabel } from '../../src/hooks/useBiometrics';
 
 export default function ProfileScreen() {
     const alert = useAlert();
     const queryClient = useQueryClient();
     const { colors } = useTheme();
     const { environment } = useSettingsStore();
-    const { user, tenantName, logout } = useAuthStore();
+    const { user, tenantName, tenantId, logout } = useAuthStore();
     const resetDashboard = useDashboardStore((state) => state.fetchDashboardData);
 
     const [isSyncing, setIsSyncing] = useState(false);
     const [isClearing, setIsClearing] = useState(false);
+
+    // Biometrics
+    const {
+        isAvailable: biometricAvailable,
+        isEnabled: biometricEnabled,
+        biometricType,
+        isLoading: biometricLoading,
+        enableBiometrics,
+        disableBiometrics,
+    } = useBiometrics();
+
+    // Password modal for biometric setup
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordInput, setPasswordInput] = useState('');
+    const [isEnabling, setIsEnabling] = useState(false);
+
+    const handleToggleBiometrics = async (value: boolean) => {
+        if (value) {
+            // Mostrar modal para pedir contraseña
+            setPasswordInput('');
+            setShowPasswordModal(true);
+        } else {
+            try {
+                await disableBiometrics();
+                alert.showSuccess('Desactivado', 'Autenticación biométrica deshabilitada');
+            } catch (error: any) {
+                alert.showError('Error', error.message || 'No se pudo desactivar');
+            }
+        }
+    };
+
+    const handleConfirmBiometricSetup = async () => {
+        if (!passwordInput.trim()) {
+            alert.showError('Error', 'Ingresa tu contraseña');
+            return;
+        }
+
+        setIsEnabling(true);
+        try {
+            await enableBiometrics({
+                email: user?.email || '',
+                password: passwordInput,
+                tenantId: tenantId || 0,
+            });
+            setShowPasswordModal(false);
+            setPasswordInput('');
+            alert.showSuccess('Activado', `${getBiometricLabel(biometricType)} habilitado para iniciar sesión`);
+        } catch (error: any) {
+            alert.showError('Error', error.message || 'No se pudo habilitar');
+        } finally {
+            setIsEnabling(false);
+        }
+    };
 
     const handleLogout = () => {
         alert.showConfirm(
@@ -97,21 +154,21 @@ export default function ProfileScreen() {
 
             {/* User Info Card */}
             <View style={[styles.userCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
-                <View style={[styles.avatar, { backgroundColor: colors.accent.blue }]}>
+                <View style={[styles.avatar, { backgroundColor: colors.brand.primary }]}>
                     <Text style={styles.avatarText}>{getInitials(user?.name || 'Usuario')}</Text>
                 </View>
                 <View style={styles.userInfo}>
                     <Text style={[styles.userName, { color: colors.text.primary }]}>{user?.name || 'Usuario'}</Text>
                     <Text style={[styles.userEmail, { color: colors.text.secondary }]}>{user?.email || 'sin email'}</Text>
                     {tenantName && (
-                        <View style={[styles.tenantBadge, { backgroundColor: colors.accent.cyan + '20' }]}>
-                            <Ionicons name="business" size={12} color={colors.accent.cyan} />
-                            <Text style={[styles.tenantText, { color: colors.accent.cyan }]}>{tenantName}</Text>
+                        <View style={[styles.tenantBadge, { backgroundColor: colors.brand.secondary + '20' }]}>
+                            <Ionicons name="business" size={12} color={colors.brand.secondary} />
+                            <Text style={[styles.tenantText, { color: colors.brand.secondary }]}>{tenantName}</Text>
                         </View>
                     )}
                 </View>
                 <TouchableOpacity style={[styles.editBtn, { backgroundColor: colors.bg.elevated }]}>
-                    <Ionicons name="pencil" size={18} color={colors.accent.blue} />
+                    <Ionicons name="pencil" size={18} color={colors.brand.primary} />
                 </TouchableOpacity>
             </View>
 
@@ -157,6 +214,45 @@ export default function ProfileScreen() {
                 </View>
             </View>
 
+            {/* Security Section */}
+            {biometricAvailable && (
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="shield-checkmark-outline" size={20} color={colors.text.muted} />
+                        <Text style={[styles.sectionTitle, { color: colors.text.muted }]}>Seguridad</Text>
+                    </View>
+                    <View style={[styles.sectionContent, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                        <View style={[styles.biometricRow, { borderBottomColor: colors.border.default }]}>
+                            <View style={[styles.actionIcon, { backgroundColor: colors.brand.primary + '15' }]}>
+                                <Ionicons
+                                    name={getBiometricIcon(biometricType) as any}
+                                    size={20}
+                                    color={colors.brand.primary}
+                                />
+                            </View>
+                            <View style={styles.biometricInfo}>
+                                <Text style={[styles.biometricTitle, { color: colors.text.primary }]}>
+                                    {getBiometricLabel(biometricType)}
+                                </Text>
+                                <Text style={[styles.biometricSubtitle, { color: colors.text.secondary }]}>
+                                    Inicia sesión con {biometricType === 'facial' ? 'tu rostro' : 'tu huella'}
+                                </Text>
+                            </View>
+                            {biometricLoading ? (
+                                <ActivityIndicator size="small" color={colors.brand.primary} />
+                            ) : (
+                                <Switch
+                                    value={biometricEnabled}
+                                    onValueChange={handleToggleBiometrics}
+                                    trackColor={{ false: colors.border.default, true: colors.brand.primary + '50' }}
+                                    thumbColor={biometricEnabled ? colors.brand.primary : colors.bg.elevated}
+                                />
+                            )}
+                        </View>
+                    </View>
+                </View>
+            )}
+
             {/* Quick Actions */}
             <View style={styles.section}>
                 <View style={styles.sectionHeader}>
@@ -171,9 +267,9 @@ export default function ProfileScreen() {
                     >
                         <View style={[styles.actionIcon, { backgroundColor: colors.status.infoBg }]}>
                             {isSyncing ? (
-                                <ActivityIndicator size="small" color={colors.accent.blue} />
+                                <ActivityIndicator size="small" color={colors.brand.primary} />
                             ) : (
-                                <Ionicons name="refresh" size={20} color={colors.accent.blue} />
+                                <Ionicons name="refresh" size={20} color={colors.brand.primary} />
                             )}
                         </View>
                         <Text style={[styles.actionText, { color: colors.text.primary }]}>
@@ -214,6 +310,76 @@ export default function ProfileScreen() {
                 <Text style={[styles.footerText, { color: colors.text.muted }]}>Club de Mercancías © {currentYear}</Text>
                 <Text style={[styles.footerText, { color: colors.text.muted }]}>Powered by Aludra</Text>
             </View>
+            {/* Password Modal for Biometric Setup */}
+            <Modal
+                visible={showPasswordModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowPasswordModal(false)}
+            >
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.modalOverlay}
+                >
+                    <View style={[styles.modalContent, { backgroundColor: colors.bg.card }]}>
+                        <View style={[styles.modalIcon, { backgroundColor: colors.brand.primary + '15' }]}>
+                            <Ionicons
+                                name={getBiometricIcon(biometricType) as any}
+                                size={32}
+                                color={colors.brand.primary}
+                            />
+                        </View>
+                        <Text style={[styles.modalTitle, { color: colors.text.primary }]}>
+                            Habilitar {getBiometricLabel(biometricType)}
+                        </Text>
+                        <Text style={[styles.modalSubtitle, { color: colors.text.secondary }]}>
+                            Ingresa tu contraseña para confirmar
+                        </Text>
+
+                        <TextInput
+                            style={[styles.modalInput, {
+                                backgroundColor: colors.bg.elevated,
+                                borderColor: colors.border.default,
+                                color: colors.text.primary
+                            }]}
+                            placeholder="Contraseña"
+                            placeholderTextColor={colors.text.muted}
+                            secureTextEntry
+                            value={passwordInput}
+                            onChangeText={setPasswordInput}
+                            autoFocus
+                        />
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalBtn, styles.modalBtnCancel, { borderColor: colors.border.default }]}
+                                onPress={() => {
+                                    setShowPasswordModal(false);
+                                    setPasswordInput('');
+                                }}
+                            >
+                                <Text style={[styles.modalBtnText, { color: colors.text.secondary }]}>
+                                    Cancelar
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalBtn, styles.modalBtnConfirm, { backgroundColor: colors.brand.primary }]}
+                                onPress={handleConfirmBiometricSetup}
+                                disabled={isEnabling}
+                            >
+                                {isEnabling ? (
+                                    <ActivityIndicator size="small" color="#ffffff" />
+                                ) : (
+                                    <Text style={[styles.modalBtnText, { color: '#ffffff' }]}>
+                                        Confirmar
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
+
             <CustomAlert
                 visible={alert.visible}
                 type={alert.config.type}
@@ -309,6 +475,89 @@ const styles = StyleSheet.create({
     actionText: { flex: 1, fontSize: 15 },
     logoutBtn: { borderBottomWidth: 0 },
 
+    // Biometric styles
+    biometricRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderBottomWidth: 0,
+    },
+    biometricInfo: {
+        flex: 1,
+    },
+    biometricTitle: {
+        fontSize: 15,
+        fontWeight: '500',
+    },
+    biometricSubtitle: {
+        fontSize: 12,
+        marginTop: 2,
+    },
+
     footer: { alignItems: 'center', paddingVertical: 32, paddingBottom: 100 },
     footerText: { fontSize: 12 },
+
+    // Modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        width: '100%',
+        maxWidth: 340,
+        borderRadius: 20,
+        padding: 24,
+        alignItems: 'center',
+    },
+    modalIcon: {
+        width: 64,
+        height: 64,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    modalInput: {
+        width: '100%',
+        height: 50,
+        borderRadius: 12,
+        borderWidth: 1,
+        paddingHorizontal: 16,
+        fontSize: 16,
+        marginBottom: 20,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+    },
+    modalBtn: {
+        flex: 1,
+        height: 48,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalBtnCancel: {
+        borderWidth: 1,
+    },
+    modalBtnConfirm: {},
+    modalBtnText: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
 });

@@ -107,7 +107,7 @@ export default function CustomerDetailScreen() {
     if (isLoading) {
         return (
             <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
-                <ActivityIndicator size="large" color={colors.accent.blue} />
+                <ActivityIndicator size="large" color={colors.brand.primary} />
                 <Text style={[styles.loadingText, { color: colors.text.secondary }]}>Cargando cliente...</Text>
             </View>
         );
@@ -119,7 +119,7 @@ export default function CustomerDetailScreen() {
                 <Ionicons name="alert-circle-outline" size={64} color={colors.status.error} />
                 <Text style={[styles.errorTitle, { color: colors.text.primary }]}>Error</Text>
                 <Text style={[styles.errorMessage, { color: colors.text.secondary }]}>{error || 'Cliente no encontrado'}</Text>
-                <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.accent.blue }]} onPress={() => router.back()}>
+                <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.brand.primary }]} onPress={() => router.back()}>
                     <Text style={[styles.backButtonText, { color: colors.white }]}>Volver</Text>
                 </TouchableOpacity>
             </View>
@@ -135,7 +135,7 @@ export default function CustomerDetailScreen() {
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Detalle del Cliente</Text>
                 <TouchableOpacity style={styles.editBtn} onPress={handleEdit}>
-                    <Ionicons name="create-outline" size={24} color={colors.accent.blue} />
+                    <Ionicons name="create-outline" size={24} color={colors.brand.primary} />
                 </TouchableOpacity>
             </View>
 
@@ -212,8 +212,8 @@ export default function CustomerDetailScreen() {
 
                         <View style={styles.statsGrid}>
                             <View style={[styles.statItem, { backgroundColor: colors.bg.elevated }]}>
-                                <View style={[styles.statIcon, { backgroundColor: colors.accent.blue + '20' }]}>
-                                    <Ionicons name="people" size={20} color={colors.accent.blue} />
+                                <View style={[styles.statIcon, { backgroundColor: colors.brand.primary + '20' }]}>
+                                    <Ionicons name="people" size={20} color={colors.brand.primary} />
                                 </View>
                                 <Text style={[styles.statValue, { color: colors.text.primary }]}>{stats.totalClubs}</Text>
                                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Clubes Totales</Text>
@@ -228,8 +228,8 @@ export default function CustomerDetailScreen() {
                             </View>
 
                             <View style={[styles.statItem, { backgroundColor: colors.bg.elevated }]}>
-                                <View style={[styles.statIcon, { backgroundColor: colors.accent.green + '20' }]}>
-                                    <Ionicons name="cash" size={20} color={colors.accent.green} />
+                                <View style={[styles.statIcon, { backgroundColor: colors.status.success + '20' }]}>
+                                    <Ionicons name="cash" size={20} color={colors.status.success} />
                                 </View>
                                 <Text style={[styles.statValue, { color: colors.text.primary }]}>{formatCurrency(stats.totalInvested)}</Text>
                                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Total Invertido</Text>
@@ -244,9 +244,9 @@ export default function CustomerDetailScreen() {
                             </View>
                         </View>
 
-                        <TouchableOpacity style={[styles.viewClubsBtn, { backgroundColor: colors.accent.blue + '15' }]} onPress={handleViewClubs}>
-                            <Text style={[styles.viewClubsBtnText, { color: colors.accent.blue }]}>Ver Clubes</Text>
-                            <Ionicons name="arrow-forward" size={18} color={colors.accent.blue} />
+                        <TouchableOpacity style={[styles.viewClubsBtn, { backgroundColor: colors.brand.primary + '15' }]} onPress={handleViewClubs}>
+                            <Text style={[styles.viewClubsBtnText, { color: colors.brand.primary }]}>Ver Clubes</Text>
+                            <Ionicons name="arrow-forward" size={18} color={colors.brand.primary} />
                         </TouchableOpacity>
                     </View>
                 )}
@@ -258,7 +258,7 @@ export default function CustomerDetailScreen() {
                     {customer.email && (
                         <View style={styles.infoRow}>
                             <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
-                                <Ionicons name="mail" size={20} color={colors.accent.blue} />
+                                <Ionicons name="mail" size={20} color={colors.brand.primary} />
                             </View>
                             <View style={styles.infoContent}>
                                 <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Email</Text>
@@ -270,7 +270,7 @@ export default function CustomerDetailScreen() {
                     {customer.phone && (
                         <View style={styles.infoRow}>
                             <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
-                                <Ionicons name="call" size={20} color={colors.accent.green} />
+                                <Ionicons name="call" size={20} color={colors.status.success} />
                             </View>
                             <View style={styles.infoContent}>
                                 <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Teléfono</Text>
@@ -312,7 +312,7 @@ export default function CustomerDetailScreen() {
                         {customer.address && (
                             <View style={styles.infoRow}>
                                 <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
-                                    <Ionicons name="location" size={20} color={colors.accent.blue} />
+                                    <Ionicons name="location" size={20} color={colors.brand.primary} />
                                 </View>
                                 <View style={styles.infoContent}>
                                     <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Dirección</Text>
@@ -324,7 +324,7 @@ export default function CustomerDetailScreen() {
                         {(customer.city || customer.state || customer.country) && (
                             <View style={styles.infoRow}>
                                 <View style={[styles.infoIcon, { backgroundColor: colors.bg.elevated }]}>
-                                    <Ionicons name="business" size={20} color={colors.accent.green} />
+                                    <Ionicons name="business" size={20} color={colors.status.success} />
                                 </View>
                                 <View style={styles.infoContent}>
                                     <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>Ubicación</Text>

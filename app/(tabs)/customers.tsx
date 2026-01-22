@@ -86,7 +86,7 @@ export default function CustomersScreen() {
                         : 'Comienza agregando tu primer cliente'}
                 </Text>
                 {!filters.search && (
-                    <TouchableOpacity style={[styles.emptyButton, { backgroundColor: colors.accent.blue }]} onPress={handleCreateCustomer}>
+                    <TouchableOpacity style={[styles.emptyButton, { backgroundColor: colors.brand.primary }]} onPress={handleCreateCustomer}>
                         <Text style={[styles.emptyButtonText, { color: colors.white }]}>Agregar Cliente</Text>
                     </TouchableOpacity>
                 )}
@@ -99,7 +99,7 @@ export default function CustomersScreen() {
 
         return (
             <View style={styles.footer}>
-                <ActivityIndicator size="small" color={colors.accent.blue} />
+                <ActivityIndicator size="small" color={colors.brand.primary} />
             </View>
         );
     };
@@ -158,7 +158,7 @@ export default function CustomersScreen() {
                                 style={[
                                     styles.filterChip,
                                     { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                    !filters.status && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                    !filters.status && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                 ]}
                                 onPress={() => handleFilterStatus(undefined)}
                             >
@@ -177,7 +177,7 @@ export default function CustomersScreen() {
                                 style={[
                                     styles.filterChip,
                                     { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                    filters.status === 'active' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                    filters.status === 'active' && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                 ]}
                                 onPress={() => handleFilterStatus('active')}
                             >
@@ -199,7 +199,7 @@ export default function CustomersScreen() {
                                 style={[
                                     styles.filterChip,
                                     { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                    filters.status === 'suspended' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                    filters.status === 'suspended' && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                 ]}
                                 onPress={() => handleFilterStatus('suspended')}
                             >
@@ -221,7 +221,7 @@ export default function CustomersScreen() {
                                 style={[
                                     styles.filterChip,
                                     { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                    filters.status === 'inactive' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                    filters.status === 'inactive' && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                 ]}
                                 onPress={() => handleFilterStatus('inactive')}
                             >
@@ -262,7 +262,7 @@ export default function CustomersScreen() {
                     <RefreshControl
                         refreshing={isLoading && page === 1}
                         onRefresh={handleRefresh}
-                        tintColor={colors.accent.blue}
+                        tintColor={colors.brand.primary}
                     />
                 }
                 ListEmptyComponent={renderEmpty}
@@ -273,7 +273,7 @@ export default function CustomersScreen() {
 
             {/* FAB - Agregar cliente */}
             <TouchableOpacity
-                style={[styles.fab, { backgroundColor: colors.accent.blue }]}
+                style={[styles.fab, { backgroundColor: colors.brand.primary }]}
                 onPress={handleCreateCustomer}
                 activeOpacity={0.85}
             >

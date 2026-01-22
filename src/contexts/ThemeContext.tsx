@@ -1,6 +1,5 @@
 // src/contexts/ThemeContext.tsx
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ============================================
@@ -11,13 +10,14 @@ export type ThemeMode = 'auto' | 'light' | 'dark';
 export type ActiveTheme = 'light' | 'dark';
 
 interface ThemeColors {
-    // Colores de marca basados en el logo
+    // Colores de marca oficiales ClubMercancias
     brand: {
-        blue: string;       // Azul del escudo
-        green: string;      // Verde del degradado
-        lime: string;       // Lima/amarillo del círculo
-        cyan: string;       // Cyan/turquesa del círculo superior
-        slate: string;      // Gris oscuro de la base
+        primary: string;        // Azul profundo
+        primaryGlow: string;    // Azul profundo glow
+        secondary: string;      // Teal
+        secondaryGlow: string;  // Teal glow
+        accent: string;         // Dorado
+        accentGlow: string;     // Dorado glow
     };
     bg: {
         primary: string;
@@ -29,23 +29,19 @@ interface ThemeColors {
     text: {
         primary: string;
         secondary: string;
-        tertiary: string;
         muted: string;
         inverse: string;
     };
     accent: {
-        // Colores principales de la marca
-        blue: string;
-        blueLight: string;
-        green: string;
-        greenLight: string;
-        cyan: string;
-        cyanLight: string;
-        lime: string;
-        // Colores secundarios/funcionales
+        primary: string;        // Azul profundo
+        primaryGlow: string;
+        secondary: string;      // Teal
+        secondaryGlow: string;
+        gold: string;           // Dorado/Accent
+        goldGlow: string;
+        // Colores funcionales adicionales
         orange: string;
         purple: string;
-        gold: string;
     };
     status: {
         success: string;
@@ -70,9 +66,9 @@ interface ThemeColors {
     black: string;
     transparent: string;
     gradients: {
-        brand: string[];      // Degradado del logo
-        primary: string[];
-        success: string[];
+        primary: string[];      // Gradiente principal de la marca
+        secondary: string[];    // Gradiente secundario (teal)
+        accent: string[];       // Gradiente dorado
     };
 }
 
@@ -86,20 +82,20 @@ interface ThemeContextType {
 }
 
 // ============================================
-// Colores de marca extraídos del logo
+// Paleta Oficial ClubMercancias
 // ============================================
 const BRAND = {
-    blue: '#1E88E5',        // Azul principal del escudo
-    blueDark: '#1565C0',    // Azul más oscuro
-    blueLight: '#42A5F5',   // Azul más claro
-    green: '#43A047',       // Verde del degradado
-    greenLight: '#66BB6A',  // Verde claro
-    lime: '#C0CA33',        // Lima/amarillo verdoso
-    limeLight: '#D4E157',   // Lima claro
-    cyan: '#26C6DA',        // Cyan/turquesa del círculo
-    cyanLight: '#4DD0E1',   // Cyan claro
-    slate: '#455A64',       // Gris azulado de la base
-    slateDark: '#37474F',   // Gris más oscuro
+    // Colores principales de marca
+    primary: '#0A3D62',         // Azul profundo - Navegación, headers, sidebars, botones principales
+    primaryGlow: '#1565a0',     // Azul profundo glow
+    secondary: '#17BEBB',       // Teal - Botones secundarios, interacciones UI, indicadores de éxito
+    secondaryGlow: '#4dd0e1',   // Teal glow
+    accent: '#F6C85F',          // Dorado - Highlights, badges premium, sorteos, números ganadores
+    accentGlow: '#ffd54f',      // Dorado glow
+    neutralLight: '#F7F7F7',    // Blanco hueso - Fondos de secciones, formularios
+    neutralDark: '#2E2E2E',     // Gris antracita - Texto principal, iconos
+    // Status
+    error: '#e74c3c',           // Rojo error
 };
 
 // ============================================
@@ -108,127 +104,123 @@ const BRAND = {
 
 const darkTheme: ThemeColors = {
     brand: {
-        blue: BRAND.blue,
-        green: BRAND.green,
-        lime: BRAND.lime,
-        cyan: BRAND.cyan,
-        slate: BRAND.slate,
+        primary: BRAND.primary,
+        primaryGlow: BRAND.primaryGlow,
+        secondary: BRAND.secondary,
+        secondaryGlow: BRAND.secondaryGlow,
+        accent: BRAND.accent,
+        accentGlow: BRAND.accentGlow,
     },
     bg: {
-        primary: '#0f1419',
-        secondary: '#1a1f27',
-        card: '#242d38',
-        cardHover: '#2d3848',
-        elevated: '#323d4a',
+        primary: '#0f1419',         // Fondo principal oscuro
+        secondary: '#1a1f27',       // Fondo secundario
+        card: '#242d38',            // Cards
+        cardHover: '#2d3848',       // Cards hover
+        elevated: '#323d4a',        // Elementos elevados
     },
     text: {
-        primary: '#f0f4f8',
-        secondary: '#9ca3af',
-        tertiary: '#6b7280',
-        muted: '#4b5563',
-        inverse: '#0f1419',
+        primary: '#f0f4f8',         // Texto principal (casi blanco)
+        secondary: '#9ca3af',       // Texto secundario
+        muted: '#6b7280',           // Texto apagado
+        inverse: '#0f1419',         // Texto inverso
     },
     accent: {
-        blue: BRAND.blue,
-        blueLight: BRAND.blueLight,
-        green: BRAND.green,
-        greenLight: BRAND.greenLight,
-        cyan: BRAND.cyan,
-        cyanLight: BRAND.cyanLight,
-        lime: BRAND.lime,
+        primary: BRAND.primary,
+        primaryGlow: BRAND.primaryGlow,
+        secondary: BRAND.secondary,
+        secondaryGlow: BRAND.secondaryGlow,
+        gold: BRAND.accent,
+        goldGlow: BRAND.accentGlow,
         orange: '#FB8C00',
         purple: '#7E57C2',
-        gold: '#FFB300',
     },
     status: {
-        success: BRAND.green,
-        successText: BRAND.greenLight,
-        successBg: 'rgba(67, 160, 71, 0.15)',
-        warning: '#FB8C00',
-        warningText: '#FFA726',
-        warningBg: 'rgba(251, 140, 0, 0.15)',
-        error: '#E53935',
-        errorText: '#EF5350',
-        errorBg: 'rgba(229, 57, 53, 0.15)',
-        info: BRAND.blue,
-        infoText: BRAND.blueLight,
-        infoBg: 'rgba(30, 136, 229, 0.15)',
+        success: BRAND.secondary,
+        successText: BRAND.secondaryGlow,
+        successBg: 'rgba(23, 190, 187, 0.15)',
+        warning: BRAND.accent,
+        warningText: BRAND.accentGlow,
+        warningBg: 'rgba(246, 200, 95, 0.15)',
+        error: BRAND.error,
+        errorText: '#ef5350',
+        errorBg: 'rgba(231, 76, 60, 0.15)',
+        info: BRAND.primary,
+        infoText: BRAND.primaryGlow,
+        infoBg: 'rgba(10, 61, 98, 0.15)',
     },
     border: {
         default: '#374151',
         light: '#4b5563',
-        accent: 'rgba(30, 136, 229, 0.3)',
+        accent: 'rgba(10, 61, 98, 0.3)',
     },
     white: '#ffffff',
     black: '#000000',
     transparent: 'transparent',
     gradients: {
-        brand: [BRAND.blue, BRAND.green, BRAND.lime],
-        primary: [BRAND.blue, BRAND.blueLight],
-        success: [BRAND.green, BRAND.greenLight],
+        primary: [BRAND.primary, '#0d4d7a', BRAND.secondary, '#2dd4d1'],
+        secondary: [BRAND.secondary, BRAND.secondaryGlow],
+        accent: [BRAND.accent, BRAND.accentGlow],
     },
 };
 
 const lightTheme: ThemeColors = {
     brand: {
-        blue: BRAND.blue,
-        green: BRAND.green,
-        lime: BRAND.lime,
-        cyan: BRAND.cyan,
-        slate: BRAND.slate,
+        primary: BRAND.primary,
+        primaryGlow: BRAND.primaryGlow,
+        secondary: BRAND.secondary,
+        secondaryGlow: BRAND.secondaryGlow,
+        accent: BRAND.accent,
+        accentGlow: BRAND.accentGlow,
     },
     bg: {
-        primary: '#f8fafc',
-        secondary: '#f1f5f9',
-        card: '#ffffff',
-        cardHover: '#f8fafc',
-        elevated: '#ffffff',
+        primary: BRAND.neutralLight,    // #F7F7F7 - Blanco hueso
+        secondary: '#ffffff',           // Blanco puro
+        card: '#ffffff',                // Cards blancas
+        cardHover: '#f0f0f0',           // Cards hover
+        elevated: '#fafafa',            // Elementos elevados
     },
     text: {
-        primary: '#1e293b',
-        secondary: '#475569',
-        tertiary: '#64748b',
-        muted: '#94a3b8',
-        inverse: '#f0f4f8',
+        primary: BRAND.neutralDark,     // #2E2E2E - Gris antracita
+        secondary: '#5a5a5a',           // Texto secundario
+        muted: '#8a8a8a',               // Texto apagado
+        inverse: '#ffffff',             // Texto inverso
     },
     accent: {
-        blue: BRAND.blueDark,
-        blueLight: BRAND.blue,
-        green: '#2E7D32',
-        greenLight: BRAND.green,
-        cyan: '#00ACC1',
-        cyanLight: BRAND.cyan,
-        lime: '#9E9D24',
+        primary: BRAND.primary,
+        primaryGlow: BRAND.primaryGlow,
+        secondary: BRAND.secondary,
+        secondaryGlow: BRAND.secondaryGlow,
+        gold: BRAND.accent,
+        goldGlow: BRAND.accentGlow,
         orange: '#EF6C00',
         purple: '#5E35B1',
-        gold: '#FF8F00',
     },
     status: {
-        success: '#2E7D32',
-        successText: '#1B5E20',
-        successBg: 'rgba(46, 125, 50, 0.1)',
-        warning: '#EF6C00',
-        warningText: '#E65100',
-        warningBg: 'rgba(239, 108, 0, 0.1)',
-        error: '#C62828',
-        errorText: '#B71C1C',
-        errorBg: 'rgba(198, 40, 40, 0.1)',
-        info: BRAND.blueDark,
-        infoText: '#0D47A1',
-        infoBg: 'rgba(21, 101, 192, 0.1)',
+        success: BRAND.secondary,
+        successText: '#0f9d9a',
+        successBg: 'rgba(23, 190, 187, 0.15)',
+        warning: BRAND.accent,
+        warningText: '#d4a84a',
+        warningBg: 'rgba(246, 200, 95, 0.15)',
+        error: BRAND.error,
+        errorText: '#c0392b',
+        errorBg: 'rgba(231, 76, 60, 0.15)',
+        info: BRAND.primary,
+        infoText: '#083352',
+        infoBg: 'rgba(10, 61, 98, 0.15)',
     },
     border: {
-        default: '#e2e8f0',
-        light: '#cbd5e1',
-        accent: 'rgba(30, 136, 229, 0.2)',
+        default: '#e0e0e0',
+        light: '#f0f0f0',
+        accent: 'rgba(10, 61, 98, 0.3)',
     },
     white: '#ffffff',
     black: '#000000',
     transparent: 'transparent',
     gradients: {
-        brand: [BRAND.blueDark, BRAND.green, BRAND.lime],
-        primary: [BRAND.blueDark, BRAND.blue],
-        success: ['#2E7D32', BRAND.green],
+        primary: [BRAND.primary, '#0d4d7a', BRAND.secondary, '#2dd4d1'],
+        secondary: [BRAND.secondary, BRAND.secondaryGlow],
+        accent: [BRAND.accent, BRAND.accentGlow],
     },
 };
 
@@ -252,9 +244,9 @@ function shouldBeDarkByTime(): boolean {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const systemColorScheme = useColorScheme();
     const [mode, setModeState] = useState<ThemeMode>('auto');
     const [isLoaded, setIsLoaded] = useState(false);
+    const [, forceUpdate] = useState(0);
 
     // Cargar preferencia guardada
     useEffect(() => {
@@ -292,7 +284,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
         const interval = setInterval(() => {
             // Forzar re-render para actualizar el tema
-            setModeState((prev) => prev);
+            forceUpdate(n => n + 1);
         }, 60000); // Cada minuto
 
         return () => clearInterval(interval);

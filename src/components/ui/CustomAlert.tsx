@@ -63,8 +63,8 @@ export function CustomAlert({
             case 'confirm':
                 return {
                     name: 'help-circle' as const,
-                    color: colors.accent.blue,
-                    bgColor: `${colors.accent.blue}15`,
+                    color: colors.brand.primary,
+                    bgColor: `${colors.brand.primary}15`,
                 };
             default:
                 return {
@@ -89,7 +89,7 @@ export function CustomAlert({
                 };
             default:
                 return {
-                    bg: colors.accent.blue,
+                    bg: colors.brand.primary,
                     text: colors.white,
                 };
         }

@@ -1,64 +1,84 @@
 // src/constants/colors.ts
+// Paleta Oficial ClubMercancias
+
+export const BRAND_COLORS = {
+    // Colores principales de marca
+    primary: '#0A3D62',         // Azul profundo - Navegación, headers, sidebars, botones principales
+    primaryGlow: '#1565a0',     // Azul profundo glow
+    secondary: '#17BEBB',       // Teal - Botones secundarios, interacciones UI, indicadores de éxito
+    secondaryGlow: '#4dd0e1',   // Teal glow
+    accent: '#F6C85F',          // Dorado - Highlights, badges premium, sorteos, números ganadores
+    accentGlow: '#ffd54f',      // Dorado glow
+    neutralLight: '#F7F7F7',    // Blanco hueso - Fondos de secciones, formularios
+    neutralDark: '#2E2E2E',     // Gris antracita - Texto principal, iconos
+};
 
 export const COLORS = {
-    // Brand Colors (from logo)
+    // Brand Colors (Paleta Oficial ClubMercancias)
     brand: {
-        blue: '#1a5fb4',
-        blueLight: '#3b82f6',
-        green: '#4caf50',
-        greenLight: '#7cb342',
-        cyan: '#00acc1',
-        dark: '#37474f',
+        primary: BRAND_COLORS.primary,
+        primaryGlow: BRAND_COLORS.primaryGlow,
+        secondary: BRAND_COLORS.secondary,
+        secondaryGlow: BRAND_COLORS.secondaryGlow,
+        accent: BRAND_COLORS.accent,
+        accentGlow: BRAND_COLORS.accentGlow,
     },
 
-    // Dark Theme - Backgrounds
+    // Backgrounds (Light Theme by default)
     bg: {
-        primary: '#1a1d24',      // Fondo principal
-        secondary: '#242832',    // Fondo secundario
-        card: '#2d323c',         // Cards
-        cardHover: '#363c48',    // Cards hover
-        elevated: '#383e4a',     // Elementos elevados
+        primary: BRAND_COLORS.neutralLight,  // #F7F7F7
+        secondary: '#ffffff',
+        card: '#ffffff',
+        cardHover: '#f0f0f0',
+        elevated: '#fafafa',
     },
 
     // Text Colors
     text: {
-        primary: '#f1f5f9',      // Texto principal (casi blanco)
-        secondary: '#94a3b8',    // Texto secundario
-        muted: '#64748b',        // Texto apagado
-        inverse: '#1a1d24',      // Texto inverso (para fondos claros)
+        primary: BRAND_COLORS.neutralDark,   // #2E2E2E
+        secondary: '#5a5a5a',
+        muted: '#8a8a8a',
+        inverse: '#ffffff',
+        // Alias para compatibilidad
+        tertiary: '#8a8a8a',
     },
 
-    // Accent Colors (basados en la marca pero más vibrantes)
+    // Accent Colors
     accent: {
-        blue: '#3b82f6',
-        blueGlow: '#60a5fa',
-        green: '#22c55e',
-        greenGlow: '#4ade80',
-        cyan: '#06b6d4',
-        cyanGlow: '#22d3ee',
-        orange: '#f59e0b',
-        orangeGlow: '#fbbf24',
-        purple: '#8b5cf6',
-        purpleGlow: '#a78bfa',
+        primary: BRAND_COLORS.primary,
+        primaryGlow: BRAND_COLORS.primaryGlow,
+        secondary: BRAND_COLORS.secondary,
+        secondaryGlow: BRAND_COLORS.secondaryGlow,
+        gold: BRAND_COLORS.accent,
+        goldGlow: BRAND_COLORS.accentGlow,
+        orange: '#EF6C00',
+        purple: '#5E35B1',
+        // Aliases para compatibilidad
+        blue: BRAND_COLORS.primary,
+        blueGlow: BRAND_COLORS.primaryGlow,
+        green: BRAND_COLORS.secondary,
+        greenGlow: BRAND_COLORS.secondaryGlow,
+        cyan: BRAND_COLORS.secondary,
+        cyanGlow: BRAND_COLORS.secondaryGlow,
     },
 
     // Status Colors
     status: {
-        success: '#22c55e',
-        successBg: 'rgba(34, 197, 94, 0.15)',
-        warning: '#f59e0b',
-        warningBg: 'rgba(245, 158, 11, 0.15)',
-        error: '#ef4444',
-        errorBg: 'rgba(239, 68, 68, 0.15)',
-        info: '#3b82f6',
-        infoBg: 'rgba(59, 130, 246, 0.15)',
+        success: BRAND_COLORS.secondary,
+        successBg: 'rgba(23, 190, 187, 0.15)',
+        warning: BRAND_COLORS.accent,
+        warningBg: 'rgba(246, 200, 95, 0.15)',
+        error: '#e74c3c',
+        errorBg: 'rgba(231, 76, 60, 0.15)',
+        info: BRAND_COLORS.primary,
+        infoBg: 'rgba(10, 61, 98, 0.15)',
     },
 
     // Borders & Dividers
     border: {
-        default: '#3a4150',
-        light: '#4a5568',
-        accent: 'rgba(59, 130, 246, 0.3)',
+        default: '#e0e0e0',
+        light: '#f0f0f0',
+        accent: 'rgba(10, 61, 98, 0.3)',
     },
 
     // Common
@@ -66,17 +86,18 @@ export const COLORS = {
     black: '#000000',
     transparent: 'transparent',
 
-    // Gradients (para uso con LinearGradient si se necesita)
+    // Gradients
     gradients: {
-        primary: ['#1a5fb4', '#3b82f6'],
-        secondary: ['#4caf50', '#22c55e'],
-        dark: ['#1a1d24', '#242832'],
+        primary: [BRAND_COLORS.primary, '#0d4d7a', BRAND_COLORS.secondary, '#2dd4d1'],
+        secondary: [BRAND_COLORS.secondary, BRAND_COLORS.secondaryGlow],
+        accent: [BRAND_COLORS.accent, BRAND_COLORS.accentGlow],
     },
 };
 
 // Alias útiles
-export const PRIMARY = COLORS.accent.blue;
-export const SECONDARY = COLORS.accent.green;
+export const PRIMARY = BRAND_COLORS.primary;
+export const SECONDARY = BRAND_COLORS.secondary;
+export const ACCENT = BRAND_COLORS.accent;
 export const BACKGROUND = COLORS.bg.primary;
 export const CARD = COLORS.bg.card;
 export const TEXT = COLORS.text.primary;

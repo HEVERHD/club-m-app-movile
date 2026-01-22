@@ -80,14 +80,14 @@ export const ClubCard = memo(function ClubCard({ club, onPress }: Props) {
                 {/* Share */}
                 <View style={[styles.shareBox, { backgroundColor: colors.bg.elevated }]}>
                     <Text style={[styles.shareLabel, { color: colors.text.muted }]}>Share</Text>
-                    <Text style={[styles.shareValue, { color: colors.accent.blue }]}>{club.share}</Text>
+                    <Text style={[styles.shareValue, { color: colors.brand.primary }]}>{club.share}</Text>
                 </View>
             </View>
 
             {/* Progress */}
             <View style={styles.progressSection}>
                 <View style={[styles.progressBar, { backgroundColor: colors.border.default }]}>
-                    <View style={[styles.progressFill, { width: `${progressPercent}%`, backgroundColor: colors.accent.blue }]} />
+                    <View style={[styles.progressFill, { width: `${progressPercent}%`, backgroundColor: colors.brand.primary }]} />
                 </View>
                 <Text style={[styles.progressText, { color: colors.text.muted }]}>
                     {club.weeksPaid}/{52} semanas
@@ -100,16 +100,16 @@ export const ClubCard = memo(function ClubCard({ club, onPress }: Props) {
                     <Text style={[styles.balanceLabel, { color: colors.text.muted }]}>Balance</Text>
                     <Text style={[
                         styles.balanceValue,
-                        { color: club.balanceAmount < 0 ? colors.status.error : colors.accent.green }
+                        { color: club.balanceAmount < 0 ? colors.status.error : colors.status.success }
                     ]}>
                         {formatCurrency(club.balanceAmount)}
                     </Text>
                 </View>
 
                 <TouchableOpacity style={styles.detailBtn} onPress={onPress}>
-                    <Text style={[styles.detailBtnText, { color: colors.accent.blue }]}>Ver detalle</Text>
+                    <Text style={[styles.detailBtnText, { color: colors.brand.primary }]}>Ver detalle</Text>
                     <View style={[styles.detailArrow, { backgroundColor: colors.status.infoBg }]}>
-                        <Ionicons name="chevron-forward" size={14} color={colors.accent.blue} />
+                        <Ionicons name="chevron-forward" size={14} color={colors.brand.primary} />
                     </View>
                 </TouchableOpacity>
             </View>

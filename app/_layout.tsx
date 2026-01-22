@@ -36,7 +36,7 @@ function AppContent() {
     if (!isReady) {
         return (
             <View style={[styles.loadingContainer, { backgroundColor: colors.bg.primary }]}>
-                <ActivityIndicator size="large" color={colors.accent.blue} />
+                <ActivityIndicator size="large" color={colors.brand.primary} />
             </View>
         );
     }

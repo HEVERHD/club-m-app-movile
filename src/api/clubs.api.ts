@@ -342,3 +342,69 @@ export const clubApi = {
         }
     },
 };
+
+// ============================================
+// FUNCIONES EXPORTADAS PARA CLIENTES
+// ============================================
+
+/**
+ * Obtener clubes de un cliente por su customerId o cédula
+ * @param customerIdOrDoc - CustomerId o número de identificación del cliente
+ */
+export async function getClubsByCustomer(customerIdOrDoc: string): Promise<Club[]> {
+    try {
+        console.log('🔍 [clubs.api] Buscando clubes para cliente:', customerIdOrDoc);
+
+        // Primero verificar si hay cache válido
+        if (isCacheValid() && clubsCache) {
+            const filtered = clubsCache.data.filter(
+                (c) => c.customerId === customerIdOrDoc || c.customerNumber === customerIdOrDoc
+            );
+            if (filtered.length > 0) {
+                console.log(`📦 [clubs.api] ${filtered.length} clubes encontrados en cache`);
+                return filtered;
+            }
+        }
+
+        // Buscar en API usando SearchText
+        const { data } = await mdl05Client.post('/mdl05/club/history', {
+            SearchText: customerIdOrDoc,
+            PageNumber: 1,
+            PageSize: 100,
+            Status: null,
+        });
+
+        const clubs = (data?.Data || []).map(mapClubResponse);
+        console.log(`✅ [clubs.api] ${clubs.length} clubes encontrados para cliente ${customerIdOrDoc}`);
+
+        return clubs;
+    } catch (error: any) {
+        console.error('❌ [clubs.api] Error buscando clubes del cliente:', error.message);
+        return [];
+    }
+}
+
+/**
+ * Obtener sorteos de un cliente por su customerId o cédula
+ * @param customerIdOrDoc - CustomerId o número de identificación del cliente
+ */
+export async function getDrawsByCustomer(customerIdOrDoc: string): Promise<Draw[]> {
+    try {
+        console.log('🎰 [clubs.api] Buscando sorteos para cliente:', customerIdOrDoc);
+
+        // Obtener clubes del cliente primero
+        const clubs = await getClubsByCustomer(customerIdOrDoc);
+
+        if (clubs.length === 0) {
+            return [];
+        }
+
+        // Por ahora retornar array vacío - esto necesitará implementarse
+        // cuando el backend tenga el endpoint de sorteos por cliente
+        console.log(`⚠️ [clubs.api] Endpoint de sorteos por cliente no implementado aún`);
+        return [];
+    } catch (error: any) {
+        console.error('❌ [clubs.api] Error buscando sorteos del cliente:', error.message);
+        return [];
+    }
+}

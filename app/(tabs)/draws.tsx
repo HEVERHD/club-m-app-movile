@@ -94,7 +94,7 @@ export default function DrawsScreen() {
                         : 'Ejecuta tu primer sorteo para comenzar'}
                 </Text>
                 {!filters.status && !filters.clubTypeId && (
-                    <TouchableOpacity style={[styles.emptyButton, { backgroundColor: colors.accent.blue }]} onPress={handleExecuteDraw}>
+                    <TouchableOpacity style={[styles.emptyButton, { backgroundColor: colors.brand.primary }]} onPress={handleExecuteDraw}>
                         <Text style={[styles.emptyButtonText, { color: colors.white }]}>Ejecutar Sorteo</Text>
                     </TouchableOpacity>
                 )}
@@ -107,7 +107,7 @@ export default function DrawsScreen() {
 
         return (
             <View style={styles.footer}>
-                <ActivityIndicator size="small" color={colors.accent.blue} />
+                <ActivityIndicator size="small" color={colors.brand.primary} />
             </View>
         );
     };
@@ -136,7 +136,7 @@ export default function DrawsScreen() {
                             color={colors.text.primary}
                         />
                         {activeFiltersCount > 0 && (
-                            <View style={[styles.filterBadge, { backgroundColor: colors.accent.blue }]}>
+                            <View style={[styles.filterBadge, { backgroundColor: colors.brand.primary }]}>
                                 <Text style={[styles.filterBadgeText, { color: colors.white }]}>{activeFiltersCount}</Text>
                             </View>
                         )}
@@ -153,7 +153,7 @@ export default function DrawsScreen() {
                                     style={[
                                         styles.filterChip,
                                         { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                        !filters.status && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                        !filters.status && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                     ]}
                                     onPress={() => handleFilterStatus(undefined)}
                                 >
@@ -172,7 +172,7 @@ export default function DrawsScreen() {
                                     style={[
                                         styles.filterChip,
                                         { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                        filters.status === 'completed' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                        filters.status === 'completed' && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                     ]}
                                     onPress={() => handleFilterStatus('completed')}
                                 >
@@ -197,7 +197,7 @@ export default function DrawsScreen() {
                                     style={[
                                         styles.filterChip,
                                         { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                        filters.status === 'pending' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                        filters.status === 'pending' && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                     ]}
                                     onPress={() => handleFilterStatus('pending')}
                                 >
@@ -222,7 +222,7 @@ export default function DrawsScreen() {
                                     style={[
                                         styles.filterChip,
                                         { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                        filters.status === 'cancelled' && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                        filters.status === 'cancelled' && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                     ]}
                                     onPress={() => handleFilterStatus('cancelled')}
                                 >
@@ -252,7 +252,7 @@ export default function DrawsScreen() {
                                     style={[
                                         styles.filterChip,
                                         { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                        !filters.clubTypeId && { backgroundColor: colors.accent.blue, borderColor: colors.accent.blue },
+                                        !filters.clubTypeId && { backgroundColor: colors.brand.primary, borderColor: colors.brand.primary },
                                     ]}
                                     onPress={() => handleFilterClubType(undefined)}
                                 >
@@ -289,8 +289,8 @@ export default function DrawsScreen() {
                                 style={styles.clearFiltersBtn}
                                 onPress={handleClearFilters}
                             >
-                                <Ionicons name="close-circle" size={16} color={colors.accent.blue} />
-                                <Text style={[styles.clearFiltersText, { color: colors.accent.blue }]}>Limpiar Filtros</Text>
+                                <Ionicons name="close-circle" size={16} color={colors.brand.primary} />
+                                <Text style={[styles.clearFiltersText, { color: colors.brand.primary }]}>Limpiar Filtros</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -319,7 +319,7 @@ export default function DrawsScreen() {
                     <RefreshControl
                         refreshing={isLoading && pagination.page === 1}
                         onRefresh={handleRefresh}
-                        tintColor={colors.accent.blue}
+                        tintColor={colors.brand.primary}
                     />
                 }
                 ListEmptyComponent={renderEmpty}
@@ -339,7 +339,7 @@ export default function DrawsScreen() {
 
             {/* FAB - Ejecutar sorteo */}
             <TouchableOpacity
-                style={[styles.fab, { backgroundColor: colors.accent.blue }]}
+                style={[styles.fab, { backgroundColor: colors.brand.primary }]}
                 onPress={handleExecuteDraw}
                 activeOpacity={0.85}
             >

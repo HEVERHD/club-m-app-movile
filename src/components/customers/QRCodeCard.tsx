@@ -52,14 +52,14 @@ export function QRCodeCard({ customerId, identificationNumber, customerName }: Q
             <View style={[styles.card, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                 <View style={styles.cardHeader}>
                     <View style={styles.titleRow}>
-                        <Ionicons name="qr-code" size={20} color={colors.accent.blue} />
+                        <Ionicons name="qr-code" size={20} color={colors.brand.primary} />
                         <Text style={[styles.cardTitle, { color: colors.text.primary }]}>Código de Miembro</Text>
                     </View>
                     <TouchableOpacity
-                        style={[styles.expandBtn, { backgroundColor: colors.accent.blue + '15' }]}
+                        style={[styles.expandBtn, { backgroundColor: colors.brand.primary + '15' }]}
                         onPress={() => setModalVisible(true)}
                     >
-                        <Ionicons name="expand-outline" size={20} color={colors.accent.blue} />
+                        <Ionicons name="expand-outline" size={20} color={colors.brand.primary} />
                     </TouchableOpacity>
                 </View>
 
@@ -79,7 +79,7 @@ export function QRCodeCard({ customerId, identificationNumber, customerName }: Q
                     <View style={styles.qrInfo}>
                         <Text style={[styles.docLabel, { color: colors.text.secondary }]}>Cédula</Text>
                         <Text style={[styles.docNumber, { color: colors.text.primary }]}>{identificationNumber}</Text>
-                        <Text style={[styles.tapHint, { color: colors.accent.blue }]}>Toca para ampliar</Text>
+                        <Text style={[styles.tapHint, { color: colors.brand.primary }]}>Toca para ampliar</Text>
                     </View>
                 </TouchableOpacity>
             </View>
@@ -135,11 +135,11 @@ export function QRCodeCard({ customerId, identificationNumber, customerName }: Q
                         {/* Botones de acción */}
                         <View style={styles.actionButtons}>
                             <TouchableOpacity
-                                style={[styles.shareBtn, { backgroundColor: colors.accent.blue + '15' }]}
+                                style={[styles.shareBtn, { backgroundColor: colors.brand.primary + '15' }]}
                                 onPress={handleShare}
                             >
-                                <Ionicons name="share-outline" size={20} color={colors.accent.blue} />
-                                <Text style={[styles.shareBtnText, { color: colors.accent.blue }]}>Compartir</Text>
+                                <Ionicons name="share-outline" size={20} color={colors.brand.primary} />
+                                <Text style={[styles.shareBtnText, { color: colors.brand.primary }]}>Compartir</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

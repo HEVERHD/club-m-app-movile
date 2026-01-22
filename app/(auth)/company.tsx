@@ -5,15 +5,16 @@ import {
     KeyboardAvoidingView, Platform, StyleSheet, StatusBar, Image,
     ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/stores/auth-store';
-import { useTheme } from '../../src/contexts/ThemeContext';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 
 export default function CompanyScreen() {
-    const { colors, isDark } = useTheme();
+    const insets = useSafeAreaInsets();
     const alert = useAlert();
     const [company, setCompany] = useState('');
     const [isFocused, setIsFocused] = useState(false);
@@ -33,11 +34,13 @@ export default function CompanyScreen() {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.bg.primary }]}>
-            <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.bg.primary} />
-
-            {/* Fondo con gradiente sutil */}
-            <View style={[styles.backgroundGlow, { backgroundColor: colors.accent.blue + '15' }]} />
+        <LinearGradient
+            colors={['#1a4a6e', '#2d6a8a', '#3d8aa6']}
+            style={styles.container}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+        >
+            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -48,8 +51,9 @@ export default function CompanyScreen() {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Header / Branding */}
-                    <View style={styles.brandingSection}>
+                    {/* Card del formulario */}
+                    <View style={styles.formCard}>
+                        {/* Logo */}
                         <View style={styles.logoWrapper}>
                             <Image
                                 source={require('../../assets/icon.png')}
@@ -58,39 +62,21 @@ export default function CompanyScreen() {
                             />
                         </View>
 
-                        <Text style={[styles.brandName, { color: colors.text.primary }]}>Clubes de Mercancías</Text>
-                        <Text style={[styles.tagline, { color: colors.text.muted }]}>Sistema de gestión empresarial</Text>
-                    </View>
-
-                    {/* Card del formulario */}
-                    <View style={[styles.formCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
-                        <View style={styles.formHeader}>
-                            <View style={[styles.stepIndicator, { backgroundColor: colors.accent.blue }]}>
-                                <Text style={[styles.stepNumber, { color: colors.white }]}>1</Text>
-                            </View>
-                            <View>
-                                <Text style={[styles.formTitle, { color: colors.text.primary }]}>Identifica tu empresa</Text>
-                                <Text style={[styles.formSubtitle, { color: colors.text.muted }]}>Ingresa el código de tu compañía</Text>
-                            </View>
-                        </View>
+                        {/* Título */}
+                        <Text style={styles.brandName}>Club de Mercancías</Text>
+                        <Text style={styles.tagline}>Ingresa el nombre de tu compañía</Text>
 
                         {/* Input */}
                         <View style={styles.inputWrapper}>
-                            <Text style={[styles.inputLabel, { color: colors.text.secondary }]}>Código de empresa</Text>
+                            <Text style={styles.inputLabel}>Nombre de la compañía</Text>
                             <View style={[
                                 styles.inputContainer,
-                                { backgroundColor: colors.bg.elevated, borderColor: colors.border.default },
-                                isFocused && { borderColor: colors.accent.blue, backgroundColor: colors.accent.blue + '10' }
+                                isFocused && styles.inputContainerFocused
                             ]}>
-                                <Ionicons
-                                    name="business-outline"
-                                    size={20}
-                                    color={isFocused ? colors.accent.blue : colors.text.muted}
-                                />
                                 <TextInput
-                                    style={[styles.input, { color: colors.text.primary }]}
-                                    placeholder="Ej: cochez"
-                                    placeholderTextColor={colors.text.muted}
+                                    style={styles.input}
+                                    placeholder="cochez"
+                                    placeholderTextColor="#9ca3af"
                                     value={company}
                                     onChangeText={(text) => {
                                         setCompany(text);
@@ -101,59 +87,62 @@ export default function CompanyScreen() {
                                     autoCapitalize="none"
                                     autoCorrect={false}
                                 />
-                                {company.length > 0 && (
-                                    <TouchableOpacity onPress={() => setCompany('')}>
-                                        <Ionicons name="close-circle" size={20} color={colors.text.muted} />
-                                    </TouchableOpacity>
-                                )}
+                                <Ionicons name="search" size={20} color="#9ca3af" />
                             </View>
                         </View>
 
                         {/* Error */}
                         {error && (
-                            <View style={[styles.errorBox, { backgroundColor: colors.status.errorBg }]}>
-                                <Ionicons name="alert-circle" size={18} color={colors.status.error} />
-                                <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>
+                            <View style={styles.errorBox}>
+                                <Ionicons name="alert-circle" size={18} color="#ef4444" />
+                                <Text style={styles.errorText}>{error}</Text>
                             </View>
                         )}
 
-                        {/* Continue Button */}
+                        {/* Continue Button con degradado */}
                         <TouchableOpacity
-                            style={[styles.continueBtn, { backgroundColor: colors.accent.blue }, isLoading && styles.continueBtnDisabled]}
                             onPress={handleContinue}
                             disabled={isLoading}
                             activeOpacity={0.85}
+                            style={[styles.continueBtnWrapper, isLoading && styles.continueBtnDisabled]}
                         >
-                            {isLoading ? (
-                                <ActivityIndicator color={colors.white} size="small" />
-                            ) : (
-                                <>
-                                    <Text style={[styles.continueBtnText, { color: colors.white }]}>Continuar</Text>
-                                    <View style={styles.continueBtnIcon}>
-                                        <Ionicons name="arrow-forward" size={18} color={colors.white} />
-                                    </View>
-                                </>
-                            )}
+                            <LinearGradient
+                                colors={['#1a4a6e', '#2d6a8a', '#3d8aa6']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.continueBtn}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator color="#ffffff" size="small" />
+                                ) : (
+                                    <>
+                                        <Text style={styles.continueBtnText}>Continuar</Text>
+                                        <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+                                    </>
+                                )}
+                            </LinearGradient>
                         </TouchableOpacity>
-
-                        {/* Info tip */}
-                        <View style={styles.infoTip}>
-                            <Ionicons name="information-circle-outline" size={16} color={colors.text.muted} />
-                            <Text style={[styles.infoTipText, { color: colors.text.muted }]}>
-                                El código fue proporcionado por tu administrador
-                            </Text>
-                        </View>
                     </View>
 
-                    {/* Footer */}
-                    <View style={styles.footer}>
-                        <View style={styles.securityIndicator}>
-                            <View style={[styles.securityDot, { backgroundColor: colors.accent.green }]} />
-                            <Text style={[styles.securityText, { color: colors.text.muted }]}>Conexión cifrada SSL</Text>
-                        </View>
-                    </View>
+                    {/* Customer Lookup Link */}
+                    <TouchableOpacity
+                        style={styles.customerLookupLink}
+                        onPress={() => router.push('/(auth)/customer-lookup')}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.customerLookupText}>
+                            ¿Eres cliente? <Text style={styles.customerLookupHighlight}>Consulta tu club aquí</Text>
+                        </Text>
+                    </TouchableOpacity>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Footer fijo abajo */}
+            <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+                <Text style={styles.footerText}>
+                    Powered by <Text style={styles.footerHighlight}>Hypernovalabs</Text>
+                </Text>
+            </View>
             <CustomAlert
                 visible={alert.visible}
                 type={alert.config.type}
@@ -162,7 +151,7 @@ export default function CompanyScreen() {
                 buttons={alert.config.buttons}
                 onDismiss={alert.hide}
             />
-        </View>
+        </LinearGradient>
     );
 }
 
@@ -170,101 +159,86 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    backgroundGlow: {
-        position: 'absolute',
-        top: -100,
-        left: '50%',
-        marginLeft: -200,
-        width: 400,
-        height: 400,
-        borderRadius: 200,
-    },
     keyboardView: {
         flex: 1,
     },
     scrollContent: {
         flexGrow: 1,
         paddingHorizontal: 24,
-        paddingTop: 60,
-        paddingBottom: 40,
-    },
-
-    // Branding
-    brandingSection: {
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 32,
-    },
-    logoWrapper: {
-        marginBottom: 16,
-    },
-    logo: {
-        width: 100,
-        height: 100,
-    },
-    brandName: {
-        fontSize: 22,
-        fontWeight: '700',
-        marginBottom: 6,
-        letterSpacing: -0.3,
-    },
-    tagline: {
-        fontSize: 14,
     },
 
     // Form Card
     formCard: {
+        backgroundColor: '#ffffff',
         borderRadius: 24,
-        padding: 24,
-        borderWidth: 1,
-    },
-    formHeader: {
-        flexDirection: 'row',
+        paddingHorizontal: 28,
+        paddingTop: 32,
+        paddingBottom: 28,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.15,
+        shadowRadius: 30,
+        elevation: 15,
         alignItems: 'center',
-        gap: 14,
-        marginBottom: 28,
+        width: '100%',
+        maxWidth: 400,
     },
-    stepIndicator: {
-        width: 36,
-        height: 36,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
+
+    // Logo dentro de la card
+    logoWrapper: {
+        marginBottom: 20,
     },
-    stepNumber: {
-        fontSize: 16,
+    logo: {
+        width: 70,
+        height: 70,
+    },
+
+    // Títulos dentro de la card
+    brandName: {
+        fontSize: 24,
         fontWeight: '700',
+        color: '#1f2937',
+        marginBottom: 6,
+        letterSpacing: -0.5,
+        textAlign: 'center',
     },
-    formTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 2,
-    },
-    formSubtitle: {
-        fontSize: 13,
+    tagline: {
+        fontSize: 14,
+        color: '#6b7280',
+        marginBottom: 28,
+        textAlign: 'center',
     },
 
     // Inputs
     inputWrapper: {
+        width: '100%',
         marginBottom: 20,
     },
     inputLabel: {
         fontSize: 13,
         fontWeight: '500',
+        color: '#374151',
         marginBottom: 8,
-        marginLeft: 4,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: 14,
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 14,
-        gap: 12,
-        borderWidth: 1.5,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+    },
+    inputContainerFocused: {
+        borderColor: '#2d6a8a',
     },
     input: {
         flex: 1,
         fontSize: 16,
+        color: '#1f2937',
         padding: 0,
     },
 
@@ -272,25 +246,31 @@ const styles = StyleSheet.create({
     errorBox: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#fef2f2',
         padding: 12,
         borderRadius: 12,
         gap: 10,
-        marginBottom: 8,
+        marginBottom: 16,
+        width: '100%',
     },
     errorText: {
         fontSize: 13,
+        color: '#ef4444',
         flex: 1,
     },
 
     // Continue Button
+    continueBtnWrapper: {
+        width: '100%',
+        borderRadius: 12,
+        overflow: 'hidden',
+    },
     continueBtn: {
-        borderRadius: 14,
         paddingVertical: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 10,
-        marginBottom: 16,
+        gap: 8,
     },
     continueBtnDisabled: {
         opacity: 0.6,
@@ -298,44 +278,36 @@ const styles = StyleSheet.create({
     continueBtnText: {
         fontSize: 16,
         fontWeight: '600',
-    },
-    continueBtnIcon: {
-        width: 28,
-        height: 28,
-        borderRadius: 8,
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        alignItems: 'center',
-        justifyContent: 'center',
+        color: '#ffffff',
     },
 
-    // Info tip
-    infoTip: {
-        flexDirection: 'row',
+    // Customer lookup link
+    customerLookupLink: {
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
+        marginTop: 24,
+        paddingVertical: 12,
     },
-    infoTipText: {
-        fontSize: 12,
+    customerLookupText: {
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.8)',
+    },
+    customerLookupHighlight: {
+        color: '#ffffff',
+        fontWeight: '600',
+        textDecorationLine: 'underline',
     },
 
-    // Footer
+    // Footer fijo abajo
     footer: {
         alignItems: 'center',
-        marginTop: 32,
+        paddingTop: 16,
     },
-    securityIndicator: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
+    footerText: {
+        fontSize: 13,
+        color: 'rgba(255, 255, 255, 0.6)',
     },
-    securityDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-    },
-    securityText: {
-        fontSize: 12,
-        fontWeight: '500',
+    footerHighlight: {
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontWeight: '600',
     },
 });

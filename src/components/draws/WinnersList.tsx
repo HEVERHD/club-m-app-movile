@@ -23,7 +23,7 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
     if (winners.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <Ionicons name="trophy-outline" size={64} color={colors.text.tertiary} />
+                <Ionicons name="trophy-outline" size={64} color={colors.text.muted} />
                 <Text style={[styles.emptyText, { color: colors.text.secondary }]}>No hay ganadores registrados</Text>
             </View>
         );
@@ -100,17 +100,17 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
 
                     <View style={styles.winnerDetails}>
                         <View style={styles.detailRow}>
-                            <Ionicons name="shield" size={16} color={colors.accent.blue} />
+                            <Ionicons name="shield" size={16} color={colors.brand.primary} />
                             <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>Número de Acción:</Text>
-                            <View style={[styles.shareBadge, { backgroundColor: colors.accent.blue }]}>
+                            <View style={[styles.shareBadge, { backgroundColor: colors.brand.primary }]}>
                                 <Text style={[styles.shareText, { color: colors.white }]}>{winner.share}</Text>
                             </View>
                         </View>
 
                         <View style={styles.detailRow}>
-                            <Ionicons name="cash" size={16} color={colors.accent.green} />
+                            <Ionicons name="cash" size={16} color={colors.status.success} />
                             <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>Premio:</Text>
-                            <Text style={[styles.prizeAmount, { color: colors.accent.green }]}>
+                            <Text style={[styles.prizeAmount, { color: colors.status.success }]}>
                                 ${winner.prizeAmount.toFixed(2)}
                             </Text>
                         </View>
@@ -174,7 +174,7 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
                         <View style={styles.actionsContainer}>
                             {!winner.notified && (
                                 <TouchableOpacity
-                                    style={[styles.actionButton, { backgroundColor: colors.accent.blue }]}
+                                    style={[styles.actionButton, { backgroundColor: colors.brand.primary }]}
                                     onPress={() => handleMarkNotified(winner.clubId, winner.customerName)}
                                 >
                                     <Ionicons name="mail" size={16} color={colors.white} />
@@ -184,7 +184,7 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
 
                             {!winner.claimed && winner.notified && (
                                 <TouchableOpacity
-                                    style={[styles.actionButton, { backgroundColor: colors.accent.green }]}
+                                    style={[styles.actionButton, { backgroundColor: colors.status.success }]}
                                     onPress={() => handleMarkClaimed(winner.clubId, winner.customerName)}
                                 >
                                     <Ionicons name="checkmark" size={16} color={colors.white} />
@@ -193,11 +193,11 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
                             )}
 
                             <TouchableOpacity
-                                style={[styles.actionButton, { backgroundColor: colors.bg.secondary, borderWidth: 1, borderColor: colors.accent.blue }]}
+                                style={[styles.actionButton, { backgroundColor: colors.bg.secondary, borderWidth: 1, borderColor: colors.brand.primary }]}
                                 onPress={() => handleViewClub(winner.clubId)}
                             >
-                                <Ionicons name="eye" size={16} color={colors.accent.blue} />
-                                <Text style={[styles.actionButtonText, { color: colors.accent.blue }]}>
+                                <Ionicons name="eye" size={16} color={colors.brand.primary} />
+                                <Text style={[styles.actionButtonText, { color: colors.brand.primary }]}>
                                     Ver Club
                                 </Text>
                             </TouchableOpacity>
@@ -206,8 +206,8 @@ export function WinnersList({ winners, drawId, canMarkActions = false }: Winners
 
                     {winner.claimDate && (
                         <View style={styles.claimDateContainer}>
-                            <Ionicons name="calendar" size={12} color={colors.text.tertiary} />
-                            <Text style={[styles.claimDateText, { color: colors.text.tertiary }]}>
+                            <Ionicons name="calendar" size={12} color={colors.text.muted} />
+                            <Text style={[styles.claimDateText, { color: colors.text.muted }]}>
                                 Reclamado: {new Date(winner.claimDate).toLocaleDateString('es-PA')}
                             </Text>
                         </View>

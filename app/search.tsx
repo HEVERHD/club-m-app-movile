@@ -5,23 +5,33 @@ import {
     StyleSheet, ActivityIndicator, Keyboard
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { COLORS } from '../src/constants/colors';
 import { clubApi } from '../src/api/clubs.api';
 import type { Club } from '../src/types/clubs';
 
 export default function SearchScreen() {
-    const [query, setQuery] = useState('');
+    // Obtener parámetros de la URL (desde QR Scanner)
+    const params = useLocalSearchParams<{ query?: string; autoSearch?: string }>();
+
+    const [query, setQuery] = useState(params.query || '');
     const [results, setResults] = useState<Club[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const inputRef = useRef<TextInput>(null);
+    const hasAutoSearched = useRef(false);
 
-    // Focus en el input al entrar
+    // Focus en el input al entrar o búsqueda automática desde QR
     useEffect(() => {
-        setTimeout(() => inputRef.current?.focus(), 100);
-    }, []);
+        if (params.query && params.autoSearch === 'true' && !hasAutoSearched.current) {
+            hasAutoSearched.current = true;
+            // Ejecutar búsqueda automática desde QR
+            handleSearch(params.query);
+        } else {
+            setTimeout(() => inputRef.current?.focus(), 100);
+        }
+    }, [params.query, params.autoSearch]);
 
     const handleSearch = useCallback(async (searchText: string) => {
         const trimmed = searchText.trim();

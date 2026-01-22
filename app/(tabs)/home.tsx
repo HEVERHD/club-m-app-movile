@@ -1,11 +1,12 @@
 // app/(tabs)/home.tsx
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, StyleSheet, ActivityIndicator, Animated, Alert } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { useDashboardStore } from '../../src/stores/dashboard-store';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { router } from 'expo-router';
+import { QRScanner, QRData } from '../../src/components/scanner/QRScanner';
 
 // Helper para formatear moneda
 const formatCurrency = (amount: number): string => {
@@ -53,6 +54,7 @@ export default function HomeScreen() {
     const { stats, recentActivity, isLoading, fetchDashboardData } = useDashboardStore();
     const { colors } = useTheme();
     const [refreshing, setRefreshing] = useState(false);
+    const [showScanner, setShowScanner] = useState(false);
 
     // Animaciones
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -89,6 +91,32 @@ export default function HomeScreen() {
         return 'Buenas noches';
     };
 
+    // Manejar escaneo de QR
+    const handleQRScan = (data: QRData) => {
+        setShowScanner(false);
+
+        if (data.type === 'CLUB_MEMBER' && (data.id || data.doc)) {
+            // Buscar cliente por ID o cédula
+            const searchTerm = data.doc || data.id || '';
+            router.push({
+                pathname: '/search',
+                params: { query: searchTerm, autoSearch: 'true' },
+            });
+        } else if (data.type === 'TEXT' && data.doc) {
+            // Tratar como cédula
+            router.push({
+                pathname: '/search',
+                params: { query: data.doc, autoSearch: 'true' },
+            });
+        } else {
+            Alert.alert(
+                'QR No Reconocido',
+                'Este código QR no corresponde a un miembro del club.',
+                [{ text: 'OK' }]
+            );
+        }
+    };
+
     const getInitials = (name: string) => {
         return name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'US';
     };
@@ -99,7 +127,7 @@ export default function HomeScreen() {
             icon: 'layers',
             value: stats.activeClubs.toString(),
             label: 'Clubes Activos',
-            color: colors.brand.blue,
+            color: colors.brand.primary,
             bg: colors.status.infoBg,
             trend: stats.activeClubs > 0 ? 'up' : null,
         },
@@ -107,7 +135,7 @@ export default function HomeScreen() {
             icon: 'wallet',
             value: formatCurrency(stats.totalPaidAmount),
             label: 'Total Pagado',
-            color: colors.brand.green,
+            color: colors.brand.secondary,
             bg: colors.status.successBg,
             trend: stats.totalPaidAmount > 0 ? 'up' : null,
         },
@@ -115,8 +143,8 @@ export default function HomeScreen() {
             icon: 'calendar',
             value: stats.totalWeeksPaid.toString(),
             label: 'Semanas',
-            color: colors.brand.cyan,
-            bg: colors.brand.cyan + '20',
+            color: colors.brand.secondary,
+            bg: colors.brand.secondary + '20',
             trend: null,
         },
         {
@@ -131,19 +159,19 @@ export default function HomeScreen() {
 
     const actions = [
         {
+            icon: 'qr-code',
+            title: 'Escanear QR',
+            subtitle: 'Buscar cliente',
+            color: colors.brand.secondary,
+            bg: colors.brand.secondary + '20',
+            onPress: () => setShowScanner(true),
+        },
+        {
             icon: 'add-circle',
             title: 'Nuevo Club',
             subtitle: 'Crear contrato',
-            color: colors.brand.blue,
+            color: colors.brand.primary,
             bg: colors.status.infoBg,
-            onPress: () => router.push('/(tabs)/clubs'),
-        },
-        {
-            icon: 'card',
-            title: 'Registrar Pago',
-            subtitle: 'Pagar cuota',
-            color: colors.brand.green,
-            bg: colors.status.successBg,
             onPress: () => router.push('/(tabs)/clubs'),
         },
         {
@@ -184,9 +212,9 @@ export default function HomeScreen() {
 
     const getActivityIcon = (type: string) => {
         switch (type) {
-            case 'payment': return { name: 'card', color: colors.brand.green, bg: colors.status.successBg };
+            case 'payment': return { name: 'card', color: colors.brand.secondary, bg: colors.status.successBg };
             case 'withdrawal': return { name: 'cash', color: colors.accent.orange, bg: colors.status.warningBg };
-            default: return { name: 'add-circle', color: colors.brand.blue, bg: colors.status.infoBg };
+            default: return { name: 'add-circle', color: colors.brand.primary, bg: colors.status.infoBg };
         }
     };
 
@@ -199,8 +227,8 @@ export default function HomeScreen() {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        colors={[colors.brand.blue]}
-                        tintColor={colors.brand.blue}
+                        colors={[colors.brand.primary]}
+                        tintColor={colors.brand.primary}
                         progressBackgroundColor={colors.bg.card}
                     />
                 }
@@ -233,12 +261,12 @@ export default function HomeScreen() {
                                     )}
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.avatarContainer} onPress={() => router.push('/(tabs)/profile')}>
-                                    <View style={[styles.avatar, { backgroundColor: colors.brand.blue }]}>
+                                    <View style={[styles.avatar, { backgroundColor: colors.brand.primary }]}>
                                         <Text style={[styles.avatarText, { color: colors.white }]}>
                                             {getInitials(user?.name || 'Usuario')}
                                         </Text>
                                     </View>
-                                    <View style={[styles.onlineIndicator, { backgroundColor: colors.brand.green, borderColor: colors.bg.primary }]} />
+                                    <View style={[styles.onlineIndicator, { backgroundColor: colors.brand.secondary, borderColor: colors.bg.primary }]} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -248,8 +276,8 @@ export default function HomeScreen() {
                             style={[styles.tenantCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}
                             activeOpacity={0.7}
                         >
-                            <View style={[styles.tenantIconContainer, { backgroundColor: colors.brand.cyan + '20' }]}>
-                                <Ionicons name="business" size={18} color={colors.brand.cyan} />
+                            <View style={[styles.tenantIconContainer, { backgroundColor: colors.brand.secondary + '20' }]}>
+                                <Ionicons name="business" size={18} color={colors.brand.secondary} />
                             </View>
                             <View style={styles.tenantInfo}>
                                 <Text style={[styles.tenantLabel, { color: colors.text.muted }]}>COMPAÑÍA ACTIVA</Text>
@@ -313,8 +341,8 @@ export default function HomeScreen() {
                         <View style={[styles.progressCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
                             <View style={styles.progressHeader}>
                                 <View style={styles.progressLeft}>
-                                    <View style={[styles.progressIconBg, { backgroundColor: colors.brand.cyan + '20' }]}>
-                                        <Ionicons name="stats-chart" size={20} color={colors.brand.cyan} />
+                                    <View style={[styles.progressIconBg, { backgroundColor: colors.brand.secondary + '20' }]}>
+                                        <Ionicons name="stats-chart" size={20} color={colors.brand.secondary} />
                                     </View>
                                     <View>
                                         <Text style={[styles.progressTitle, { color: colors.text.primary }]}>Resumen Financiero</Text>
@@ -333,7 +361,7 @@ export default function HomeScreen() {
                                             styles.progressBarFill,
                                             {
                                                 width: `${Math.min(totalProgress, 100)}%`,
-                                                backgroundColor: colors.brand.green
+                                                backgroundColor: colors.brand.secondary
                                             }
                                         ]}
                                     />
@@ -352,11 +380,11 @@ export default function HomeScreen() {
                             <View style={[styles.financeRow, { backgroundColor: colors.bg.elevated }]}>
                                 <View style={styles.financeItem}>
                                     <View style={[styles.financeIconSmall, { backgroundColor: colors.status.successBg }]}>
-                                        <Ionicons name="arrow-up" size={12} color={colors.brand.green} />
+                                        <Ionicons name="arrow-up" size={12} color={colors.brand.secondary} />
                                     </View>
                                     <View>
                                         <Text style={[styles.financeLabel, { color: colors.text.muted }]}>Pagado</Text>
-                                        <Text style={[styles.financeValue, { color: colors.brand.green }]}>
+                                        <Text style={[styles.financeValue, { color: colors.brand.secondary }]}>
                                             {formatCurrency(stats.totalPaidAmount)}
                                         </Text>
                                     </View>
@@ -364,7 +392,7 @@ export default function HomeScreen() {
                                 <View style={[styles.financeDivider, { backgroundColor: colors.border.default }]} />
                                 <View style={styles.financeItem}>
                                     <View style={[styles.financeIconSmall, { backgroundColor: colors.status.infoBg }]}>
-                                        <Ionicons name="wallet" size={12} color={colors.brand.blue} />
+                                        <Ionicons name="wallet" size={12} color={colors.brand.primary} />
                                     </View>
                                     <View>
                                         <Text style={[styles.financeLabel, { color: colors.text.muted }]}>Balance</Text>
@@ -418,8 +446,8 @@ export default function HomeScreen() {
                                 style={styles.seeAllBtn}
                                 onPress={() => router.push('/(tabs)/draws')}
                             >
-                                <Text style={[styles.seeAllText, { color: colors.brand.blue }]}>Ver todos</Text>
-                                <Ionicons name="chevron-forward" size={14} color={colors.brand.blue} />
+                                <Text style={[styles.seeAllText, { color: colors.brand.primary }]}>Ver todos</Text>
+                                <Ionicons name="chevron-forward" size={14} color={colors.brand.primary} />
                             </TouchableOpacity>
                         </View>
                         <TouchableOpacity
@@ -438,7 +466,7 @@ export default function HomeScreen() {
                                     Sorteos programados para Miércoles y Domingo
                                 </Text>
                             </View>
-                            <View style={[styles.nextDrawBadge, { backgroundColor: colors.brand.blue }]}>
+                            <View style={[styles.nextDrawBadge, { backgroundColor: colors.brand.primary }]}>
                                 <Ionicons name="chevron-forward" size={18} color={colors.white} />
                             </View>
                         </TouchableOpacity>
@@ -449,14 +477,14 @@ export default function HomeScreen() {
                         <View style={styles.sectionHeader}>
                             <Text style={[styles.sectionTitle, { color: colors.text.primary, marginBottom: 0 }]}>Actividad Reciente</Text>
                             <TouchableOpacity style={styles.seeAllBtn}>
-                                <Text style={[styles.seeAllText, { color: colors.brand.blue }]}>Ver todo</Text>
-                                <Ionicons name="chevron-forward" size={14} color={colors.brand.blue} />
+                                <Text style={[styles.seeAllText, { color: colors.brand.primary }]}>Ver todo</Text>
+                                <Ionicons name="chevron-forward" size={14} color={colors.brand.primary} />
                             </TouchableOpacity>
                         </View>
 
                         {isLoading ? (
                             <View style={[styles.loadingCard, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
-                                <ActivityIndicator size="small" color={colors.brand.blue} />
+                                <ActivityIndicator size="small" color={colors.brand.primary} />
                                 <Text style={[styles.loadingText, { color: colors.text.muted }]}>Cargando actividad...</Text>
                             </View>
                         ) : recentActivity.length > 0 ? (
@@ -485,7 +513,7 @@ export default function HomeScreen() {
                                                 </Text>
                                             </View>
                                             {activity.amount !== undefined && activity.amount > 0 && (
-                                                <Text style={[styles.activityAmount, { color: colors.brand.green }]}>
+                                                <Text style={[styles.activityAmount, { color: colors.brand.secondary }]}>
                                                     +{formatCurrency(activity.amount)}
                                                 </Text>
                                             )}
@@ -519,6 +547,13 @@ export default function HomeScreen() {
                     <View style={styles.bottomSpacer} />
                 </Animated.View>
             </ScrollView>
+
+            {/* QR Scanner Modal */}
+            <QRScanner
+                visible={showScanner}
+                onClose={() => setShowScanner(false)}
+                onScan={handleQRScan}
+            />
         </View>
     );
 }
