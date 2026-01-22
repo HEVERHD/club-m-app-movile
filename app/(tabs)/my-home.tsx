@@ -17,11 +17,13 @@ import { useAuthStore } from '../../src/stores/auth-store';
 import { getClubsByCustomer } from '../../src/api/clubs.api';
 import type { Club } from '../../src/types/clubs';
 import QRCode from 'react-native-qrcode-svg';
+import { useNotificationsStore } from '../../src/stores/notifications-store';
 
 export default function MyHomeScreen() {
     const { colors } = useTheme();
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
+    const unreadNotifications = useNotificationsStore((state) => state.unreadCount);
 
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -101,9 +103,16 @@ export default function MyHomeScreen() {
                     </View>
                     <TouchableOpacity
                         style={[styles.notificationBtn, { backgroundColor: colors.bg.card }]}
-                        onPress={() => {/* TODO: Notificaciones */ }}
+                        onPress={() => router.push('/notifications')}
                     >
                         <Ionicons name="notifications-outline" size={24} color={colors.text.primary} />
+                        {unreadNotifications > 0 && (
+                            <View style={[styles.notificationBadge, { backgroundColor: colors.status.error }]}>
+                                <Text style={styles.notificationBadgeText}>
+                                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                                </Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
 
@@ -330,6 +339,22 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    notificationBadge: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        minWidth: 18,
+        height: 18,
+        borderRadius: 9,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+    },
+    notificationBadgeText: {
+        color: '#ffffff',
+        fontSize: 10,
+        fontWeight: '700',
     },
 
     // Member Card

@@ -23,6 +23,23 @@ export function useNetworkStatus() {
         setStatus(prev => ({ ...prev, pendingActions: queue.length }));
     }, []);
 
+    const checkConnection = useCallback(async (): Promise<boolean> => {
+        try {
+            const state = await NetInfo.fetch();
+            const queue = await getOfflineQueue();
+            setStatus({
+                isConnected: state.isConnected ?? false,
+                isInternetReachable: state.isInternetReachable,
+                connectionType: state.type,
+                pendingActions: queue.length,
+            });
+            return state.isConnected === true && state.isInternetReachable === true;
+        } catch (error) {
+            console.error('Error checking network:', error);
+            return false;
+        }
+    }, []);
+
     useEffect(() => {
         // Verificar estado inicial
         NetInfo.fetch().then(async (state: NetInfoState) => {
@@ -59,5 +76,6 @@ export function useNetworkStatus() {
         ...status,
         isOffline: !status.isConnected || status.isInternetReachable === false,
         updatePendingActions,
+        checkConnection,
     };
 }

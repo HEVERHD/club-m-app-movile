@@ -7,6 +7,8 @@ import { useDashboardStore } from '../../src/stores/dashboard-store';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { router } from 'expo-router';
 import { QRScanner, QRData } from '../../src/components/scanner/QRScanner';
+import { useNotificationsStore } from '../../src/stores/notifications-store';
+import { useCouponsFiltered } from '../../src/stores/coupons-store';
 
 // Helper para formatear moneda
 const formatCurrency = (amount: number): string => {
@@ -55,6 +57,8 @@ export default function HomeScreen() {
     const { colors } = useTheme();
     const [refreshing, setRefreshing] = useState(false);
     const [showScanner, setShowScanner] = useState(false);
+    const unreadNotifications = useNotificationsStore((state) => state.unreadCount);
+    const { availableCount: couponsCount } = useCouponsFiltered();
 
     // Animaciones
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -165,14 +169,16 @@ export default function HomeScreen() {
             color: colors.brand.secondary,
             bg: colors.brand.secondary + '20',
             onPress: () => setShowScanner(true),
+            badge: null,
         },
         {
-            icon: 'add-circle',
-            title: 'Nuevo Club',
-            subtitle: 'Crear contrato',
-            color: colors.brand.primary,
-            bg: colors.status.infoBg,
-            onPress: () => router.push('/(tabs)/clubs'),
+            icon: 'ticket-outline',
+            title: 'Mis Cupones',
+            subtitle: couponsCount > 0 ? `${couponsCount} disponibles` : 'Ver cupones',
+            color: '#22c55e',
+            bg: 'rgba(34, 197, 94, 0.15)',
+            onPress: () => router.push('/coupons'),
+            badge: couponsCount > 0 ? couponsCount : null,
         },
         {
             icon: 'trophy',
@@ -181,6 +187,7 @@ export default function HomeScreen() {
             color: colors.accent.gold,
             bg: colors.accent.gold + '20',
             onPress: () => router.push('/draw/execute'),
+            badge: null,
         },
         {
             icon: 'document-text',
@@ -189,6 +196,7 @@ export default function HomeScreen() {
             color: colors.accent.orange,
             bg: colors.status.warningBg,
             onPress: () => router.push('/draw/winners-report'),
+            badge: null,
         },
     ];
 
@@ -251,12 +259,14 @@ export default function HomeScreen() {
                             <View style={styles.headerRight}>
                                 <TouchableOpacity
                                     style={[styles.notificationBtn, { backgroundColor: colors.bg.card }]}
-                                    onPress={() => {}}
+                                    onPress={() => router.push('/notifications')}
                                 >
                                     <Ionicons name="notifications-outline" size={22} color={colors.text.secondary} />
-                                    {alerts.length > 0 && (
+                                    {unreadNotifications > 0 && (
                                         <View style={[styles.notificationBadge, { backgroundColor: colors.status.error }]}>
-                                            <Text style={styles.notificationBadgeText}>{alerts.length}</Text>
+                                            <Text style={styles.notificationBadgeText}>
+                                                {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                                            </Text>
                                         </View>
                                     )}
                                 </TouchableOpacity>
@@ -428,8 +438,15 @@ export default function HomeScreen() {
                                     activeOpacity={0.7}
                                     onPress={action.onPress}
                                 >
-                                    <View style={[styles.actionIconBg, { backgroundColor: action.bg }]}>
-                                        <Ionicons name={action.icon as any} size={24} color={action.color} />
+                                    <View style={styles.actionCardHeader}>
+                                        <View style={[styles.actionIconBg, { backgroundColor: action.bg }]}>
+                                            <Ionicons name={action.icon as any} size={24} color={action.color} />
+                                        </View>
+                                        {action.badge && (
+                                            <View style={[styles.actionBadge, { backgroundColor: action.color }]}>
+                                                <Text style={styles.actionBadgeText}>{action.badge}</Text>
+                                            </View>
+                                        )}
                                     </View>
                                     <Text style={[styles.actionTitle, { color: colors.text.primary }]}>{action.title}</Text>
                                     <Text style={[styles.actionSubtitle, { color: colors.text.muted }]}>{action.subtitle}</Text>
@@ -639,7 +656,10 @@ const styles = StyleSheet.create({
     // Actions
     actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     actionCard: { width: '48%', flexGrow: 1, borderRadius: 14, padding: 14, borderWidth: 1 },
-    actionIconBg: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
+    actionCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
+    actionIconBg: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    actionBadge: { minWidth: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 },
+    actionBadgeText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
     actionTitle: { fontSize: 14, fontWeight: '600', marginBottom: 2 },
     actionSubtitle: { fontSize: 12 },
 

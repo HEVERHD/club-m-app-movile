@@ -17,6 +17,9 @@ import { clearClubsCache } from '../../src/api/clubs.api';
 import { CustomAlert } from '../../src/components/ui/CustomAlert';
 import { useAlert } from '../../src/hooks/useAlert';
 import { useBiometrics, getBiometricIcon, getBiometricLabel } from '../../src/hooks/useBiometrics';
+import { useNotifications } from '../../src/hooks/useNotifications';
+import { useCouponsFiltered } from '../../src/stores/coupons-store';
+import { useNotificationsStore } from '../../src/stores/notifications-store';
 
 export default function ProfileScreen() {
     const alert = useAlert();
@@ -29,6 +32,11 @@ export default function ProfileScreen() {
     const [isSyncing, setIsSyncing] = useState(false);
     const [isClearing, setIsClearing] = useState(false);
 
+    // Coupons count
+    const { availableCount: couponsCount } = useCouponsFiltered();
+    // Notifications count
+    const unreadNotifications = useNotificationsStore((state) => state.unreadCount);
+
     // Biometrics
     const {
         isAvailable: biometricAvailable,
@@ -38,6 +46,27 @@ export default function ProfileScreen() {
         enableBiometrics,
         disableBiometrics,
     } = useBiometrics();
+
+    // Notifications
+    const {
+        isEnabled: notificationsEnabled,
+        isLoading: notificationsLoading,
+        toggleNotifications,
+        sendTestNotification,
+    } = useNotifications();
+
+    const handleToggleNotifications = async (value: boolean) => {
+        try {
+            await toggleNotifications(value);
+            if (value) {
+                alert.showSuccess('Activado', 'Recibirás notificaciones de pagos, sorteos y más');
+            } else {
+                alert.showSuccess('Desactivado', 'No recibirás notificaciones push');
+            }
+        } catch (error: any) {
+            alert.showError('Error', error.message || 'No se pudo cambiar la configuración');
+        }
+    };
 
     // Password modal for biometric setup
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -214,15 +243,16 @@ export default function ProfileScreen() {
                 </View>
             </View>
 
-            {/* Security Section */}
-            {biometricAvailable && (
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Ionicons name="shield-checkmark-outline" size={20} color={colors.text.muted} />
-                        <Text style={[styles.sectionTitle, { color: colors.text.muted }]}>Seguridad</Text>
-                    </View>
-                    <View style={[styles.sectionContent, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
-                        <View style={[styles.biometricRow, { borderBottomColor: colors.border.default }]}>
+            {/* Security & Notifications Section */}
+            <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                    <Ionicons name="shield-checkmark-outline" size={20} color={colors.text.muted} />
+                    <Text style={[styles.sectionTitle, { color: colors.text.muted }]}>Seguridad y Notificaciones</Text>
+                </View>
+                <View style={[styles.sectionContent, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    {/* Biometric toggle */}
+                    {biometricAvailable && (
+                        <View style={[styles.biometricRow, { borderBottomColor: colors.border.default, borderBottomWidth: 1 }]}>
                             <View style={[styles.actionIcon, { backgroundColor: colors.brand.primary + '15' }]}>
                                 <Ionicons
                                     name={getBiometricIcon(biometricType) as any}
@@ -249,9 +279,75 @@ export default function ProfileScreen() {
                                 />
                             )}
                         </View>
+                    )}
+
+                    {/* Notifications toggle */}
+                    <View style={[styles.biometricRow, { borderBottomWidth: 0 }]}>
+                        <View style={[styles.actionIcon, { backgroundColor: colors.accent.purple + '15' }]}>
+                            <Ionicons name="notifications-outline" size={20} color={colors.accent.purple} />
+                        </View>
+                        <View style={styles.biometricInfo}>
+                            <Text style={[styles.biometricTitle, { color: colors.text.primary }]}>
+                                Notificaciones Push
+                            </Text>
+                            <Text style={[styles.biometricSubtitle, { color: colors.text.secondary }]}>
+                                Recordatorios de pago y avisos
+                            </Text>
+                        </View>
+                        {notificationsLoading ? (
+                            <ActivityIndicator size="small" color={colors.accent.purple} />
+                        ) : (
+                            <Switch
+                                value={notificationsEnabled}
+                                onValueChange={handleToggleNotifications}
+                                trackColor={{ false: colors.border.default, true: colors.accent.purple + '50' }}
+                                thumbColor={notificationsEnabled ? colors.accent.purple : colors.bg.elevated}
+                            />
+                        )}
                     </View>
                 </View>
-            )}
+            </View>
+
+            {/* Mis Beneficios */}
+            <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                    <Ionicons name="gift-outline" size={20} color={colors.text.muted} />
+                    <Text style={[styles.sectionTitle, { color: colors.text.muted }]}>Mis Beneficios</Text>
+                </View>
+                <View style={[styles.sectionContent, { backgroundColor: colors.bg.card, borderColor: colors.border.default }]}>
+                    <TouchableOpacity
+                        style={[styles.actionBtn, { borderBottomColor: colors.border.default }]}
+                        onPress={() => router.push('/coupons')}
+                    >
+                        <View style={[styles.actionIcon, { backgroundColor: colors.status.successBg }]}>
+                            <Ionicons name="ticket-outline" size={20} color={colors.status.success} />
+                        </View>
+                        <Text style={[styles.actionText, { color: colors.text.primary }]}>Mis Cupones</Text>
+                        {couponsCount > 0 && (
+                            <View style={[styles.countBadge, { backgroundColor: colors.status.success }]}>
+                                <Text style={styles.countBadgeText}>{couponsCount}</Text>
+                            </View>
+                        )}
+                        <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.actionBtn, { borderBottomWidth: 0 }]}
+                        onPress={() => router.push('/notifications')}
+                    >
+                        <View style={[styles.actionIcon, { backgroundColor: colors.accent.purple + '15' }]}>
+                            <Ionicons name="notifications-outline" size={20} color={colors.accent.purple} />
+                        </View>
+                        <Text style={[styles.actionText, { color: colors.text.primary }]}>Notificaciones</Text>
+                        {unreadNotifications > 0 && (
+                            <View style={[styles.countBadge, { backgroundColor: colors.accent.purple }]}>
+                                <Text style={styles.countBadgeText}>{unreadNotifications}</Text>
+                            </View>
+                        )}
+                        <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+                    </TouchableOpacity>
+                </View>
+            </View>
 
             {/* Quick Actions */}
             <View style={styles.section}>
@@ -474,6 +570,20 @@ const styles = StyleSheet.create({
     },
     actionText: { flex: 1, fontSize: 15 },
     logoutBtn: { borderBottomWidth: 0 },
+    countBadge: {
+        minWidth: 22,
+        height: 22,
+        borderRadius: 11,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 6,
+        marginRight: 8,
+    },
+    countBadgeText: {
+        color: '#ffffff',
+        fontSize: 12,
+        fontWeight: '700',
+    },
 
     // Biometric styles
     biometricRow: {
