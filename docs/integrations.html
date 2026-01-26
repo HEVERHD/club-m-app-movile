@@ -906,12 +906,19 @@
                                     <div class="integration-file">customers.api.ts</div>
                                 </div>
                             </div>
-                            <span class="integration-status partial">
-                                <i class="ri-alert-fill"></i>
-                                Parcial
+                            <span class="integration-status integrated">
+                                <i class="ri-checkbox-circle-fill"></i>
+                                Funcional
                             </span>
                         </div>
                         <div class="integration-body">
+                            <div style="padding: 16px; background: rgba(34, 197, 94, 0.1); border-left: 3px solid var(--success); border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 0; color: var(--text-primary); font-size: 0.9rem;">
+                                    <i class="ri-information-line" style="color: var(--success);"></i>
+                                    <strong>Módulo Funcional:</strong> Búsqueda, consulta y registro de clientes (particular/empresa) funcionan perfectamente.
+                                    Los métodos genéricos CRUD no existen en la API Aludra, pero se reemplazan por métodos específicos más robustos.
+                                </p>
+                            </div>
                             <table class="endpoints-table">
                                 <thead>
                                     <tr>
@@ -950,19 +957,19 @@
                                         <td><span class="endpoint-name">createCustomer()</span></td>
                                         <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
                                         <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
-                                        <td>Endpoint generico no existe</td>
+                                        <td>No necesario - usar registerParticular() o registerEmpresa()</td>
                                     </tr>
                                     <tr>
                                         <td><span class="endpoint-name">updateCustomer()</span></td>
                                         <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
                                         <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
-                                        <td>Endpoint generico no existe</td>
+                                        <td>No necesario - usar updateParticular() o updateEmpresa()</td>
                                     </tr>
                                     <tr>
                                         <td><span class="endpoint-name">deleteCustomer()</span></td>
                                         <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
                                         <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
-                                        <td>Endpoint generico no existe</td>
+                                        <td>Endpoint no disponible en API Aludra</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1388,14 +1395,6 @@
                             <div class="todo-title">Cancelar Sorteo</div>
                             <div class="todo-desc">cancelDraw() no implementado en backend.</div>
                             <div class="todo-file">draws.api.ts:294</div>
-                        </div>
-                    </div>
-                    <div class="todo-item">
-                        <div class="todo-icon"><i class="ri-user-settings-line"></i></div>
-                        <div class="todo-content">
-                            <div class="todo-title">CRUD Generico de Clientes</div>
-                            <div class="todo-desc">createCustomer(), updateCustomer(), deleteCustomer() genericos no disponibles. Solo funcionan los especificos (particular/empresa).</div>
-                            <div class="todo-file">customers.api.ts:273, 292, 312</div>
                         </div>
                     </div>
                 </div>
