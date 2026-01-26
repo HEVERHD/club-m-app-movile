@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionalidades - Club de Mercancias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4a6e;
+            --primary-light: #2d6a8a;
+            --primary-dark: #0f3450;
+            --secondary: #22c55e;
+            --accent-gold: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --bg-dark: #0a0f1a;
+            --bg-card: #111827;
+            --bg-elevated: #1f2937;
+            --bg-hover: #374151;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1f2937;
+            --border-light: #374151;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            --gradient-primary: linear-gradient(135deg, #1a4a6e 0%, #2d6a8a 50%, #3d8aa6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 0 40px;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-logo i { font-size: 22px; color: white; }
+        .nav-title { font-weight: 700; font-size: 1.1rem; }
+        .nav-links { display: flex; gap: 8px; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
+        .nav-link.active { background: var(--primary); color: white; }
+        .nav-link i { font-size: 18px; }
+
+        /* Main */
+        .main { padding-top: 70px; }
+
+        /* Page Header */
+        .page-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 60px 40px;
+        }
+
+        .page-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover { color: var(--text-primary); }
+        .breadcrumb span { color: var(--text-muted); }
+        .breadcrumb .current { color: var(--text-secondary); }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover { border-color: var(--primary-light); color: var(--text-primary); }
+        .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Feature Cards */
+        .features-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        .feature-card-header {
+            padding: 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+        }
+
+        .feature-info { flex: 1; }
+
+        .feature-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .feature-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .feature-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-done { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .feature-card-body {
+            padding: 28px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-section h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-section h4 i { font-size: 16px; }
+
+        .feature-files {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: var(--text-secondary);
+        }
+
+        .file-item i { color: var(--primary-light); }
+
+        .feature-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tech-badge {
+            padding: 6px 12px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-capabilities {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .capability-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .capability-item i {
+            color: var(--success);
+            font-size: 16px;
+        }
+
+        /* Stats Summary */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .stat-box-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 40px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-brand i { font-size: 24px; color: var(--primary-light); }
+
+        .footer-links { display: flex; gap: 24px; }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover { color: var(--text-primary); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .feature-card-body { grid-template-columns: 1fr; }
+            .stats-summary { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .page-header { padding: 40px 20px; }
+            .page-header h1 { font-size: 1.8rem; }
+            .container { padding: 40px 20px; }
+            .filters { flex-wrap: wrap; }
+            .stats-summary { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo"><i class="ri-store-3-line"></i></div>
+                <span class="nav-title">Club de Mercancias</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="ri-home-4-line"></i><span>Inicio</span></a>
+                <a href="features.html" class="nav-link active"><i class="ri-apps-2-line"></i><span>Funcionalidades</span></a>
+                <a href="screens.html" class="nav-link"><i class="ri-smartphone-line"></i><span>Pantallas</span></a>
+                <a href="architecture.html" class="nav-link"><i class="ri-code-s-slash-line"></i><span>Arquitectura</span></a>
+                <a href="integrations.html" class="nav-link"><i class="ri-plug-line"></i><span>Integraciones</span></a>
+                <a href="mvp.html" class="nav-link"><i class="ri-flag-line"></i><span>MVP</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <div class="breadcrumb">
+                    <a href="index.html">Inicio</a>
+                    <span>/</span>
+                    <span class="current">Funcionalidades</span>
+                </div>
+                <h1>Funcionalidades</h1>
+                <p>Detalle completo de todas las funcionalidades implementadas en la aplicacion movil.</p>
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">Todas</button>
+                    <button class="filter-btn" data-filter="done">Completadas</button>
+                    <button class="filter-btn" data-filter="pending">Pendientes</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stat-box">
+                    <div class="stat-box-value" style="color: var(--success);">16</div>
+                    <div class="stat-box-label">Completadas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value" style="color: var(--success);">0</div>
+                    <div class="stat-box-label">Pendientes</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value" style="color: var(--info);">60+</div>
+                    <div class="stat-box-label">Archivos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value" style="color: var(--success);">100%</div>
+                    <div class="stat-box-label">Progreso</div>
+                </div>
+            </div>
+
+            <!-- Features List -->
+            <div class="features-grid">
+                <!-- Authentication -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                            <i class="ri-login-box-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Sistema de Autenticacion</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Sistema completo de login con email/password, seleccion de empresa multi-tenant, tokens JWT, y persistencia de sesion con SecureStore.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(auth)/login.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(auth)/company.tsx</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/stores/auth-store.ts</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/client.ts</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">Zustand</span>
+                                <span class="tech-badge">SecureStore</span>
+                                <span class="tech-badge">JWT</span>
+                                <span class="tech-badge">Axios</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Login con email/password</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Multi-tenant (seleccion de empresa)</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Persistencia de sesion</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Manejo de tokens JWT</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biometrics -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink);">
+                            <i class="ri-fingerprint-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Autenticacion Biometrica</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Login rapido con Face ID y huella digital. Credenciales encriptadas almacenadas de forma segura para acceso instantaneo.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-code-line"></i> src/hooks/useBiometrics.ts</div>
+                                <div class="file-item"><i class="ri-settings-3-line"></i> src/components/settings/</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">expo-local-authentication</span>
+                                <span class="tech-badge">SecureStore</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Face ID (iOS)</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Huella digital (Android/iOS)</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Credenciales encriptadas</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Habilitacion opcional</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Push Notifications -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+                            <i class="ri-notification-3-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Notificaciones Push</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Sistema completo de notificaciones con canales Android, recordatorios de pago, alertas de sorteos e historial de notificaciones.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/notifications.tsx</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/stores/notifications-store.ts</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/services/notifications.ts</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">expo-notifications</span>
+                                <span class="tech-badge">expo-device</span>
+                                <span class="tech-badge">Zustand Persist</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Push notifications</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Canales Android</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Notificaciones locales</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Historial</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coupons -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                            <i class="ri-coupon-3-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Cupones y Beneficios</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Sistema de cupones con multiples tipos de descuento, canje, historial, terminos y condiciones, y filtrado por estado.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/coupons.tsx</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/stores/coupons-store.ts</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/coupons.api.ts</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/coupons/CouponCard.tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">Zustand Persist</span>
+                                <span class="tech-badge">React Native Modal</span>
+                                <span class="tech-badge">date-fns</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> 6+ tipos de cupon</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Canje de cupones</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Historial (usados/expirados)</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Terminos y condiciones</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offline Mode -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                            <i class="ri-wifi-off-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Modo Offline</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Funcionalidad sin conexion con cache local, deteccion automatica de red, cola de acciones offline y sincronizacion.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-code-line"></i> src/hooks/useNetworkStatus.ts</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/ui/OfflineBanner.tsx</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/services/syncService.ts</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/lib/storage.ts</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">@react-native-community/netinfo</span>
+                                <span class="tech-badge">AsyncStorage</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Deteccion de red</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Cache local</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Cola de acciones offline</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Sincronizacion automatica</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                            <i class="ri-dashboard-3-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Dashboard Principal</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Vista principal con estadisticas, acciones rapidas, actividad reciente y alertas. Adaptado para roles de staff y cliente.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(tabs)/home.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(tabs)/my-home.tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">React Query</span>
+                                <span class="tech-badge">LinearGradient</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Estadisticas en tiempo real</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Acciones rapidas</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Actividad reciente</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Vista por rol</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clubs -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">
+                            <i class="ri-group-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Gestion de Clubes</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Lista de clubes de ahorro, detalles, progreso de semanas, balance, historial de pagos y miembros activos.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(tabs)/clubs.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/club/[id].tsx</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/clubs.api.ts</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/clubs/ClubCard.tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">React Query</span>
+                                <span class="tech-badge">Expo Router</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Lista de clubes</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Detalle de club</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Progreso semanal</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Balance y pagos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Draws/Sorteos -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">
+                            <i class="ri-trophy-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Sorteos</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Ejecucion de sorteos con animacion, visualizacion de ganadores, generacion de reportes PDF y historial.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(tabs)/draws.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/draw.tsx</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/draws.api.ts</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">react-native-pdf</span>
+                                <span class="tech-badge">expo-sharing</span>
+                                <span class="tech-badge">Reanimated</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Ejecucion de sorteos</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Animacion de ruleta</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Reportes PDF</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Historial</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QR Scanner -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(20, 184, 166, 0.15); color: #14b8a6;">
+                            <i class="ri-qr-scan-2-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Escaner QR</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Busqueda de clientes por codigo QR integrado con la camara del dispositivo.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/scanner/QRScanner.tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">expo-camera</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Escaneo QR</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Busqueda de clientes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+                            <i class="ri-moon-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Tema Claro/Oscuro</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Sistema de temas con soporte automatico del sistema operativo y persistencia de preferencia.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/contexts/ThemeContext.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/settings/ThemeSelector.tsx</div>
+                                <div class="file-item"><i class="ri-palette-line"></i> src/constants/colors.ts</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">React Context</span>
+                                <span class="tech-badge">AsyncStorage</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Tema claro</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Tema oscuro</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Auto (sistema)</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Persistencia</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                            <i class="ri-search-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Busqueda de Clientes</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Busqueda por nombre, cedula o numero de contrato con resultados instantaneos y filtrado.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/search.tsx</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/customers.api.ts</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">React Query</span>
+                                <span class="tech-badge">Debounce</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Busqueda por nombre</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Busqueda por cedula</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Busqueda por contrato</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Resultados instantaneos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(107, 114, 128, 0.15); color: var(--text-muted);">
+                            <i class="ri-user-settings-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Perfil y Configuracion</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Gestion de perfil de usuario, configuraciones de app, sincronizacion y limpieza de cache.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(tabs)/profile.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(tabs)/my-profile.tsx</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/stores/settingsStore.ts</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">Zustand</span>
+                                <span class="tech-badge">AsyncStorage</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Ver perfil</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Configuraciones</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Limpiar cache</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Cerrar sesion</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMPLETADOS MVP -->
+
+                <!-- Payment History -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                            <i class="ri-receipt-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Historial de Compras</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Registro completo de pagos, canjes y transacciones del cliente con filtros por tipo.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/purchases.tsx</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/purchases.api.ts</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/stores/purchases-store.ts</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/purchases/PurchaseItem.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/purchases/PurchasesSummaryCard.tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">Zustand</span>
+                                <span class="tech-badge">AsyncStorage</span>
+                                <span class="tech-badge">expo-linear-gradient</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Lista de transacciones</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Filtros por tipo (Todos/Pagos/Canjes)</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Resumen con totales</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Pull to refresh</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Member QR -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">
+                            <i class="ri-qr-code-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">QR de Miembro</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Codigo QR personal para identificacion rapida en tienda y canje de beneficios.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/customers/QRCodeCard.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/(tabs)/my-profile.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/customer/[id].tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">react-native-qrcode-svg</span>
+                                <span class="tech-badge">expo-sharing</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Generacion QR</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Vista compacta y modal</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Compartir QR</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Points System -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">
+                            <i class="ri-star-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Sistema de Puntos</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Visualizacion de puntos acumulados con historial de movimientos y filtros.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/points.tsx</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/points.api.ts</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/stores/points-store.ts</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/points/PointsCard.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/points/PointsTransactionItem.tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">Zustand</span>
+                                <span class="tech-badge">AsyncStorage</span>
+                                <span class="tech-badge">expo-linear-gradient</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Ver puntos disponibles</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Historial de movimientos</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Filtros (Todos/Ganados/Canjeados)</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Puntos por expirar</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campaigns -->
+                <div class="feature-card" data-status="done">
+                    <div class="feature-card-header">
+                        <div class="feature-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+                            <i class="ri-megaphone-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <div class="feature-title-row">
+                                <h3 class="feature-title">Ofertas y Campanas</h3>
+                                <span class="feature-status status-done">Completado</span>
+                            </div>
+                            <p class="feature-description">Ofertas exclusivas y campanas promocionales con participacion y seguimiento.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card-body">
+                        <div class="feature-section">
+                            <h4><i class="ri-file-code-line"></i> Archivos</h4>
+                            <div class="feature-files">
+                                <div class="file-item"><i class="ri-reactjs-line"></i> app/campaigns.tsx</div>
+                                <div class="file-item"><i class="ri-server-line"></i> src/api/campaigns.api.ts</div>
+                                <div class="file-item"><i class="ri-database-2-line"></i> src/stores/campaigns-store.ts</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/campaigns/CampaignCard.tsx</div>
+                                <div class="file-item"><i class="ri-reactjs-line"></i> src/components/campaigns/CampaignBanner.tsx</div>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-tools-line"></i> Tecnologias</h4>
+                            <div class="feature-tech">
+                                <span class="tech-badge">Zustand</span>
+                                <span class="tech-badge">AsyncStorage</span>
+                                <span class="tech-badge">expo-linear-gradient</span>
+                            </div>
+                        </div>
+                        <div class="feature-section">
+                            <h4><i class="ri-checkbox-circle-line"></i> Capacidades</h4>
+                            <div class="feature-capabilities">
+                                <div class="capability-item"><i class="ri-check-line"></i> Lista de ofertas activas</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Detalle con terminos</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Participar en campanas</div>
+                                <div class="capability-item"><i class="ri-check-line"></i> Banner en home</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="ri-code-box-line"></i>
+                <span>Desarrollado con Claude Code | Enero 2026</span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Inicio</a>
+                <a href="screens.html" class="footer-link">Pantallas</a>
+                <a href="architecture.html" class="footer-link">Arquitectura</a>
+                <a href="mvp.html" class="footer-link">MVP</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Filter functionality
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const featureCards = document.querySelectorAll('.feature-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.dataset.filter;
+
+                featureCards.forEach(card => {
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = card.dataset.status === filter ? 'block' : 'none';
+                    }
+                });
+            });
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        featureCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `all 0.5s ease ${index * 0.1}s`;
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

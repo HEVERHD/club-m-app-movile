@@ -2,11 +2,12 @@
 import { useState } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity, StyleSheet,
-    ActivityIndicator, Switch, Modal, TextInput, KeyboardAvoidingView, Platform
+    ActivityIndicator, Switch, Modal, TextInput, KeyboardAvoidingView, Platform, Pressable
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useAuthStore } from '../../src/stores/auth-store';
@@ -31,6 +32,8 @@ export default function ProfileScreen() {
 
     const [isSyncing, setIsSyncing] = useState(false);
     const [isClearing, setIsClearing] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     // Coupons count
     const { availableCount: couponsCount } = useCouponsFiltered();
@@ -111,18 +114,16 @@ export default function ProfileScreen() {
         }
     };
 
-    const handleLogout = () => {
-        alert.showConfirm(
-            'Cerrar Sesión',
-            '¿Estás seguro de que deseas cerrar sesión?',
-            async () => {
-                await logout();
-                router.replace('/(auth)/company');
-            },
-            undefined,
-            'Cerrar Sesión',
-            'Cancelar'
-        );
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        try {
+            await logout();
+            setShowLogoutModal(false);
+            router.replace('/(auth)/company');
+        } catch (error) {
+            console.error('Error logging out:', error);
+            setIsLoggingOut(false);
+        }
     };
 
     const handleSyncData = async () => {
@@ -392,7 +393,7 @@ export default function ProfileScreen() {
                         <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.actionBtn, styles.logoutBtn]} onPress={handleLogout}>
+                    <TouchableOpacity style={[styles.actionBtn, styles.logoutBtn]} onPress={() => setShowLogoutModal(true)}>
                         <View style={[styles.actionIcon, { backgroundColor: colors.status.errorBg }]}>
                             <Ionicons name="log-out-outline" size={20} color={colors.status.error} />
                         </View>
@@ -484,6 +485,91 @@ export default function ProfileScreen() {
                 buttons={alert.config.buttons}
                 onDismiss={alert.hide}
             />
+
+            {/* Modal de Cerrar Sesión - Premium */}
+            <Modal
+                visible={showLogoutModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowLogoutModal(false)}
+            >
+                <Pressable
+                    style={styles.logoutModalOverlay}
+                    onPress={() => !isLoggingOut && setShowLogoutModal(false)}
+                >
+                    <Pressable style={[styles.logoutModalContent, { backgroundColor: colors.bg.card }]}>
+                        {/* Icon with gradient background */}
+                        <LinearGradient
+                            colors={['#fee2e2', '#fecaca']}
+                            style={styles.logoutModalIconContainer}
+                        >
+                            <View style={styles.logoutModalIconInner}>
+                                <Ionicons name="log-out-outline" size={32} color="#dc2626" />
+                            </View>
+                        </LinearGradient>
+
+                        {/* Title */}
+                        <Text style={[styles.logoutModalTitle, { color: colors.text.primary }]}>
+                            ¿Cerrar sesión?
+                        </Text>
+
+                        {/* Description */}
+                        <Text style={[styles.logoutModalDescription, { color: colors.text.secondary }]}>
+                            Tendrás que volver a iniciar sesión para acceder al sistema.
+                        </Text>
+
+                        {/* User info pill */}
+                        <View style={[styles.logoutModalUserPill, { backgroundColor: colors.bg.elevated }]}>
+                            <View style={[styles.logoutModalUserAvatar, { backgroundColor: colors.brand.primary }]}>
+                                <Text style={styles.logoutModalUserAvatarText}>
+                                    {getInitials(user?.name || 'Usuario')}
+                                </Text>
+                            </View>
+                            <View style={styles.logoutModalUserInfo}>
+                                <Text style={[styles.logoutModalUserName, { color: colors.text.primary }]} numberOfLines={1}>
+                                    {user?.name || 'Usuario'}
+                                </Text>
+                                <Text style={[styles.logoutModalUserEmail, { color: colors.text.muted }]} numberOfLines={1}>
+                                    {user?.email}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Buttons */}
+                        <View style={styles.logoutModalButtons}>
+                            <TouchableOpacity
+                                style={[styles.logoutModalBtnCancel, { backgroundColor: colors.bg.elevated }]}
+                                onPress={() => setShowLogoutModal(false)}
+                                disabled={isLoggingOut}
+                            >
+                                <Text style={[styles.logoutModalBtnCancelText, { color: colors.text.primary }]}>
+                                    Cancelar
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.logoutModalBtnConfirm, isLoggingOut && styles.logoutModalBtnDisabled]}
+                                onPress={handleLogout}
+                                disabled={isLoggingOut}
+                            >
+                                <LinearGradient
+                                    colors={isLoggingOut ? ['#9ca3af', '#9ca3af'] : ['#ef4444', '#dc2626']}
+                                    style={styles.logoutModalBtnConfirmGradient}
+                                >
+                                    {isLoggingOut ? (
+                                        <ActivityIndicator size="small" color="white" />
+                                    ) : (
+                                        <>
+                                            <Ionicons name="log-out-outline" size={18} color="white" />
+                                            <Text style={styles.logoutModalBtnConfirmText}>Cerrar Sesión</Text>
+                                        </>
+                                    )}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
         </ScrollView>
     );
 }
@@ -669,5 +755,126 @@ const styles = StyleSheet.create({
     modalBtnText: {
         fontSize: 16,
         fontWeight: '600',
+    },
+
+    // Logout Modal Styles
+    logoutModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    logoutModalContent: {
+        width: '100%',
+        maxWidth: 340,
+        borderRadius: 24,
+        padding: 24,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    logoutModalIconContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    logoutModalIconInner: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#dc2626',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    logoutModalTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    logoutModalDescription: {
+        fontSize: 14,
+        lineHeight: 20,
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    logoutModalUserPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderRadius: 16,
+        marginBottom: 24,
+        width: '100%',
+    },
+    logoutModalUserAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    logoutModalUserAvatarText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    logoutModalUserInfo: {
+        marginLeft: 12,
+        flex: 1,
+    },
+    logoutModalUserName: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    logoutModalUserEmail: {
+        fontSize: 12,
+        marginTop: 2,
+    },
+    logoutModalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+    },
+    logoutModalBtnCancel: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 14,
+        alignItems: 'center',
+    },
+    logoutModalBtnCancelText: {
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    logoutModalBtnConfirm: {
+        flex: 1,
+        borderRadius: 14,
+        overflow: 'hidden',
+    },
+    logoutModalBtnConfirmGradient: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        gap: 6,
+    },
+    logoutModalBtnConfirmText: {
+        color: 'white',
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    logoutModalBtnDisabled: {
+        opacity: 0.7,
     },
 });

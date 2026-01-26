@@ -18,12 +18,21 @@ import { getClubsByCustomer } from '../../src/api/clubs.api';
 import type { Club } from '../../src/types/clubs';
 import QRCode from 'react-native-qrcode-svg';
 import { useNotificationsStore } from '../../src/stores/notifications-store';
+import { useCampaignsStore, useCampaignsFiltered } from '../../src/stores/campaigns-store';
+import { usePointsStore } from '../../src/stores/points-store';
+import { CampaignBanner } from '../../src/components/campaigns/CampaignBanner';
 
 export default function MyHomeScreen() {
     const { colors } = useTheme();
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const unreadNotifications = useNotificationsStore((state) => state.unreadCount);
+
+    // New stores for MVP features
+    const { fetchCampaigns } = useCampaignsStore();
+    const { active: activeCampaigns } = useCampaignsFiltered();
+    const { fetchPoints } = usePointsStore();
+    const pointsSummary = usePointsStore((state) => state.summary);
 
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -39,6 +48,7 @@ export default function MyHomeScreen() {
         if (!user?.customerId) return;
 
         try {
+            // Load clubs
             const customerClubs = await getClubsByCustomer(user.customerId);
             setClubs(customerClubs);
 
@@ -55,13 +65,19 @@ export default function MyHomeScreen() {
                 totalBalance,
                 weeksPaid: totalWeeksPaid,
             });
+
+            // Load campaigns and points (MVP features)
+            await Promise.all([
+                fetchCampaigns(),
+                fetchPoints(),
+            ]);
         } catch (error) {
             console.error('Error loading customer data:', error);
         } finally {
             setIsLoading(false);
             setRefreshing(false);
         }
-    }, [user?.customerId]);
+    }, [user?.customerId, fetchCampaigns, fetchPoints]);
 
     useEffect(() => {
         loadData();
@@ -224,6 +240,68 @@ export default function MyHomeScreen() {
                         </Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Second row of quick actions - MVP features */}
+                <View style={styles.actionsRow}>
+                    <TouchableOpacity
+                        style={[styles.actionBtn, { backgroundColor: colors.bg.card }]}
+                        onPress={() => router.push('/points')}
+                    >
+                        <View style={[styles.actionIcon, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
+                            <Ionicons name="star" size={24} color="#f59e0b" />
+                        </View>
+                        <Text style={[styles.actionText, { color: colors.text.primary }]}>
+                            Mis Puntos
+                        </Text>
+                        {(pointsSummary?.availablePoints ?? 0) > 0 && (
+                            <View style={[styles.actionBadge, { backgroundColor: '#f59e0b' }]}>
+                                <Text style={styles.actionBadgeText}>
+                                    {pointsSummary?.availablePoints}
+                                </Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.actionBtn, { backgroundColor: colors.bg.card }]}
+                        onPress={() => router.push('/purchases')}
+                    >
+                        <View style={[styles.actionIcon, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
+                            <Ionicons name="receipt" size={24} color="#10b981" />
+                        </View>
+                        <Text style={[styles.actionText, { color: colors.text.primary }]}>
+                            Historial
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.actionBtn, { backgroundColor: colors.bg.card }]}
+                        onPress={() => router.push('/campaigns')}
+                    >
+                        <View style={[styles.actionIcon, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
+                            <Ionicons name="megaphone" size={24} color="#8b5cf6" />
+                        </View>
+                        <Text style={[styles.actionText, { color: colors.text.primary }]}>
+                            Ofertas
+                        </Text>
+                        {activeCampaigns.length > 0 && (
+                            <View style={[styles.actionBadge, { backgroundColor: '#8b5cf6' }]}>
+                                <Text style={styles.actionBadgeText}>
+                                    {activeCampaigns.length}
+                                </Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
+
+                {/* Active Campaigns Banner */}
+                {activeCampaigns.length > 0 && (
+                    <CampaignBanner
+                        campaigns={activeCampaigns.slice(0, 3)}
+                        onCampaignPress={(campaign) => router.push('/campaigns')}
+                        onViewAllPress={() => router.push('/campaigns')}
+                    />
+                )}
 
                 {/* Clubes recientes */}
                 <View style={styles.sectionHeader}>
@@ -448,6 +526,22 @@ const styles = StyleSheet.create({
     actionText: {
         fontSize: 12,
         fontWeight: '600',
+    },
+    actionBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        minWidth: 20,
+        height: 20,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 6,
+    },
+    actionBadgeText: {
+        color: '#ffffff',
+        fontSize: 10,
+        fontWeight: '700',
     },
 
     // Section

@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integraciones API - Club de Mercancias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4a6e;
+            --primary-light: #2d6a8a;
+            --primary-dark: #0f3450;
+            --secondary: #22c55e;
+            --accent-gold: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --bg-dark: #0a0f1a;
+            --bg-card: #111827;
+            --bg-elevated: #1f2937;
+            --bg-hover: #374151;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1f2937;
+            --border-light: #374151;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            --gradient-primary: linear-gradient(135deg, #1a4a6e 0%, #2d6a8a 50%, #3d8aa6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 0 40px;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-logo i { font-size: 22px; color: white; }
+        .nav-title { font-weight: 700; font-size: 1.1rem; }
+        .nav-links { display: flex; gap: 8px; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
+        .nav-link.active { background: var(--primary); color: white; }
+        .nav-link i { font-size: 18px; }
+
+        /* Main */
+        .main { padding-top: 70px; }
+
+        /* Hero */
+        .hero {
+            background: var(--gradient-primary);
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 32px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .hero-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        /* Container */
+        .container { max-width: 1400px; margin: 0 auto; padding: 60px 40px; }
+
+        /* Section */
+        .section { margin-bottom: 60px; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header i { font-size: 24px; color: var(--primary-light); }
+        .section-header h2 { font-size: 1.5rem; font-weight: 700; flex: 1; }
+
+        /* API Clients Grid */
+        .clients-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .client-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .client-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        .client-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .client-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .client-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .client-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .client-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .client-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+        }
+
+        .client-detail i { font-size: 16px; color: var(--text-muted); }
+
+        /* Integration Cards */
+        .integration-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .integration-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .integration-card:hover {
+            border-color: var(--primary-light);
+        }
+
+        .integration-card.status-full { border-left: 4px solid var(--success); }
+        .integration-card.status-partial { border-left: 4px solid var(--warning); }
+        .integration-card.status-mock { border-left: 4px solid var(--error); }
+
+        .integration-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-elevated);
+            cursor: pointer;
+        }
+
+        .integration-title-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .integration-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .integration-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .integration-file {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .integration-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .integration-status.full {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .integration-status.partial {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .integration-status.mock {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .integration-body {
+            padding: 24px;
+        }
+
+        .endpoints-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .endpoints-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .endpoints-table td {
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .endpoints-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .endpoints-table tr:hover td {
+            background: var(--bg-elevated);
+        }
+
+        .endpoint-name {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+        }
+
+        .method-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .method-get { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .method-post { background: rgba(59, 130, 246, 0.2); color: var(--info); }
+        .method-patch { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .method-delete { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+        .status-icon {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-icon.integrated { color: var(--success); }
+        .status-icon.mock { color: var(--error); }
+        .status-icon.incomplete { color: var(--warning); }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .summary-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin: 0 auto 16px;
+        }
+
+        .summary-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Mock Data Section */
+        .mock-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .mock-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .mock-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .mock-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-gold);
+        }
+
+        .mock-card-title {
+            font-weight: 600;
+        }
+
+        .mock-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mock-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .mock-item i {
+            color: var(--accent-gold);
+        }
+
+        .mock-item-name {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: var(--text-primary);
+        }
+
+        .mock-item-desc {
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* Todo Section */
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--warning);
+        }
+
+        .todo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            flex-shrink: 0;
+        }
+
+        .todo-content {
+            flex: 1;
+        }
+
+        .todo-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .todo-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .todo-file {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 40px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-brand { display: flex; align-items: center; gap: 12px; }
+        .footer-brand i { font-size: 24px; color: var(--primary-light); }
+        .footer-links { display: flex; gap: 24px; }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer-link:hover { color: var(--text-primary); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .clients-grid { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .mock-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .hero { padding: 40px 20px; }
+            .hero h1 { font-size: 1.8rem; }
+            .hero-stats { flex-wrap: wrap; gap: 20px; }
+            .container { padding: 40px 20px; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .endpoints-table { font-size: 0.8rem; }
+            .endpoints-table th, .endpoints-table td { padding: 10px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo"><i class="ri-store-3-line"></i></div>
+                <span class="nav-title">Club de Mercancias</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="ri-home-4-line"></i><span>Inicio</span></a>
+                <a href="features.html" class="nav-link"><i class="ri-apps-2-line"></i><span>Funcionalidades</span></a>
+                <a href="screens.html" class="nav-link"><i class="ri-smartphone-line"></i><span>Pantallas</span></a>
+                <a href="architecture.html" class="nav-link"><i class="ri-code-s-slash-line"></i><span>Arquitectura</span></a>
+                <a href="integrations.html" class="nav-link active"><i class="ri-plug-line"></i><span>Integraciones</span></a>
+                <a href="mvp.html" class="nav-link"><i class="ri-flag-line"></i><span>MVP</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Integraciones API</h1>
+                <p>Estado de conexion con el backend, endpoints integrados, datos mock y funcionalidades pendientes.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" style="color: var(--success);">5</div>
+                        <div class="hero-stat-label">Modulos Integrados</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" style="color: var(--warning);">2</div>
+                        <div class="hero-stat-label">Parcialmente</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" style="color: var(--error);">1</div>
+                        <div class="hero-stat-label">Solo Mock</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">3</div>
+                        <div class="hero-stat-label">API Clients</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <!-- Summary -->
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                        <i class="ri-check-double-line"></i>
+                    </div>
+                    <div class="summary-value" style="color: var(--success);">23</div>
+                    <div class="summary-label">Endpoints Integrados</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                        <i class="ri-database-2-line"></i>
+                    </div>
+                    <div class="summary-value" style="color: var(--warning);">6</div>
+                    <div class="summary-label">Datos Mock</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--error);">
+                        <i class="ri-error-warning-line"></i>
+                    </div>
+                    <div class="summary-value" style="color: var(--error);">8</div>
+                    <div class="summary-label">Pendientes Backend</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                        <i class="ri-timer-line"></i>
+                    </div>
+                    <div class="summary-value" style="color: var(--info);">5min</div>
+                    <div class="summary-label">Cache TTL</div>
+                </div>
+            </div>
+
+            <!-- API Clients -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-server-line"></i>
+                    <h2>API Clients</h2>
+                </div>
+                <div class="clients-grid">
+                    <div class="client-card">
+                        <div class="client-header">
+                            <div class="client-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                                <i class="ri-shield-keyhole-line"></i>
+                            </div>
+                            <div>
+                                <div class="client-name">apiClient</div>
+                                <div class="client-desc">Autenticacion general</div>
+                            </div>
+                        </div>
+                        <div class="client-details">
+                            <div class="client-detail">
+                                <i class="ri-key-line"></i>
+                                Bearer Token (JWT)
+                            </div>
+                            <div class="client-detail">
+                                <i class="ri-time-line"></i>
+                                Timeout: 30s
+                            </div>
+                            <div class="client-detail">
+                                <i class="ri-refresh-line"></i>
+                                Auto-refresh token
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="client-card">
+                        <div class="client-header">
+                            <div class="client-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+                                <i class="ri-key-2-line"></i>
+                            </div>
+                            <div>
+                                <div class="client-name">mdl05Client</div>
+                                <div class="client-desc">Clubes y Sorteos</div>
+                            </div>
+                        </div>
+                        <div class="client-details">
+                            <div class="client-detail">
+                                <i class="ri-key-line"></i>
+                                API Key Header
+                            </div>
+                            <div class="client-detail">
+                                <i class="ri-time-line"></i>
+                                Timeout: 180s (3 min)
+                            </div>
+                            <div class="client-detail">
+                                <i class="ri-restart-line"></i>
+                                Retry logic (2 intentos)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="client-card">
+                        <div class="client-header">
+                            <div class="client-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                                <i class="ri-user-search-line"></i>
+                            </div>
+                            <div>
+                                <div class="client-name">mdl03Client</div>
+                                <div class="client-desc">Clientes</div>
+                            </div>
+                        </div>
+                        <div class="client-details">
+                            <div class="client-detail">
+                                <i class="ri-key-line"></i>
+                                Bearer + Subscription Key
+                            </div>
+                            <div class="client-detail">
+                                <i class="ri-time-line"></i>
+                                Timeout: 30s
+                            </div>
+                            <div class="client-detail">
+                                <i class="ri-database-line"></i>
+                                Cache 5 min TTL
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Integrations by Module -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-plug-line"></i>
+                    <h2>Estado de Integraciones por Modulo</h2>
+                </div>
+                <div class="integration-grid">
+                    <!-- Authentication -->
+                    <div class="integration-card status-full">
+                        <div class="integration-header">
+                            <div class="integration-title-row">
+                                <div class="integration-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                                    <i class="ri-shield-keyhole-line"></i>
+                                </div>
+                                <div>
+                                    <div class="integration-title">Autenticacion</div>
+                                    <div class="integration-file">client.ts</div>
+                                </div>
+                            </div>
+                            <span class="integration-status full">
+                                <i class="ri-checkbox-circle-fill"></i>
+                                Integrado
+                            </span>
+                        </div>
+                        <div class="integration-body">
+                            <table class="endpoints-table">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Metodo</th>
+                                        <th>Estado</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="endpoint-name">/core/CheckCompany/companyname/{name}</span></td>
+                                        <td><span class="method-badge method-get">GET</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Verificar empresa por nombre</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/core/Login</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Login con JWT + refresh token</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Clubs -->
+                    <div class="integration-card status-partial">
+                        <div class="integration-header">
+                            <div class="integration-title-row">
+                                <div class="integration-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+                                    <i class="ri-group-line"></i>
+                                </div>
+                                <div>
+                                    <div class="integration-title">Clubes</div>
+                                    <div class="integration-file">clubs.api.ts</div>
+                                </div>
+                            </div>
+                            <span class="integration-status partial">
+                                <i class="ri-alert-fill"></i>
+                                Hibrido
+                            </span>
+                        </div>
+                        <div class="integration-body">
+                            <table class="endpoints-table">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Metodo</th>
+                                        <th>Estado</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/club/history</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Lista de clubes con cache 5min</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/createClub</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Crear club nuevo</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/updateClub/{id}</span></td>
+                                        <td><span class="method-badge method-patch">PATCH</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Actualizar club</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/deleteClub/{id}</span></td>
+                                        <td><span class="method-badge method-delete">DELETE</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Eliminar club</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">mockClubTypes</span></td>
+                                        <td><span class="method-badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">LOCAL</span></td>
+                                        <td><span class="status-icon mock"><i class="ri-database-2-line"></i> Mock</span></td>
+                                        <td>Tipos de club (Miercoles/Domingo)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">mockDenominations</span></td>
+                                        <td><span class="method-badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">LOCAL</span></td>
+                                        <td><span class="status-icon mock"><i class="ri-database-2-line"></i> Mock</span></td>
+                                        <td>Denominaciones ($3, $5, $10)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">mockClubStatuses</span></td>
+                                        <td><span class="method-badge" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">LOCAL</span></td>
+                                        <td><span class="status-icon mock"><i class="ri-database-2-line"></i> Mock</span></td>
+                                        <td>Estados del club (5 tipos)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Customers -->
+                    <div class="integration-card status-partial">
+                        <div class="integration-header">
+                            <div class="integration-title-row">
+                                <div class="integration-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                                    <i class="ri-user-3-line"></i>
+                                </div>
+                                <div>
+                                    <div class="integration-title">Clientes</div>
+                                    <div class="integration-file">customers.api.ts</div>
+                                </div>
+                            </div>
+                            <span class="integration-status partial">
+                                <i class="ri-alert-fill"></i>
+                                Parcial
+                            </span>
+                        </div>
+                        <div class="integration-body">
+                            <table class="endpoints-table">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Metodo</th>
+                                        <th>Estado</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl03/SearchCustomers/Post</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Busqueda con paginacion</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl03/GetCustomerGeneralInfo/Post</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Info detallada del cliente</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/core/Register/v2 (particular)</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Registro persona natural</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/core/Register/v2 (empresa)</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Registro persona juridica</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">createCustomer()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
+                                        <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
+                                        <td>Endpoint generico no existe</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">updateCustomer()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
+                                        <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
+                                        <td>Endpoint generico no existe</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">deleteCustomer()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
+                                        <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
+                                        <td>Endpoint generico no existe</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Draws -->
+                    <div class="integration-card status-partial">
+                        <div class="integration-header">
+                            <div class="integration-title-row">
+                                <div class="integration-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink);">
+                                    <i class="ri-gift-line"></i>
+                                </div>
+                                <div>
+                                    <div class="integration-title">Sorteos</div>
+                                    <div class="integration-file">draws.api.ts</div>
+                                </div>
+                            </div>
+                            <span class="integration-status partial">
+                                <i class="ri-alert-fill"></i>
+                                Parcial
+                            </span>
+                        </div>
+                        <div class="integration-body">
+                            <table class="endpoints-table">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Metodo</th>
+                                        <th>Estado</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/Draw/Get/DrawId/{id}</span></td>
+                                        <td><span class="method-badge method-get">GET</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Lista/detalle de sorteos</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/Club/RegisterDraw</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Ejecutar sorteo</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/GetReport1</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>PDF de ganadores</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">getDrawWinners()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
+                                        <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
+                                        <td>Retorna array vacio</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">cancelDraw()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
+                                        <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
+                                        <td>Backend no implementado</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">markWinnerNotified()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
+                                        <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
+                                        <td>Backend no implementado</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">markPrizeClaimed()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">N/A</span></td>
+                                        <td><span class="status-icon incomplete"><i class="ri-close-circle-fill"></i> No disponible</span></td>
+                                        <td>Backend no implementado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Payments -->
+                    <div class="integration-card status-full">
+                        <div class="integration-header">
+                            <div class="integration-title-row">
+                                <div class="integration-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                                    <i class="ri-wallet-3-line"></i>
+                                </div>
+                                <div>
+                                    <div class="integration-title">Pagos</div>
+                                    <div class="integration-file">payments.api.ts</div>
+                                </div>
+                            </div>
+                            <span class="integration-status full">
+                                <i class="ri-checkbox-circle-fill"></i>
+                                Integrado
+                            </span>
+                        </div>
+                        <div class="integration-body">
+                            <table class="endpoints-table">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Metodo</th>
+                                        <th>Estado</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/ClubTransaction/Payment</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Registrar pago semanal</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/club/transactions/{id}</span></td>
+                                        <td><span class="method-badge method-get">GET</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Historial de transacciones</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">/mdl05/club/cancel</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Cancelar club</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Exchange -->
+                    <div class="integration-card status-full">
+                        <div class="integration-header">
+                            <div class="integration-title-row">
+                                <div class="integration-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">
+                                    <i class="ri-exchange-dollar-line"></i>
+                                </div>
+                                <div>
+                                    <div class="integration-title">Canje de Balance</div>
+                                    <div class="integration-file">exchange.api.ts</div>
+                                </div>
+                            </div>
+                            <span class="integration-status full">
+                                <i class="ri-checkbox-circle-fill"></i>
+                                Integrado
+                            </span>
+                        </div>
+                        <div class="integration-body">
+                            <table class="endpoints-table">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Metodo</th>
+                                        <th>Estado</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="endpoint-name">/ClubTransaction/Exchange</span></td>
+                                        <td><span class="method-badge method-post">POST</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Canje de balance individual</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">multiExchange()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(59, 130, 246, 0.2); color: var(--info);">HELPER</span></td>
+                                        <td><span class="status-icon integrated"><i class="ri-checkbox-circle-fill"></i> OK</span></td>
+                                        <td>Canje multi-club secuencial</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Coupons -->
+                    <div class="integration-card status-mock">
+                        <div class="integration-header">
+                            <div class="integration-title-row">
+                                <div class="integration-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">
+                                    <i class="ri-coupon-3-line"></i>
+                                </div>
+                                <div>
+                                    <div class="integration-title">Cupones</div>
+                                    <div class="integration-file">coupons.api.ts</div>
+                                </div>
+                            </div>
+                            <span class="integration-status mock">
+                                <i class="ri-close-circle-fill"></i>
+                                Solo Mock
+                            </span>
+                        </div>
+                        <div class="integration-body">
+                            <table class="endpoints-table">
+                                <thead>
+                                    <tr>
+                                        <th>Funcion</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="endpoint-name">getCoupons()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">MOCK</span></td>
+                                        <td><span class="status-icon mock"><i class="ri-database-2-line"></i> Mock</span></td>
+                                        <td>8 cupones hardcodeados</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">redeemCoupon()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">MOCK</span></td>
+                                        <td><span class="status-icon mock"><i class="ri-database-2-line"></i> Mock</span></td>
+                                        <td>Simula canje con ID falso</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="endpoint-name">validateCouponCode()</span></td>
+                                        <td><span class="method-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--error);">MOCK</span></td>
+                                        <td><span class="status-icon mock"><i class="ri-database-2-line"></i> Mock</span></td>
+                                        <td>Valida contra lista local</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mock Data -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-database-2-line"></i>
+                    <h2>Datos Mock / Catalogos Locales</h2>
+                </div>
+                <div class="mock-grid">
+                    <div class="mock-card">
+                        <div class="mock-card-header">
+                            <div class="mock-card-icon"><i class="ri-file-list-3-line"></i></div>
+                            <div class="mock-card-title">mockData.ts</div>
+                        </div>
+                        <div class="mock-items">
+                            <div class="mock-item">
+                                <i class="ri-price-tag-3-line"></i>
+                                <span class="mock-item-name">mockDenominations</span>
+                                <span class="mock-item-desc">$3, $5, $10 semanal</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-calendar-line"></i>
+                                <span class="mock-item-name">mockClubTypes</span>
+                                <span class="mock-item-desc">Miercoles, Domingo</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-flag-line"></i>
+                                <span class="mock-item-name">mockClubStatuses</span>
+                                <span class="mock-item-desc">5 estados posibles</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-exchange-line"></i>
+                                <span class="mock-item-name">mockTransactionTypes</span>
+                                <span class="mock-item-desc">5 tipos de transaccion</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mock-card">
+                        <div class="mock-card-header">
+                            <div class="mock-card-icon"><i class="ri-coupon-line"></i></div>
+                            <div class="mock-card-title">coupons.api.ts (100% Mock)</div>
+                        </div>
+                        <div class="mock-items">
+                            <div class="mock-item">
+                                <i class="ri-ticket-line"></i>
+                                <span class="mock-item-name">8 cupones demo</span>
+                                <span class="mock-item-desc">6 disponibles, 2 historial</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-palette-line"></i>
+                                <span class="mock-item-name">6 tipos de cupon</span>
+                                <span class="mock-item-desc">%, fijo, gratis, puntos...</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-timer-line"></i>
+                                <span class="mock-item-name">Delay simulado</span>
+                                <span class="mock-item-desc">800-1000ms artificial</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mock-card">
+                        <div class="mock-card-header">
+                            <div class="mock-card-icon"><i class="ri-star-line"></i></div>
+                            <div class="mock-card-title">points.api.ts (100% Mock)</div>
+                        </div>
+                        <div class="mock-items">
+                            <div class="mock-item">
+                                <i class="ri-coin-line"></i>
+                                <span class="mock-item-name">15 transacciones</span>
+                                <span class="mock-item-desc">Ganados, canjeados, bonus</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-pie-chart-line"></i>
+                                <span class="mock-item-name">5 tipos</span>
+                                <span class="mock-item-desc">earned, redeemed, bonus, expired, adjustment</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-timer-line"></i>
+                                <span class="mock-item-name">Delay simulado</span>
+                                <span class="mock-item-desc">500-700ms artificial</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mock-card">
+                        <div class="mock-card-header">
+                            <div class="mock-card-icon"><i class="ri-receipt-line"></i></div>
+                            <div class="mock-card-title">purchases.api.ts (100% Mock)</div>
+                        </div>
+                        <div class="mock-items">
+                            <div class="mock-item">
+                                <i class="ri-wallet-3-line"></i>
+                                <span class="mock-item-name">18 transacciones</span>
+                                <span class="mock-item-desc">Pagos, canjes, penalidades</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-list-check"></i>
+                                <span class="mock-item-name">6 tipos</span>
+                                <span class="mock-item-desc">payment, exchange, refund, penalty...</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-timer-line"></i>
+                                <span class="mock-item-name">Delay simulado</span>
+                                <span class="mock-item-desc">500-800ms artificial</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mock-card">
+                        <div class="mock-card-header">
+                            <div class="mock-card-icon"><i class="ri-megaphone-line"></i></div>
+                            <div class="mock-card-title">campaigns.api.ts (100% Mock)</div>
+                        </div>
+                        <div class="mock-items">
+                            <div class="mock-item">
+                                <i class="ri-gift-line"></i>
+                                <span class="mock-item-name">8 campanas</span>
+                                <span class="mock-item-desc">Activas, proximas, finalizadas</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-price-tag-3-line"></i>
+                                <span class="mock-item-name">5 tipos</span>
+                                <span class="mock-item-desc">discount, bonus, event, referral, promo</span>
+                            </div>
+                            <div class="mock-item">
+                                <i class="ri-timer-line"></i>
+                                <span class="mock-item-name">Delay simulado</span>
+                                <span class="mock-item-desc">400-600ms artificial</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pending Backend -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-error-warning-line"></i>
+                    <h2>Pendientes de Backend</h2>
+                </div>
+                <div class="todo-list">
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-coupon-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">API de Cupones</div>
+                            <div class="todo-desc">Implementar endpoints reales para getCoupons, redeemCoupon, validateCouponCode. Actualmente 100% mock.</div>
+                            <div class="todo-file">coupons.api.ts</div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-star-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">API de Puntos</div>
+                            <div class="todo-desc">Implementar endpoints reales para getPoints, getPointsHistory, redeemPoints. Actualmente 100% mock.</div>
+                            <div class="todo-file">points.api.ts</div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-receipt-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">API de Historial de Compras</div>
+                            <div class="todo-desc">Implementar endpoints reales para getPurchases, getPurchaseDetail. Actualmente 100% mock.</div>
+                            <div class="todo-file">purchases.api.ts</div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-megaphone-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">API de Campanas</div>
+                            <div class="todo-desc">Implementar endpoints reales para getCampaigns, participateInCampaign. Actualmente 100% mock.</div>
+                            <div class="todo-file">campaigns.api.ts</div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-trophy-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">Ganadores de Sorteos</div>
+                            <div class="todo-desc">Endpoint getDrawWinners() retorna array vacio. Backend necesita implementar consulta de ganadores.</div>
+                            <div class="todo-file">draws.api.ts:180</div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-notification-3-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">Notificacion a Ganadores</div>
+                            <div class="todo-desc">Funciones markWinnerNotified() y markPrizeClaimed() lanzan error "not available".</div>
+                            <div class="todo-file">draws.api.ts:304, 314</div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-close-circle-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">Cancelar Sorteo</div>
+                            <div class="todo-desc">cancelDraw() no implementado en backend.</div>
+                            <div class="todo-file">draws.api.ts:294</div>
+                        </div>
+                    </div>
+                    <div class="todo-item">
+                        <div class="todo-icon"><i class="ri-user-settings-line"></i></div>
+                        <div class="todo-content">
+                            <div class="todo-title">CRUD Generico de Clientes</div>
+                            <div class="todo-desc">createCustomer(), updateCustomer(), deleteCustomer() genericos no disponibles. Solo funcionan los especificos (particular/empresa).</div>
+                            <div class="todo-file">customers.api.ts:273, 292, 312</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="ri-code-box-line"></i>
+                <span>Desarrollado con Claude Code | Enero 2026</span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Inicio</a>
+                <a href="features.html" class="footer-link">Funcionalidades</a>
+                <a href="architecture.html" class="footer-link">Arquitectura</a>
+                <a href="mvp.html" class="footer-link">MVP</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.client-card, .integration-card, .summary-card, .mock-card, .todo-item').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = `all 0.5s ease ${index * 0.05}s`;
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

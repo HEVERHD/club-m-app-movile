@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club de Mercancias - Dashboard Ejecutivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4a6e;
+            --primary-light: #2d6a8a;
+            --primary-dark: #0f3450;
+            --secondary: #22c55e;
+            --accent-gold: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --bg-dark: #0a0f1a;
+            --bg-card: #111827;
+            --bg-elevated: #1f2937;
+            --bg-hover: #374151;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1f2937;
+            --border-light: #374151;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            --gradient-primary: linear-gradient(135deg, #1a4a6e 0%, #2d6a8a 50%, #3d8aa6 100%);
+            --gradient-gold: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 0 40px;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-logo i {
+            font-size: 22px;
+            color: white;
+        }
+
+        .nav-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-link i {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main {
+            padding-top: 70px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--gradient-primary);
+            padding: 80px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-badge i {
+            color: var(--accent-gold);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: left;
+        }
+
+        .hero-stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .hero-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            font-size: 28px;
+            color: var(--primary-light);
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .section-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .section-link:hover {
+            color: var(--text-primary);
+            gap: 12px;
+        }
+
+        /* Quick Stats Grid */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .quick-stat {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quick-stat:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-light);
+        }
+
+        .quick-stat:hover::before {
+            opacity: 1;
+        }
+
+        .quick-stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .quick-stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .quick-stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .quick-stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-neutral {
+            color: var(--text-muted);
+        }
+
+        /* Progress Card */
+        .progress-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--gradient-primary);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .progress-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .progress-info p {
+            color: var(--text-secondary);
+        }
+
+        .progress-percentage {
+            font-size: 4rem;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .progress-bar-wrapper {
+            margin-bottom: 32px;
+        }
+
+        .progress-bar-bg {
+            height: 16px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 8px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-milestones {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .milestone {
+            text-align: center;
+            flex: 1;
+        }
+
+        .milestone-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .milestone-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .milestone.completed .milestone-value {
+            color: var(--success);
+        }
+
+        .milestone.pending .milestone-value {
+            color: var(--warning);
+        }
+
+        /* Navigation Cards */
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .nav-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-card:hover {
+            transform: translateX(10px);
+            border-color: var(--primary-light);
+        }
+
+        .nav-card:hover::before {
+            opacity: 1;
+        }
+
+        .nav-card:nth-child(1)::before { background: var(--gradient-primary); }
+        .nav-card:nth-child(2)::before { background: var(--gradient-success); }
+        .nav-card:nth-child(3)::before { background: var(--gradient-gold); }
+        .nav-card:nth-child(4)::before { background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); }
+
+        .nav-card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .nav-card-content {
+            flex: 1;
+        }
+
+        .nav-card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .nav-card-desc {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .nav-card-meta {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-card-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .nav-card-tag i {
+            font-size: 16px;
+        }
+
+        .nav-card-arrow {
+            position: absolute;
+            right: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .nav-card:hover .nav-card-arrow {
+            color: var(--primary-light);
+            right: 24px;
+        }
+
+        /* Features Preview */
+        .features-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .feature-preview {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-preview:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        .feature-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .feature-preview-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .feature-preview-title {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .feature-preview-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-done {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .feature-preview-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Tech Stack Preview */
+        .tech-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tech-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .tech-tag i {
+            font-size: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 40px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-brand i {
+            font-size: 24px;
+            color: var(--primary-light);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .quick-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .nav-cards {
+                grid-template-columns: 1fr;
+            }
+            .features-preview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                padding: 0 20px;
+            }
+            .nav-links {
+                display: none;
+            }
+            .hero {
+                padding: 60px 20px;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero-stats {
+                gap: 24px;
+            }
+            .hero-stat-value {
+                font-size: 2rem;
+            }
+            .container {
+                padding: 40px 20px;
+            }
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+            .features-preview {
+                grid-template-columns: 1fr;
+            }
+            .progress-milestones {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            .footer-content {
+                flex-direction: column;
+                gap: 24px;
+                text-align: center;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .nav {
+                display: none;
+            }
+            .main {
+                padding-top: 0;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo">
+                    <i class="ri-store-3-line"></i>
+                </div>
+                <span class="nav-title">Club de Mercancias</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">
+                    <i class="ri-home-4-line"></i>
+                    <span>Inicio</span>
+                </a>
+                <a href="features.html" class="nav-link">
+                    <i class="ri-apps-2-line"></i>
+                    <span>Funcionalidades</span>
+                </a>
+                <a href="screens.html" class="nav-link">
+                    <i class="ri-smartphone-line"></i>
+                    <span>Pantallas</span>
+                </a>
+                <a href="architecture.html" class="nav-link">
+                    <i class="ri-code-s-slash-line"></i>
+                    <span>Arquitectura</span>
+                </a>
+                <a href="integrations.html" class="nav-link">
+                    <i class="ri-plug-line"></i>
+                    <span>Integraciones</span>
+                </a>
+                <a href="mvp.html" class="nav-link">
+                    <i class="ri-flag-line"></i>
+                    <span>MVP</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="ri-rocket-2-line"></i>
+                    <span>Dashboard Ejecutivo - Desarrollo App Movil</span>
+                </div>
+                <h1>Club de Mercancias</h1>
+                <p class="hero-subtitle">Portal web B2B/B2C y app movil multitenant para gestion integral de clubes de ahorro, sorteos, beneficios y fidelizacion sobre Aludra.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">85%</div>
+                        <div class="hero-stat-label">Progreso MVP</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">36</div>
+                        <div class="hero-stat-label">Pantallas</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">12</div>
+                        <div class="hero-stat-label">Stores</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">10</div>
+                        <div class="hero-stat-label">APIs</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <div class="quick-stat-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                        <i class="ri-database-2-line"></i>
+                    </div>
+                    <div class="quick-stat-value" style="color: var(--success);">5/9</div>
+                    <div class="quick-stat-label">APIs con Backend Real</div>
+                    <div class="quick-stat-trend trend-up">
+                        <i class="ri-check-double-line"></i>
+                        <span>Conectado a Aludra</span>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                        <i class="ri-flask-line"></i>
+                    </div>
+                    <div class="quick-stat-value" style="color: var(--warning);">4/9</div>
+                    <div class="quick-stat-label">APIs con Datos Mock</div>
+                    <div class="quick-stat-trend trend-neutral">
+                        <i class="ri-alert-line"></i>
+                        <span>Frontend Completo</span>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-stat-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                        <i class="ri-smartphone-line"></i>
+                    </div>
+                    <div class="quick-stat-value" style="color: var(--info);">36</div>
+                    <div class="quick-stat-label">Pantallas Completas</div>
+                    <div class="quick-stat-trend trend-up">
+                        <i class="ri-layout-4-line"></i>
+                        <span>Staff + Cliente</span>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-stat-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+                        <i class="ri-pie-chart-line"></i>
+                    </div>
+                    <div class="quick-stat-value" style="color: var(--accent-purple);">56%</div>
+                    <div class="quick-stat-label">Backend Completo</div>
+                    <div class="quick-stat-trend trend-up">
+                        <i class="ri-arrow-up-line"></i>
+                        <span>5 de 9 modulos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Card -->
+            <div class="progress-card">
+                <div class="progress-header">
+                    <div class="progress-info">
+                        <h3>Progreso del MVP</h3>
+                        <p>App movil completa (36 pantallas) - Backend: 5 modulos con API real, 4 con datos mock</p>
+                    </div>
+                    <div class="progress-percentage">85%</div>
+                </div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="progress-milestones">
+                    <div class="milestone completed">
+                        <div class="milestone-value">5/9</div>
+                        <div class="milestone-label">Backend Real</div>
+                    </div>
+                    <div class="milestone pending">
+                        <div class="milestone-value">4/9</div>
+                        <div class="milestone-label">Mock Data</div>
+                    </div>
+                    <div class="milestone completed">
+                        <div class="milestone-value">36</div>
+                        <div class="milestone-label">Pantallas</div>
+                    </div>
+                    <div class="milestone">
+                        <div class="milestone-value">Q1</div>
+                        <div class="milestone-label">2026</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Cards -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="ri-layout-grid-line"></i>
+                        <h2>Explorar Dashboard</h2>
+                    </div>
+                </div>
+                <div class="nav-cards">
+                    <a href="features.html" class="nav-card">
+                        <div class="nav-card-icon" style="background: rgba(26, 74, 110, 0.15); color: var(--primary-light);">
+                            <i class="ri-apps-2-line"></i>
+                        </div>
+                        <div class="nav-card-content">
+                            <div class="nav-card-title">Funcionalidades</div>
+                            <div class="nav-card-desc">Detalle completo de todas las funcionalidades implementadas con archivos, componentes y estado actual.</div>
+                            <div class="nav-card-meta">
+                                <span class="nav-card-tag">
+                                    <i class="ri-apps-2-line"></i>
+                                    12 stores
+                                </span>
+                                <span class="nav-card-tag">
+                                    <i class="ri-code-box-line"></i>
+                                    40+ componentes
+                                </span>
+                            </div>
+                        </div>
+                        <i class="ri-arrow-right-line nav-card-arrow"></i>
+                    </a>
+                    <a href="screens.html" class="nav-card">
+                        <div class="nav-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                            <i class="ri-smartphone-line"></i>
+                        </div>
+                        <div class="nav-card-content">
+                            <div class="nav-card-title">Pantallas y Rutas</div>
+                            <div class="nav-card-desc">Mapa completo de todas las pantallas de la app, navegacion y flujos de usuario.</div>
+                            <div class="nav-card-meta">
+                                <span class="nav-card-tag">
+                                    <i class="ri-layout-4-line"></i>
+                                    36 pantallas
+                                </span>
+                                <span class="nav-card-tag">
+                                    <i class="ri-user-line"></i>
+                                    2 roles (Staff/Cliente)
+                                </span>
+                            </div>
+                        </div>
+                        <i class="ri-arrow-right-line nav-card-arrow"></i>
+                    </a>
+                    <a href="architecture.html" class="nav-card">
+                        <div class="nav-card-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">
+                            <i class="ri-code-s-slash-line"></i>
+                        </div>
+                        <div class="nav-card-content">
+                            <div class="nav-card-title">Arquitectura Tecnica</div>
+                            <div class="nav-card-desc">Stack tecnologico, estructura de carpetas, patrones de diseno y flujo de datos.</div>
+                            <div class="nav-card-meta">
+                                <span class="nav-card-tag">
+                                    <i class="ri-reactjs-line" style="color: #61dafb;"></i>
+                                    React Native
+                                </span>
+                                <span class="nav-card-tag">
+                                    <i class="ri-file-code-line" style="color: #3178c6;"></i>
+                                    TypeScript
+                                </span>
+                            </div>
+                        </div>
+                        <i class="ri-arrow-right-line nav-card-arrow"></i>
+                    </a>
+                    <a href="integrations.html" class="nav-card">
+                        <div class="nav-card-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">
+                            <i class="ri-plug-line"></i>
+                        </div>
+                        <div class="nav-card-content">
+                            <div class="nav-card-title">Integraciones API</div>
+                            <div class="nav-card-desc">Estado de conexion con backend Aludra, endpoints integrados y funcionalidades multitenant.</div>
+                            <div class="nav-card-meta">
+                                <span class="nav-card-tag">
+                                    <i class="ri-checkbox-circle-line" style="color: var(--success);"></i>
+                                    10 APIs
+                                </span>
+                                <span class="nav-card-tag">
+                                    <i class="ri-server-line"></i>
+                                    3 servicios backend
+                                </span>
+                            </div>
+                        </div>
+                        <i class="ri-arrow-right-line nav-card-arrow"></i>
+                    </a>
+                    <a href="mvp.html" class="nav-card">
+                        <div class="nav-card-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+                            <i class="ri-flag-line"></i>
+                        </div>
+                        <div class="nav-card-content">
+                            <div class="nav-card-title">Checklist MVP</div>
+                            <div class="nav-card-desc">Estado detallado de cada requerimiento del MVP segun el documento de especificaciones.</div>
+                            <div class="nav-card-meta">
+                                <span class="nav-card-tag">
+                                    <i class="ri-file-list-3-line"></i>
+                                    7 modulos
+                                </span>
+                                <span class="nav-card-tag">
+                                    <i class="ri-trophy-line" style="color: var(--success);"></i>
+                                    6 completados
+                                </span>
+                            </div>
+                        </div>
+                        <i class="ri-arrow-right-line nav-card-arrow"></i>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Features Preview -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="ri-star-line"></i>
+                        <h2>Ultimas Funcionalidades</h2>
+                    </div>
+                    <a href="features.html" class="section-link">
+                        Ver todas
+                        <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+                <div class="features-preview">
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(26, 74, 110, 0.15); color: var(--primary-light);">
+                                <i class="ri-user-settings-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Gestion de Clientes</span>
+                            <span class="feature-preview-status status-done">Backend Real</span>
+                        </div>
+                        <p class="feature-preview-desc">CRUD completo de clientes, busqueda avanzada, QR codes, formularios Particular/Empresa.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                                <i class="ri-trophy-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Clubes y Sorteos</span>
+                            <span class="feature-preview-status status-done">Backend Real</span>
+                        </div>
+                        <p class="feature-preview-desc">Creacion de clubes, gestion de membresias, ejecucion de sorteos, reportes de ganadores en Aludra.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                                <i class="ri-money-dollar-circle-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Pagos de Cuotas</span>
+                            <span class="feature-preview-status status-done">Backend Real</span>
+                        </div>
+                        <p class="feature-preview-desc">Registro de pagos semanales conectado a MDL05, transacciones y balance integrados.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink);">
+                                <i class="ri-fingerprint-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Autenticacion</span>
+                            <span class="feature-preview-status status-done">Backend Real</span>
+                        </div>
+                        <p class="feature-preview-desc">Login, biometria (Face ID/Huella), multitenant, JWT tokens y roles integrados.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                                <i class="ri-star-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Sistema de Puntos</span>
+                            <span class="feature-preview-status status-pending">Datos Mock</span>
+                        </div>
+                        <p class="feature-preview-desc">Visualizacion de saldo y transacciones - Frontend completo, backend pendiente.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                                <i class="ri-coupon-3-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Cupones</span>
+                            <span class="feature-preview-status status-pending">Datos Mock</span>
+                        </div>
+                        <p class="feature-preview-desc">Sistema de cupones con canje y filtros - Frontend completo, backend pendiente.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                                <i class="ri-receipt-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Historial Compras</span>
+                            <span class="feature-preview-status status-pending">Datos Mock</span>
+                        </div>
+                        <p class="feature-preview-desc">Historial de compras y canjes - Frontend completo, backend pendiente.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                                <i class="ri-megaphone-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Campanas</span>
+                            <span class="feature-preview-status status-pending">Datos Mock</span>
+                        </div>
+                        <p class="feature-preview-desc">Campanas activas y participacion - Frontend completo, backend pendiente.</p>
+                    </div>
+                    <div class="feature-preview">
+                        <div class="feature-preview-header">
+                            <div class="feature-preview-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--error);">
+                                <i class="ri-bank-card-line"></i>
+                            </div>
+                            <span class="feature-preview-title">Pasarela de Pago</span>
+                            <span class="feature-preview-status status-pending">No Integrado</span>
+                        </div>
+                        <p class="feature-preview-desc">Integracion con Stripe/MercadoPago/Tilopay pendiente de implementar.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Backend Integration Status -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="ri-server-line"></i>
+                        <h2>Estado de Integracion Backend</h2>
+                    </div>
+                </div>
+                <div class="quick-stats" style="margin-bottom: 40px;">
+                    <div class="quick-stat">
+                        <div class="quick-stat-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                            <i class="ri-check-double-line"></i>
+                        </div>
+                        <div class="quick-stat-value" style="color: var(--success);">5</div>
+                        <div class="quick-stat-label">Modulos con Backend Real</div>
+                        <div class="quick-stat-trend trend-up">
+                            <i class="ri-database-2-line"></i>
+                            <span>Aludra API</span>
+                        </div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                            <i class="ri-code-s-slash-line"></i>
+                        </div>
+                        <div class="quick-stat-value" style="color: var(--warning);">4</div>
+                        <div class="quick-stat-label">Modulos con Datos Mock</div>
+                        <div class="quick-stat-trend trend-neutral">
+                            <i class="ri-flask-line"></i>
+                            <span>Frontend Listo</span>
+                        </div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--error);">
+                            <i class="ri-error-warning-line"></i>
+                        </div>
+                        <div class="quick-stat-value" style="color: var(--error);">1</div>
+                        <div class="quick-stat-label">Pasarela de Pago</div>
+                        <div class="quick-stat-trend trend-neutral">
+                            <i class="ri-bank-card-line"></i>
+                            <span>No Integrado</span>
+                        </div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                            <i class="ri-pie-chart-line"></i>
+                        </div>
+                        <div class="quick-stat-value" style="color: var(--info);">56%</div>
+                        <div class="quick-stat-label">Backend Completado</div>
+                        <div class="quick-stat-trend trend-up">
+                            <i class="ri-arrow-up-line"></i>
+                            <span>5 de 9 modulos</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: var(--bg-card); border-radius: 20px; padding: 32px; border: 1px solid var(--border); margin-bottom: 40px;">
+                    <h3 style="margin-bottom: 24px; font-size: 1.3rem; font-weight: 700;">Modulos con Backend Real (Conectado a Aludra)</h3>
+                    <div style="display: grid; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; border-left: 4px solid var(--success);">
+                            <i class="ri-shield-check-line" style="font-size: 24px; color: var(--success);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Autenticacion y Usuarios</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Login, JWT tokens, roles, biometria, multitenant</div>
+                            </div>
+                            <span style="color: var(--success); font-weight: 600;">API MDL03</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; border-left: 4px solid var(--success);">
+                            <i class="ri-user-settings-line" style="font-size: 24px; color: var(--success);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Gestion de Clientes</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">CRUD clientes, busqueda, filtros, QR, particular/empresa</div>
+                            </div>
+                            <span style="color: var(--success); font-weight: 600;">API MDL05</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; border-left: 4px solid var(--success);">
+                            <i class="ri-trophy-line" style="font-size: 24px; color: var(--success);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Clubes y Membresias</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Crear clubes, tipos, historial, balance, estado</div>
+                            </div>
+                            <span style="color: var(--success); font-weight: 600;">API MDL05</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; border-left: 4px solid var(--success);">
+                            <i class="ri-auction-line" style="font-size: 24px; color: var(--success);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Sorteos</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Ejecutar sorteos, obtener ganadores, reportes PDF</div>
+                            </div>
+                            <span style="color: var(--success); font-weight: 600;">API MDL05</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; border-left: 4px solid var(--success);">
+                            <i class="ri-money-dollar-circle-line" style="font-size: 24px; color: var(--success);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Pagos de Cuotas</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Registro pagos semanales, transacciones, balance del club</div>
+                            </div>
+                            <span style="color: var(--success); font-weight: 600;">API MDL05</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 32px 0 24px; font-size: 1.3rem; font-weight: 700;">Modulos con Datos Mock (Frontend Completo - Backend Pendiente)</h3>
+                    <div style="display: grid; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; border-left: 4px solid var(--warning);">
+                            <i class="ri-star-line" style="font-size: 24px; color: var(--warning);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Sistema de Puntos</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">points.api.ts - Saldo, transacciones, historial (datos simulados)</div>
+                            </div>
+                            <span style="color: var(--warning); font-weight: 600;">Mock Data</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; border-left: 4px solid var(--warning);">
+                            <i class="ri-coupon-3-line" style="font-size: 24px; color: var(--warning);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Cupones</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">coupons.api.ts - Listado, canje, filtros por estado (datos simulados)</div>
+                            </div>
+                            <span style="color: var(--warning); font-weight: 600;">Mock Data</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; border-left: 4px solid var(--warning);">
+                            <i class="ri-shopping-cart-line" style="font-size: 24px; color: var(--warning);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Historial de Compras</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">purchases.api.ts - Transacciones, canjes (datos simulados)</div>
+                            </div>
+                            <span style="color: var(--warning); font-weight: 600;">Mock Data</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; border-left: 4px solid var(--warning);">
+                            <i class="ri-megaphone-line" style="font-size: 24px; color: var(--warning);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Campanas</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">campaigns.api.ts - Ofertas, promociones, participacion (datos simulados)</div>
+                            </div>
+                            <span style="color: var(--warning); font-weight: 600;">Mock Data</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 32px 0 24px; font-size: 1.3rem; font-weight: 700;">Integraciones Pendientes</h3>
+                    <div style="display: grid; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border-left: 4px solid var(--error);">
+                            <i class="ri-bank-card-line" style="font-size: 24px; color: var(--error);"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Pasarela de Pago</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Stripe / MercadoPago / Tilopay - No integrado (pendiente de definicion)</div>
+                            </div>
+                            <span style="color: var(--error); font-weight: 600;">No Integrado</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tech Stack -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="ri-stack-line"></i>
+                        <h2>Stack Tecnologico</h2>
+                    </div>
+                    <a href="architecture.html" class="section-link">
+                        Ver arquitectura
+                        <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+                <div class="tech-preview">
+                    <div class="tech-tag">
+                        <i class="ri-reactjs-line" style="color: #61dafb;"></i>
+                        <span>React Native 0.81</span>
+                    </div>
+                    <div class="tech-tag">
+                        <i class="ri-smartphone-line" style="color: #000;"></i>
+                        <span>Expo SDK 54</span>
+                    </div>
+                    <div class="tech-tag">
+                        <i class="ri-file-code-line" style="color: #3178c6;"></i>
+                        <span>TypeScript 5.9</span>
+                    </div>
+                    <div class="tech-tag">
+                        <i class="ri-database-2-line" style="color: #764abc;"></i>
+                        <span>Zustand</span>
+                    </div>
+                    <div class="tech-tag">
+                        <i class="ri-server-line" style="color: #ff6b6b;"></i>
+                        <span>Axios</span>
+                    </div>
+                    <div class="tech-tag">
+                        <i class="ri-navigation-line" style="color: #000;"></i>
+                        <span>Expo Router</span>
+                    </div>
+                    <div class="tech-tag">
+                        <i class="ri-lock-line" style="color: var(--success);"></i>
+                        <span>SecureStore</span>
+                    </div>
+                    <div class="tech-tag">
+                        <i class="ri-shield-check-line" style="color: var(--accent-gold);"></i>
+                        <span>Zod Validation</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="ri-code-box-line"></i>
+                <span>Desarrollado con Claude Code | Enero 2026</span>
+            </div>
+            <div class="footer-links">
+                <a href="features.html" class="footer-link">Funcionalidades</a>
+                <a href="screens.html" class="footer-link">Pantallas</a>
+                <a href="architecture.html" class="footer-link">Arquitectura</a>
+                <a href="mvp.html" class="footer-link">MVP</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animate progress bar on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.progress-bar-fill').style.width = '85%';
+            }, 500);
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) translateX(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.quick-stat, .nav-card, .feature-preview, .tech-tag').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = `all 0.5s ease ${index * 0.05}s`;
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

@@ -33,6 +33,7 @@ interface AuthState {
 interface AuthActions {
     checkCompany: (companyName: string) => Promise<void>;
     login: (params: LoginParams) => Promise<void>;
+    devLogin: () => Promise<void>; // ⚠️ TEMPORAL - Login de desarrollo
     logout: () => Promise<void>;
     clearError: () => void;
     loadStoredAuth: () => Promise<void>;
@@ -210,6 +211,51 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             });
             throw error;
         }
+    },
+
+    // ⚠️ TEMPORAL - Login de desarrollo sin API
+    devLogin: async () => {
+        console.log('════════════════════════════════════════');
+        console.log('⚠️ DEV LOGIN - Modo desarrollo activado');
+        console.log('════════════════════════════════════════');
+
+        const mockUser: User = {
+            id: 'dev-user-001',
+            email: 'dev@clubmercancias.com',
+            name: 'Usuario Desarrollo',
+            role: 'admin',
+            tenantId: '1',
+            customerId: 'CUST-DEV-001',
+            identificationNumber: '8-888-8888',
+        };
+
+        const mockTenantId = 1;
+        const mockTenantName = 'Demo Company (DEV)';
+        const mockToken = 'dev-token-' + Date.now();
+
+        // Guardar en SecureStore
+        await SecureStore.setItemAsync('tenantId', String(mockTenantId));
+        await SecureStore.setItemAsync('tenantName', mockTenantName);
+        await SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN, mockToken);
+        await SecureStore.setItemAsync(STORAGE_KEYS.USER_DATA, JSON.stringify({
+            userId: mockUser.id,
+            email: mockUser.email,
+            fullName: mockUser.name,
+            role: mockUser.role,
+            customerId: mockUser.customerId,
+            identificationNumber: mockUser.identificationNumber,
+        }));
+
+        set({
+            user: mockUser,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+            tenantId: mockTenantId,
+            tenantName: mockTenantName,
+        });
+
+        console.log('✅ Dev login exitoso');
     },
 
     logout: async () => {

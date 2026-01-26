@@ -25,7 +25,7 @@ export default function LoginScreen() {
     const [localTenantName, setLocalTenantName] = useState<string | null>(null);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
-    const { login, isLoading, error, clearError, tenantId, tenantName } = useAuthStore();
+    const { login, devLogin, isLoading, error, clearError, tenantId, tenantName } = useAuthStore();
 
     // Biometrics
     const {
@@ -133,6 +133,16 @@ export default function LoginScreen() {
 
     const handleChangeCompany = () => {
         router.replace('/(auth)/company');
+    };
+
+    // ⚠️ TEMPORAL - Login de desarrollo
+    const handleDevLogin = async () => {
+        try {
+            await devLogin();
+            router.replace('/(tabs)/home');
+        } catch (e: any) {
+            alert.showError('Error', e.message || 'Error en dev login');
+        }
     };
 
     return (
@@ -297,6 +307,19 @@ export default function LoginScreen() {
                                 </Text>
                             </TouchableOpacity>
                         )}
+
+                        {/* ⚠️ TEMPORAL - Dev Login Button (solo en desarrollo) */}
+                        {/* {__DEV__ && (
+                            <TouchableOpacity
+                                onPress={handleDevLogin}
+                                disabled={isLoading}
+                                activeOpacity={0.7}
+                                style={styles.devLoginBtn}
+                            >
+                                <Ionicons name="code-slash" size={20} color="#f59e0b" />
+                                <Text style={styles.devLoginBtnText}>Dev Login (Bypass)</Text>
+                            </TouchableOpacity>
+                        )} */}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -512,6 +535,26 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: '500',
         color: '#2d6a8a',
+    },
+
+    // Dev Login Button (temporal)
+    devLoginBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        marginTop: 12,
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#f59e0b',
+        borderStyle: 'dashed',
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    },
+    devLoginBtnText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#f59e0b',
     },
 
     // Footer

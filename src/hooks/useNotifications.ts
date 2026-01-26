@@ -128,12 +128,9 @@ export function useNotifications(): UseNotificationsReturn {
         });
 
         return () => {
-            if (notificationListener.current) {
-                Notifications.removeNotificationSubscription(notificationListener.current);
-            }
-            if (responseListener.current) {
-                Notifications.removeNotificationSubscription(responseListener.current);
-            }
+            // Use .remove() method on subscription objects (modern API)
+            notificationListener.current?.remove();
+            responseListener.current?.remove();
         };
     }, [addNotification]);
 

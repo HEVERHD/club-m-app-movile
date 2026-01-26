@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura Tecnica - Club de Mercancias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4a6e;
+            --primary-light: #2d6a8a;
+            --primary-dark: #0f3450;
+            --secondary: #22c55e;
+            --accent-gold: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --bg-dark: #0a0f1a;
+            --bg-card: #111827;
+            --bg-elevated: #1f2937;
+            --bg-hover: #374151;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1f2937;
+            --border-light: #374151;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            --gradient-primary: linear-gradient(135deg, #1a4a6e 0%, #2d6a8a 50%, #3d8aa6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 0 40px;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-logo i { font-size: 22px; color: white; }
+        .nav-title { font-weight: 700; font-size: 1.1rem; }
+        .nav-links { display: flex; gap: 8px; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
+        .nav-link.active { background: var(--primary); color: white; }
+        .nav-link i { font-size: 18px; }
+
+        /* Main */
+        .main { padding-top: 70px; }
+
+        /* Page Header */
+        .page-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 60px 40px;
+        }
+
+        .page-header-content { max-width: 1400px; margin: 0 auto; }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--text-primary); }
+        .breadcrumb span { color: var(--text-muted); }
+        .breadcrumb .current { color: var(--text-secondary); }
+
+        .page-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 12px; }
+        .page-header p { color: var(--text-secondary); font-size: 1.1rem; }
+
+        /* Container */
+        .container { max-width: 1400px; margin: 0 auto; padding: 60px 40px; }
+
+        /* Section */
+        .section { margin-bottom: 60px; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header i { font-size: 24px; color: var(--primary-light); }
+        .section-header h2 { font-size: 1.5rem; font-weight: 700; }
+
+        /* Tech Stack Grid */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .tech-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .tech-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        .tech-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .tech-card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .tech-card-title { font-size: 1.2rem; font-weight: 600; }
+        .tech-card-version { color: var(--text-muted); font-size: 0.85rem; }
+
+        .tech-card-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .tech-card-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tech-feature {
+            padding: 4px 10px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Folder Structure - Visual Tree */
+        .tree-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .tree-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tree-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        .tree-card-header {
+            padding: 20px;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tree-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .tree-card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .tree-card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .tree-card-body {
+            padding: 20px;
+        }
+
+        .tree-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: var(--bg-elevated);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .tree-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .tree-item:hover {
+            background: var(--bg-hover);
+            transform: translateX(5px);
+        }
+
+        .tree-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .tree-item-icon.folder {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-gold);
+        }
+
+        .tree-item-icon.tsx {
+            background: rgba(97, 218, 251, 0.15);
+            color: #61dafb;
+        }
+
+        .tree-item-icon.ts {
+            background: rgba(49, 120, 198, 0.15);
+            color: #3178c6;
+        }
+
+        .tree-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tree-item-name {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .tree-item-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Legacy folder structure for code view */
+        .folder-structure {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            display: none;
+        }
+
+        .folder-tree {
+            line-height: 1.8;
+            white-space: pre;
+        }
+
+        .folder { color: var(--accent-gold); }
+        .file { color: var(--text-secondary); }
+        .file-tsx { color: #61dafb; }
+        .file-ts { color: #3178c6; }
+        .comment { color: var(--text-muted); font-style: italic; }
+
+        /* Data Flow */
+        .data-flow {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+        }
+
+        .flow-layers {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .flow-layer {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .flow-layer-label {
+            width: 120px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .flow-layer-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .flow-item {
+            background: var(--bg-elevated);
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .flow-item:hover { border-color: var(--primary-light); }
+        .flow-item i { font-size: 18px; }
+        .flow-item span { font-size: 0.9rem; }
+
+        .flow-arrow {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .flow-arrow i { font-size: 24px; color: var(--text-muted); }
+
+        /* Dependencies */
+        .deps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .deps-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .deps-section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .deps-section h3 i { color: var(--primary-light); }
+
+        .deps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dep-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+        }
+
+        .dep-name {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+        }
+
+        .dep-version {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        /* Patterns */
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .pattern-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .pattern-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pattern-card h3 i { color: var(--primary-light); }
+
+        .pattern-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .pattern-code {
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 40px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-brand { display: flex; align-items: center; gap: 12px; }
+        .footer-brand i { font-size: 24px; color: var(--primary-light); }
+        .footer-links { display: flex; gap: 24px; }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer-link:hover { color: var(--text-primary); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .deps-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .page-header { padding: 40px 20px; }
+            .page-header h1 { font-size: 1.8rem; }
+            .container { padding: 40px 20px; }
+            .flow-layer { flex-direction: column; align-items: flex-start; }
+            .flow-layer-label { width: auto; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo"><i class="ri-store-3-line"></i></div>
+                <span class="nav-title">Club de Mercancias</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="ri-home-4-line"></i><span>Inicio</span></a>
+                <a href="features.html" class="nav-link"><i class="ri-apps-2-line"></i><span>Funcionalidades</span></a>
+                <a href="screens.html" class="nav-link"><i class="ri-smartphone-line"></i><span>Pantallas</span></a>
+                <a href="architecture.html" class="nav-link active"><i class="ri-code-s-slash-line"></i><span>Arquitectura</span></a>
+                <a href="integrations.html" class="nav-link"><i class="ri-plug-line"></i><span>Integraciones</span></a>
+                <a href="mvp.html" class="nav-link"><i class="ri-flag-line"></i><span>MVP</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <div class="breadcrumb">
+                    <a href="index.html">Inicio</a>
+                    <span>/</span>
+                    <span class="current">Arquitectura Tecnica</span>
+                </div>
+                <h1>Arquitectura Tecnica</h1>
+                <p>Stack tecnologico, estructura del proyecto y patrones de diseno utilizados.</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Tech Stack -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-stack-line"></i>
+                    <h2>Stack Tecnologico Principal</h2>
+                </div>
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <div class="tech-card-icon" style="background: rgba(97, 218, 251, 0.15); color: #61dafb;">
+                                <i class="ri-reactjs-line"></i>
+                            </div>
+                            <div>
+                                <div class="tech-card-title">React Native</div>
+                                <div class="tech-card-version">v0.81.5</div>
+                            </div>
+                        </div>
+                        <p class="tech-card-desc">Framework principal para desarrollo mobile cross-platform (iOS y Android).</p>
+                        <div class="tech-card-features">
+                            <span class="tech-feature">Cross-platform</span>
+                            <span class="tech-feature">Native UI</span>
+                            <span class="tech-feature">Hot Reload</span>
+                        </div>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <div class="tech-card-icon" style="background: rgba(0, 0, 0, 0.15); color: var(--text-primary);">
+                                <i class="ri-smartphone-line"></i>
+                            </div>
+                            <div>
+                                <div class="tech-card-title">Expo</div>
+                                <div class="tech-card-version">SDK 54</div>
+                            </div>
+                        </div>
+                        <p class="tech-card-desc">Plataforma para desarrollo simplificado con acceso a APIs nativas.</p>
+                        <div class="tech-card-features">
+                            <span class="tech-feature">Managed Workflow</span>
+                            <span class="tech-feature">OTA Updates</span>
+                            <span class="tech-feature">Dev Tools</span>
+                        </div>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <div class="tech-card-icon" style="background: rgba(49, 120, 198, 0.15); color: #3178c6;">
+                                <i class="ri-file-code-line"></i>
+                            </div>
+                            <div>
+                                <div class="tech-card-title">TypeScript</div>
+                                <div class="tech-card-version">v5.9.2</div>
+                            </div>
+                        </div>
+                        <p class="tech-card-desc">Superset de JavaScript con tipado estatico para mayor seguridad.</p>
+                        <div class="tech-card-features">
+                            <span class="tech-feature">Type Safety</span>
+                            <span class="tech-feature">IntelliSense</span>
+                            <span class="tech-feature">Refactoring</span>
+                        </div>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <div class="tech-card-icon" style="background: rgba(118, 74, 188, 0.15); color: #764abc;">
+                                <i class="ri-database-2-line"></i>
+                            </div>
+                            <div>
+                                <div class="tech-card-title">Zustand</div>
+                                <div class="tech-card-version">v5.0.10</div>
+                            </div>
+                        </div>
+                        <p class="tech-card-desc">Gestion de estado ligera y simple con soporte de persistencia.</p>
+                        <div class="tech-card-features">
+                            <span class="tech-feature">Minimal API</span>
+                            <span class="tech-feature">Persist</span>
+                            <span class="tech-feature">DevTools</span>
+                        </div>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <div class="tech-card-icon" style="background: rgba(255, 65, 84, 0.15); color: #ff4154;">
+                                <i class="ri-refresh-line"></i>
+                            </div>
+                            <div>
+                                <div class="tech-card-title">React Query</div>
+                                <div class="tech-card-version">v5.90.16</div>
+                            </div>
+                        </div>
+                        <p class="tech-card-desc">Gestion de datos asincronos, cache y sincronizacion con servidor.</p>
+                        <div class="tech-card-features">
+                            <span class="tech-feature">Caching</span>
+                            <span class="tech-feature">Auto Refetch</span>
+                            <span class="tech-feature">Mutations</span>
+                        </div>
+                    </div>
+
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <div class="tech-card-icon" style="background: rgba(0, 0, 0, 0.15); color: var(--text-primary);">
+                                <i class="ri-navigation-line"></i>
+                            </div>
+                            <div>
+                                <div class="tech-card-title">Expo Router</div>
+                                <div class="tech-card-version">v6.0.21</div>
+                            </div>
+                        </div>
+                        <p class="tech-card-desc">Navegacion basada en archivos inspirada en Next.js.</p>
+                        <div class="tech-card-features">
+                            <span class="tech-feature">File-based</span>
+                            <span class="tech-feature">Deep Links</span>
+                            <span class="tech-feature">Layouts</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Folder Structure -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-folder-3-line"></i>
+                    <h2>Estructura del Proyecto</h2>
+                </div>
+                <div class="tree-container">
+                    <!-- App Folder -->
+                    <div class="tree-card">
+                        <div class="tree-card-header">
+                            <div class="tree-card-icon" style="background: rgba(97, 218, 251, 0.15); color: #61dafb;">
+                                <i class="ri-smartphone-line"></i>
+                            </div>
+                            <div>
+                                <div class="tree-card-title">app/</div>
+                                <div class="tree-card-subtitle">Expo Router - Pantallas</div>
+                            </div>
+                        </div>
+                        <div class="tree-card-body">
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">(auth)/</div>
+                                    <div class="tree-item-desc">company.tsx, login.tsx</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">(tabs)/</div>
+                                    <div class="tree-item-desc">home, clubs, draws, customers, profile</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">club/</div>
+                                    <div class="tree-item-desc">[id].tsx - Ruta dinamica</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon tsx"><i class="ri-reactjs-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">coupons.tsx</div>
+                                    <div class="tree-item-desc">Sistema de cupones</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon tsx"><i class="ri-reactjs-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">notifications.tsx</div>
+                                    <div class="tree-item-desc">Centro de notificaciones</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon tsx"><i class="ri-reactjs-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">draw.tsx, search.tsx</div>
+                                    <div class="tree-item-desc">Sorteos y busqueda</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Folder -->
+                    <div class="tree-card">
+                        <div class="tree-card-header">
+                            <div class="tree-card-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                                <i class="ri-server-line"></i>
+                            </div>
+                            <div>
+                                <div class="tree-card-title">src/api/</div>
+                                <div class="tree-card-subtitle">Servicios API</div>
+                            </div>
+                        </div>
+                        <div class="tree-card-body">
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">client.ts</div>
+                                    <div class="tree-item-desc">Axios config + auth interceptors</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">clubs.api.ts</div>
+                                    <div class="tree-item-desc">Endpoints de clubes</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">customers.api.ts</div>
+                                    <div class="tree-item-desc">Endpoints de clientes</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">draws.api.ts</div>
+                                    <div class="tree-item-desc">Endpoints de sorteos</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">coupons.api.ts</div>
+                                    <div class="tree-item-desc">Endpoints de cupones</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">payments.api.ts</div>
+                                    <div class="tree-item-desc">Endpoints de pagos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stores Folder -->
+                    <div class="tree-card">
+                        <div class="tree-card-header">
+                            <div class="tree-card-icon" style="background: rgba(118, 74, 188, 0.15); color: #764abc;">
+                                <i class="ri-database-2-line"></i>
+                            </div>
+                            <div>
+                                <div class="tree-card-title">src/stores/</div>
+                                <div class="tree-card-subtitle">Zustand State Management</div>
+                            </div>
+                        </div>
+                        <div class="tree-card-body">
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">auth-store.ts</div>
+                                    <div class="tree-item-desc">Autenticacion y sesion</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">coupons-store.ts</div>
+                                    <div class="tree-item-desc">Estado de cupones</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">notifications-store.ts</div>
+                                    <div class="tree-item-desc">Estado de notificaciones</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">settingsStore.ts</div>
+                                    <div class="tree-item-desc">Configuracion de app</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Components Folder -->
+                    <div class="tree-card">
+                        <div class="tree-card-header">
+                            <div class="tree-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                                <i class="ri-layout-4-line"></i>
+                            </div>
+                            <div>
+                                <div class="tree-card-title">src/components/</div>
+                                <div class="tree-card-subtitle">Componentes UI</div>
+                            </div>
+                        </div>
+                        <div class="tree-card-body">
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">ui/</div>
+                                    <div class="tree-item-desc">Componentes base reutilizables</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">clubs/</div>
+                                    <div class="tree-item-desc">ClubCard, ClubDetails...</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">coupons/</div>
+                                    <div class="tree-item-desc">CouponCard, CouponModal...</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">scanner/</div>
+                                    <div class="tree-item-desc">QRScanner component</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon folder"><i class="ri-folder-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">settings/</div>
+                                    <div class="tree-item-desc">ThemeSelector, configs...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hooks & Services -->
+                    <div class="tree-card">
+                        <div class="tree-card-header">
+                            <div class="tree-card-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink);">
+                                <i class="ri-code-s-slash-line"></i>
+                            </div>
+                            <div>
+                                <div class="tree-card-title">src/hooks/</div>
+                                <div class="tree-card-subtitle">Custom React Hooks</div>
+                            </div>
+                        </div>
+                        <div class="tree-card-body">
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">useBiometrics.ts</div>
+                                    <div class="tree-item-desc">Face ID / Huella digital</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">useNetworkStatus.ts</div>
+                                    <div class="tree-item-desc">Deteccion de conectividad</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services -->
+                    <div class="tree-card">
+                        <div class="tree-card-header">
+                            <div class="tree-card-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">
+                                <i class="ri-tools-line"></i>
+                            </div>
+                            <div>
+                                <div class="tree-card-title">src/services/</div>
+                                <div class="tree-card-subtitle">Servicios de la App</div>
+                            </div>
+                        </div>
+                        <div class="tree-card-body">
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">notifications.ts</div>
+                                    <div class="tree-item-desc">Push notifications service</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">syncService.ts</div>
+                                    <div class="tree-item-desc">Sincronizacion offline</div>
+                                </div>
+                            </div>
+                            <div class="tree-item">
+                                <div class="tree-item-icon ts"><i class="ri-file-code-line"></i></div>
+                                <div class="tree-item-info">
+                                    <div class="tree-item-name">api.config.ts</div>
+                                    <div class="tree-item-desc">Configuracion de API</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Flow -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-flow-chart"></i>
+                    <h2>Flujo de Datos</h2>
+                </div>
+                <div class="data-flow">
+                    <div class="flow-layers">
+                        <div class="flow-layer">
+                            <div class="flow-layer-label">UI Layer</div>
+                            <div class="flow-layer-items">
+                                <div class="flow-item" style="border-color: #61dafb;">
+                                    <i class="ri-reactjs-line" style="color: #61dafb;"></i>
+                                    <span>React Components</span>
+                                </div>
+                                <div class="flow-item" style="border-color: #61dafb;">
+                                    <i class="ri-layout-4-line" style="color: #61dafb;"></i>
+                                    <span>Expo Router Screens</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flow-arrow"><i class="ri-arrow-down-line"></i></div>
+                        <div class="flow-layer">
+                            <div class="flow-layer-label">State Layer</div>
+                            <div class="flow-layer-items">
+                                <div class="flow-item" style="border-color: #764abc;">
+                                    <i class="ri-database-2-line" style="color: #764abc;"></i>
+                                    <span>Zustand Stores</span>
+                                </div>
+                                <div class="flow-item" style="border-color: #ff4154;">
+                                    <i class="ri-refresh-line" style="color: #ff4154;"></i>
+                                    <span>React Query Cache</span>
+                                </div>
+                                <div class="flow-item" style="border-color: var(--accent-purple);">
+                                    <i class="ri-paint-line" style="color: var(--accent-purple);"></i>
+                                    <span>Theme Context</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flow-arrow"><i class="ri-arrow-down-line"></i></div>
+                        <div class="flow-layer">
+                            <div class="flow-layer-label">Service Layer</div>
+                            <div class="flow-layer-items">
+                                <div class="flow-item" style="border-color: var(--info);">
+                                    <i class="ri-server-line" style="color: var(--info);"></i>
+                                    <span>API Services</span>
+                                </div>
+                                <div class="flow-item" style="border-color: var(--success);">
+                                    <i class="ri-notification-line" style="color: var(--success);"></i>
+                                    <span>Push Notifications</span>
+                                </div>
+                                <div class="flow-item" style="border-color: var(--warning);">
+                                    <i class="ri-refresh-line" style="color: var(--warning);"></i>
+                                    <span>Sync Service</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flow-arrow"><i class="ri-arrow-down-line"></i></div>
+                        <div class="flow-layer">
+                            <div class="flow-layer-label">Storage Layer</div>
+                            <div class="flow-layer-items">
+                                <div class="flow-item" style="border-color: var(--success);">
+                                    <i class="ri-lock-line" style="color: var(--success);"></i>
+                                    <span>SecureStore (tokens)</span>
+                                </div>
+                                <div class="flow-item" style="border-color: var(--accent-gold);">
+                                    <i class="ri-hard-drive-2-line" style="color: var(--accent-gold);"></i>
+                                    <span>AsyncStorage (cache)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flow-arrow"><i class="ri-arrow-down-line"></i></div>
+                        <div class="flow-layer">
+                            <div class="flow-layer-label">External</div>
+                            <div class="flow-layer-items">
+                                <div class="flow-item" style="border-color: var(--primary-light);">
+                                    <i class="ri-cloud-line" style="color: var(--primary-light);"></i>
+                                    <span>REST API Backend</span>
+                                </div>
+                                <div class="flow-item" style="border-color: var(--accent-pink);">
+                                    <i class="ri-notification-badge-line" style="color: var(--accent-pink);"></i>
+                                    <span>Expo Push Service</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dependencies -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-npmjs-line"></i>
+                    <h2>Dependencias Principales</h2>
+                </div>
+                <div class="deps-grid">
+                    <div class="deps-section">
+                        <h3><i class="ri-apps-line"></i> Core</h3>
+                        <div class="deps-list">
+                            <div class="dep-item">
+                                <span class="dep-name">react-native</span>
+                                <span class="dep-version">0.81.5</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">expo</span>
+                                <span class="dep-version">~54.0.31</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">expo-router</span>
+                                <span class="dep-version">~6.0.21</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">react</span>
+                                <span class="dep-version">19.1.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="deps-section">
+                        <h3><i class="ri-database-2-line"></i> State & Data</h3>
+                        <div class="deps-list">
+                            <div class="dep-item">
+                                <span class="dep-name">zustand</span>
+                                <span class="dep-version">^5.0.10</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">@tanstack/react-query</span>
+                                <span class="dep-version">^5.90.16</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">axios</span>
+                                <span class="dep-version">^1.13.2</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">@react-native-async-storage</span>
+                                <span class="dep-version">^2.2.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="deps-section">
+                        <h3><i class="ri-shield-line"></i> Security & Auth</h3>
+                        <div class="deps-list">
+                            <div class="dep-item">
+                                <span class="dep-name">expo-secure-store</span>
+                                <span class="dep-version">~15.0.8</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">expo-local-authentication</span>
+                                <span class="dep-version">^17.0.8</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">zod</span>
+                                <span class="dep-version">^4.3.5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="deps-section">
+                        <h3><i class="ri-tools-line"></i> Expo APIs</h3>
+                        <div class="deps-list">
+                            <div class="dep-item">
+                                <span class="dep-name">expo-notifications</span>
+                                <span class="dep-version">^0.32.16</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">expo-camera</span>
+                                <span class="dep-version">^17.0.10</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">expo-file-system</span>
+                                <span class="dep-version">^19.0.21</span>
+                            </div>
+                            <div class="dep-item">
+                                <span class="dep-name">@react-native-community/netinfo</span>
+                                <span class="dep-version">^11.4.1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Patterns -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-puzzle-line"></i>
+                    <h2>Patrones de Diseno</h2>
+                </div>
+                <div class="patterns-grid">
+                    <div class="pattern-card">
+                        <h3><i class="ri-database-2-line"></i> Zustand Store Pattern</h3>
+                        <p>Estado global con acciones encapsuladas y persistencia opcional.</p>
+                        <div class="pattern-code">
+const useStore = create(persist(<br>
+&nbsp;&nbsp;(set, get) => ({<br>
+&nbsp;&nbsp;&nbsp;&nbsp;data: [],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setData: (data) => set({ data }),<br>
+&nbsp;&nbsp;}),<br>
+&nbsp;&nbsp;{ name: 'store-key' }<br>
+));
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3><i class="ri-refresh-line"></i> React Query Pattern</h3>
+                        <p>Queries con cache automatico y refetch inteligente.</p>
+                        <div class="pattern-code">
+const { data, isLoading } = useQuery({<br>
+&nbsp;&nbsp;queryKey: ['clubs', tenantId],<br>
+&nbsp;&nbsp;queryFn: () => fetchClubs(tenantId),<br>
+&nbsp;&nbsp;staleTime: 5 * 60 * 1000,<br>
+});
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3><i class="ri-code-line"></i> Custom Hook Pattern</h3>
+                        <p>Logica reutilizable encapsulada en hooks personalizados.</p>
+                        <div class="pattern-code">
+export function useBiometrics() {<br>
+&nbsp;&nbsp;const [isAvailable, setAvailable] = useState(false);<br>
+&nbsp;&nbsp;const authenticate = async () => { ... };<br>
+&nbsp;&nbsp;return { isAvailable, authenticate };<br>
+}
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3><i class="ri-layout-4-line"></i> File-based Routing</h3>
+                        <p>Rutas definidas por estructura de carpetas (Expo Router).</p>
+                        <div class="pattern-code">
+app/<br>
+├── (auth)/login.tsx    → /login<br>
+├── (tabs)/home.tsx     → /home<br>
+├── club/[id].tsx       → /club/:id<br>
+└── coupons.tsx         → /coupons
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3><i class="ri-paint-line"></i> Theme Context</h3>
+                        <p>Tematizacion global con React Context y hooks.</p>
+                        <div class="pattern-code">
+const { colors, isDark, setTheme } = useTheme();<br>
+<br>
+&lt;View style={{<br>
+&nbsp;&nbsp;backgroundColor: colors.bg.primary<br>
+}} /&gt;
+                        </div>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h3><i class="ri-server-line"></i> API Service Pattern</h3>
+                        <p>Servicios API centralizados con interceptores Axios.</p>
+                        <div class="pattern-code">
+// api/clubs.api.ts<br>
+export const getClubs = async (tenantId: number) => {<br>
+&nbsp;&nbsp;const { data } = await client.get('/clubs', {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;params: { tenantId }<br>
+&nbsp;&nbsp;});<br>
+&nbsp;&nbsp;return data;<br>
+};
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="ri-code-box-line"></i>
+                <span>Desarrollado con Claude Code | Enero 2026</span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Inicio</a>
+                <a href="features.html" class="footer-link">Funcionalidades</a>
+                <a href="screens.html" class="footer-link">Pantallas</a>
+                <a href="mvp.html" class="footer-link">MVP</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.tech-card, .deps-section, .pattern-card, .flow-item').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = `all 0.5s ease ${index * 0.05}s`;
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

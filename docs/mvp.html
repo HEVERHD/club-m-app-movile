@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVP Checklist - Club de Mercancias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4a6e;
+            --primary-light: #2d6a8a;
+            --primary-dark: #0f3450;
+            --secondary: #22c55e;
+            --accent-gold: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --bg-dark: #0a0f1a;
+            --bg-card: #111827;
+            --bg-elevated: #1f2937;
+            --bg-hover: #374151;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1f2937;
+            --border-light: #374151;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            --gradient-primary: linear-gradient(135deg, #1a4a6e 0%, #2d6a8a 50%, #3d8aa6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 0 40px;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-logo i { font-size: 22px; color: white; }
+        .nav-title { font-weight: 700; font-size: 1.1rem; }
+        .nav-links { display: flex; gap: 8px; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
+        .nav-link.active { background: var(--primary); color: white; }
+        .nav-link i { font-size: 18px; }
+
+        /* Main */
+        .main { padding-top: 70px; }
+
+        /* Hero Progress */
+        .hero-progress {
+            background: var(--gradient-primary);
+            padding: 80px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-progress::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .hero-progress-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .hero-progress-info h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .hero-progress-info p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .hero-progress-percentage {
+            text-align: right;
+        }
+
+        .progress-number {
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .progress-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .progress-bar-hero {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .progress-bar-fill-hero {
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-bar-fill-hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-stats {
+            display: flex;
+            gap: 60px;
+        }
+
+        .progress-stat {
+            text-align: center;
+        }
+
+        .progress-stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .progress-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
+        /* Container */
+        .container { max-width: 1400px; margin: 0 auto; padding: 60px 40px; }
+
+        /* Section */
+        .section { margin-bottom: 60px; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header i { font-size: 24px; color: var(--primary-light); }
+        .section-header h2 { font-size: 1.5rem; font-weight: 700; flex: 1; }
+
+        .section-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+
+        /* MVP Requirements */
+        .mvp-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .mvp-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .mvp-item:hover {
+            border-color: var(--primary-light);
+        }
+
+        .mvp-item.done {
+            border-left: 4px solid var(--success);
+        }
+
+        .mvp-item.pending {
+            border-left: 4px solid var(--warning);
+        }
+
+        .mvp-checkbox {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .mvp-checkbox.done {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .mvp-checkbox.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .mvp-content { flex: 1; }
+
+        .mvp-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mvp-title .status-tag {
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-done { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+
+        .mvp-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .mvp-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .mvp-detail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .mvp-detail i { font-size: 16px; }
+
+        .mvp-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .mvp-file {
+            padding: 4px 10px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: var(--text-muted);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .timeline-item:last-child { padding-bottom: 0; }
+
+        .timeline-dot {
+            position: absolute;
+            left: -33px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            border: 4px solid var(--bg-dark);
+        }
+
+        .timeline-dot.done { background: var(--success); }
+        .timeline-dot.pending { background: var(--warning); }
+        .timeline-dot.future { background: var(--text-muted); }
+
+        .timeline-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .timeline-phase {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .timeline-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .timeline-feature {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .timeline-feature i.done { color: var(--success); }
+        .timeline-feature i.pending { color: var(--warning); }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .summary-card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 20px;
+        }
+
+        .summary-card-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .summary-card-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Next Steps */
+        .next-steps {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .next-steps h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .next-steps h3 i { color: var(--warning); }
+
+        .next-step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .next-step-item:hover {
+            transform: translateX(5px);
+        }
+
+        .next-step-item:last-child { margin-bottom: 0; }
+
+        .next-step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .next-step-content h4 {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .next-step-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 40px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-brand { display: flex; align-items: center; gap: 12px; }
+        .footer-brand i { font-size: 24px; color: var(--primary-light); }
+        .footer-links { display: flex; gap: 24px; }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer-link:hover { color: var(--text-primary); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .summary-grid { grid-template-columns: 1fr; }
+            .hero-progress-header { flex-direction: column; gap: 24px; }
+            .hero-progress-percentage { text-align: left; }
+            .progress-stats { flex-wrap: wrap; gap: 30px; }
+        }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .hero-progress { padding: 60px 20px; }
+            .hero-progress-info h1 { font-size: 1.8rem; }
+            .progress-number { font-size: 3.5rem; }
+            .container { padding: 40px 20px; }
+            .mvp-item { flex-direction: column; gap: 16px; }
+            .timeline { padding-left: 30px; }
+            .timeline-dot { left: -23px; width: 14px; height: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo"><i class="ri-store-3-line"></i></div>
+                <span class="nav-title">Club de Mercancias</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="ri-home-4-line"></i><span>Inicio</span></a>
+                <a href="features.html" class="nav-link"><i class="ri-apps-2-line"></i><span>Funcionalidades</span></a>
+                <a href="screens.html" class="nav-link"><i class="ri-smartphone-line"></i><span>Pantallas</span></a>
+                <a href="architecture.html" class="nav-link"><i class="ri-code-s-slash-line"></i><span>Arquitectura</span></a>
+                <a href="integrations.html" class="nav-link"><i class="ri-plug-line"></i><span>Integraciones</span></a>
+                <a href="mvp.html" class="nav-link active"><i class="ri-flag-line"></i><span>MVP</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <!-- Hero Progress -->
+        <section class="hero-progress">
+            <div class="hero-progress-content">
+                <div class="hero-progress-header">
+                    <div class="hero-progress-info">
+                        <h1>MVP Progress</h1>
+                        <p>Estado actual del Producto Minimo Viable - Seccion 2.7 del documento de requerimientos</p>
+                    </div>
+                    <div class="hero-progress-percentage">
+                        <div class="progress-number">100%</div>
+                        <div class="progress-label">Completado</div>
+                    </div>
+                </div>
+                <div class="progress-bar-hero">
+                    <div class="progress-bar-fill-hero" style="width: 0%;"></div>
+                </div>
+                <div class="progress-stats">
+                    <div class="progress-stat">
+                        <div class="progress-stat-value">16</div>
+                        <div class="progress-stat-label">Completadas</div>
+                    </div>
+                    <div class="progress-stat">
+                        <div class="progress-stat-value">0</div>
+                        <div class="progress-stat-label">Pendientes</div>
+                    </div>
+                    <div class="progress-stat">
+                        <div class="progress-stat-value">16</div>
+                        <div class="progress-stat-label">Total</div>
+                    </div>
+                    <div class="progress-stat">
+                        <div class="progress-stat-value">Q1</div>
+                        <div class="progress-stat-label">2026</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <!-- Summary -->
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                        <i class="ri-checkbox-circle-line"></i>
+                    </div>
+                    <div class="summary-card-value" style="color: var(--success);">16</div>
+                    <div class="summary-card-label">Funcionalidades Completadas</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                        <i class="ri-trophy-line"></i>
+                    </div>
+                    <div class="summary-card-value" style="color: var(--success);">100%</div>
+                    <div class="summary-card-label">MVP Completado</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--info);">
+                        <i class="ri-file-list-3-line"></i>
+                    </div>
+                    <div class="summary-card-value" style="color: var(--info);">2.7</div>
+                    <div class="summary-card-label">Seccion del Documento</div>
+                </div>
+            </div>
+
+            <!-- MVP Requirements - Completed -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-checkbox-circle-line"></i>
+                    <h2>Requerimientos Completados</h2>
+                    <span class="section-badge badge-success">16 items</span>
+                </div>
+                <div class="mvp-grid">
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Registro/Login (telefono o email)
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Sistema completo de autenticacion con email/password, seleccion de empresa multi-tenant y persistencia de sesion.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-user-line"></i> Multi-tenant</span>
+                                <span class="mvp-detail"><i class="ri-lock-line"></i> JWT Tokens</span>
+                                <span class="mvp-detail"><i class="ri-save-line"></i> SecureStore</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">auth-store.ts</span>
+                                <span class="mvp-file">login.tsx</span>
+                                <span class="mvp-file">company.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Ver perfil del usuario
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Pantalla de perfil con datos del usuario, configuraciones, tema y opciones de cuenta.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-user-3-line"></i> Datos personales</span>
+                                <span class="mvp-detail"><i class="ri-settings-3-line"></i> Configuracion</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">profile.tsx</span>
+                                <span class="mvp-file">my-profile.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Ver status del club
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Vista detallada de clubes con progreso semanal, balance, pagos realizados y estado actual.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-bar-chart-line"></i> Progreso</span>
+                                <span class="mvp-detail"><i class="ri-wallet-3-line"></i> Balance</span>
+                                <span class="mvp-detail"><i class="ri-calendar-line"></i> Semanas</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">clubs.tsx</span>
+                                <span class="mvp-file">club/[id].tsx</span>
+                                <span class="mvp-file">ClubCard.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Ver y canjear cupones/beneficios
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Sistema completo de cupones con multiples tipos, canje, historial y terminos.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-price-tag-3-line"></i> 6+ tipos</span>
+                                <span class="mvp-detail"><i class="ri-exchange-line"></i> Canje</span>
+                                <span class="mvp-detail"><i class="ri-history-line"></i> Historial</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">coupons.tsx</span>
+                                <span class="mvp-file">coupons-store.ts</span>
+                                <span class="mvp-file">CouponCard.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Autenticacion biometrica
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Face ID y huella digital para login rapido con credenciales encriptadas.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-fingerprint-line"></i> Face ID</span>
+                                <span class="mvp-detail"><i class="ri-fingerprint-line"></i> Huella</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">useBiometrics.ts</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Notificaciones push
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Sistema completo con canales Android, recordatorios e historial.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-notification-3-line"></i> Push</span>
+                                <span class="mvp-detail"><i class="ri-history-line"></i> Historial</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">notifications.tsx</span>
+                                <span class="mvp-file">notifications-store.ts</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Modo offline
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Cache local, deteccion de red y sincronizacion automatica.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-wifi-off-line"></i> Offline</span>
+                                <span class="mvp-detail"><i class="ri-refresh-line"></i> Sync</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">syncService.ts</span>
+                                <span class="mvp-file">useNetworkStatus.ts</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Dashboard principal
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Vista general con estadisticas, acciones rapidas y actividad reciente.</p>
+                            <div class="mvp-files">
+                                <span class="mvp-file">home.tsx</span>
+                                <span class="mvp-file">my-home.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Gestion de sorteos
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Ejecucion de sorteos con animacion, ganadores y reportes PDF.</p>
+                            <div class="mvp-files">
+                                <span class="mvp-file">draws.tsx</span>
+                                <span class="mvp-file">draw.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Escaner QR
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Busqueda de clientes por codigo QR.</p>
+                            <div class="mvp-files">
+                                <span class="mvp-file">QRScanner.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Tema claro/oscuro
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Sistema de temas con soporte automatico y persistencia.</p>
+                            <div class="mvp-files">
+                                <span class="mvp-file">ThemeContext.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Busqueda de clientes
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Busqueda por nombre, cedula o contrato.</p>
+                            <div class="mvp-files">
+                                <span class="mvp-file">search.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Mostrar QR de miembro
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Codigo QR personal para identificacion rapida en tienda, con vista compacta y modal expandido.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-qr-code-line"></i> QR Generado</span>
+                                <span class="mvp-detail"><i class="ri-share-line"></i> Compartir</span>
+                                <span class="mvp-detail"><i class="ri-fullscreen-line"></i> Vista Modal</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">QRCodeCard.tsx</span>
+                                <span class="mvp-file">my-profile.tsx</span>
+                                <span class="mvp-file">customer/[id].tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Ver puntos acumulados
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Visualizacion de puntos acumulados por el cliente con historial de movimientos y filtros por tipo.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-star-line"></i> Sistema de puntos</span>
+                                <span class="mvp-detail"><i class="ri-history-line"></i> Historial</span>
+                                <span class="mvp-detail"><i class="ri-filter-3-line"></i> Filtros</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">points.tsx</span>
+                                <span class="mvp-file">points-store.ts</span>
+                                <span class="mvp-file">points.api.ts</span>
+                                <span class="mvp-file">PointsCard.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Historial de compras completo
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Registro detallado de todos los pagos y transacciones del cliente con filtros por tipo y fecha.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-wallet-3-line"></i> Pagos</span>
+                                <span class="mvp-detail"><i class="ri-swap-line"></i> Canjes</span>
+                                <span class="mvp-detail"><i class="ri-filter-3-line"></i> Filtros</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">purchases.tsx</span>
+                                <span class="mvp-file">purchases-store.ts</span>
+                                <span class="mvp-file">purchases.api.ts</span>
+                                <span class="mvp-file">PurchaseItem.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mvp-item done">
+                        <div class="mvp-checkbox done"><i class="ri-check-line"></i></div>
+                        <div class="mvp-content">
+                            <div class="mvp-title">
+                                Ofertas exclusivas y campanas
+                                <span class="status-tag status-done">Completado</span>
+                            </div>
+                            <p class="mvp-description">Sistema de ofertas especiales y campanas promocionales con participacion y seguimiento.</p>
+                            <div class="mvp-details">
+                                <span class="mvp-detail"><i class="ri-megaphone-line"></i> Campanas</span>
+                                <span class="mvp-detail"><i class="ri-gift-line"></i> Ofertas</span>
+                                <span class="mvp-detail"><i class="ri-user-star-line"></i> Participar</span>
+                            </div>
+                            <div class="mvp-files">
+                                <span class="mvp-file">campaigns.tsx</span>
+                                <span class="mvp-file">campaigns-store.ts</span>
+                                <span class="mvp-file">campaigns.api.ts</span>
+                                <span class="mvp-file">CampaignCard.tsx</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MVP Complete Banner -->
+            <section class="section">
+                <div class="next-steps" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.1)); border-color: var(--success);">
+                    <h3 style="color: var(--success);"><i class="ri-trophy-line"></i> MVP Completado!</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">Todas las funcionalidades del MVP han sido implementadas exitosamente. La aplicacion esta lista para pruebas de usuario y despliegue.</p>
+                    <div class="next-step-item" style="background: rgba(34, 197, 94, 0.1);">
+                        <div class="next-step-number" style="background: var(--gradient-success);"><i class="ri-check-line" style="font-size: 18px;"></i></div>
+                        <div class="next-step-content">
+                            <h4>Sistema de Puntos</h4>
+                            <p>Visualizacion completa de puntos con historial, filtros y resumen de movimientos.</p>
+                        </div>
+                    </div>
+                    <div class="next-step-item" style="background: rgba(34, 197, 94, 0.1);">
+                        <div class="next-step-number" style="background: var(--gradient-success);"><i class="ri-check-line" style="font-size: 18px;"></i></div>
+                        <div class="next-step-content">
+                            <h4>Historial de Compras</h4>
+                            <p>Registro detallado de transacciones con filtros por tipo, pagos y canjes.</p>
+                        </div>
+                    </div>
+                    <div class="next-step-item" style="background: rgba(34, 197, 94, 0.1);">
+                        <div class="next-step-number" style="background: var(--gradient-success);"><i class="ri-check-line" style="font-size: 18px;"></i></div>
+                        <div class="next-step-content">
+                            <h4>Ofertas y Campanas</h4>
+                            <p>Sistema completo de ofertas exclusivas con participacion y seguimiento.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timeline -->
+            <section class="section">
+                <div class="section-header">
+                    <i class="ri-calendar-line"></i>
+                    <h2>Linea de Tiempo</h2>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot done"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-phase">Fase 1 - Completada</div>
+                            <div class="timeline-title">Fundamentos y Autenticacion</div>
+                            <div class="timeline-desc">Setup del proyecto, sistema de login multi-tenant, navegacion base, tema claro/oscuro.</div>
+                            <div class="timeline-features">
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Login</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Multi-tenant</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Navegacion</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Temas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot done"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-phase">Fase 2 - Completada</div>
+                            <div class="timeline-title">Core Features</div>
+                            <div class="timeline-desc">Dashboard, gestion de clubes, sistema de sorteos, busqueda de clientes.</div>
+                            <div class="timeline-features">
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Dashboard</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Clubes</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Sorteos</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Busqueda</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot done"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-phase">Fase 3 - Completada</div>
+                            <div class="timeline-title">Experiencia Premium</div>
+                            <div class="timeline-desc">Biometria, notificaciones push, modo offline con sincronizacion.</div>
+                            <div class="timeline-features">
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Biometria</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Push</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Offline</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot done"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-phase">Fase 4 - Completada</div>
+                            <div class="timeline-title">Beneficios</div>
+                            <div class="timeline-desc">Sistema de cupones con multiples tipos, canje e historial.</div>
+                            <div class="timeline-features">
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Cupones</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Canje</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Historial</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot done"></div>
+                        <div class="timeline-content" style="border-color: var(--success);">
+                            <div class="timeline-phase">Fase 5 - Completada</div>
+                            <div class="timeline-title">MVP Completo</div>
+                            <div class="timeline-desc">Historial de pagos, sistema de puntos, ofertas y campanas - Todo implementado!</div>
+                            <div class="timeline-features">
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> QR</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Pagos</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Puntos</span>
+                                <span class="timeline-feature"><i class="ri-check-line done"></i> Ofertas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot future"></div>
+                        <div class="timeline-content" style="opacity: 0.7;">
+                            <div class="timeline-phase">Fase 6 - Futuro</div>
+                            <div class="timeline-title">Post-MVP y Optimizaciones</div>
+                            <div class="timeline-desc">Testing, optimizaciones de rendimiento, analytics, mejoras UX.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="ri-code-box-line"></i>
+                <span>Desarrollado con Claude Code | Enero 2026</span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Inicio</a>
+                <a href="features.html" class="footer-link">Funcionalidades</a>
+                <a href="screens.html" class="footer-link">Pantallas</a>
+                <a href="architecture.html" class="footer-link">Arquitectura</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animate progress bar on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.progress-bar-fill-hero').style.width = '100%';
+            }, 500);
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.mvp-item, .summary-card, .timeline-item, .next-step-item').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = `all 0.5s ease ${index * 0.05}s`;
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
