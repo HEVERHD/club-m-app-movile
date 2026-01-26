@@ -1,6 +1,6 @@
 // app/(tabs)/my-profile.tsx - Perfil del cliente
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Switch, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,14 +8,66 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useAuthStore } from '../../src/stores/auth-store';
 import { ThemeSelector } from '../../src/components/ui/ThemeSelector';
+import { useBiometrics, getBiometricIcon, getBiometricLabel } from '../../src/hooks/useBiometrics';
 import QRCode from 'react-native-qrcode-svg';
 
 export default function MyProfileScreen() {
     const { colors } = useTheme();
     const router = useRouter();
-    const { user, logout, tenantName } = useAuthStore();
+    const { user, logout, tenantName, tenantId } = useAuthStore();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    // Biometrics
+    const {
+        isAvailable: biometricAvailable,
+        isEnabled: biometricEnabled,
+        biometricType,
+        isLoading: biometricLoading,
+        enableBiometrics,
+        disableBiometrics,
+    } = useBiometrics();
+
+    // Password modal for biometric setup
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordInput, setPasswordInput] = useState('');
+    const [isEnabling, setIsEnabling] = useState(false);
+
+    const handleToggleBiometrics = async (value: boolean) => {
+        if (value) {
+            // Mostrar modal para pedir contraseña
+            setPasswordInput('');
+            setShowPasswordModal(true);
+        } else {
+            try {
+                await disableBiometrics();
+            } catch (error: any) {
+                console.error('Error deshabilitando biometría:', error);
+            }
+        }
+    };
+
+    const handleConfirmBiometricSetup = async () => {
+        if (!passwordInput.trim()) {
+            alert('Ingresa tu contraseña');
+            return;
+        }
+
+        setIsEnabling(true);
+        try {
+            await enableBiometrics({
+                email: user?.email || '',
+                password: passwordInput,
+                tenantId: tenantId || 0,
+            });
+            setShowPasswordModal(false);
+            setPasswordInput('');
+        } catch (error: any) {
+            alert(error.message || 'No se pudo habilitar');
+        } finally {
+            setIsEnabling(false);
+        }
+    };
 
     const handleLogout = async () => {
         setIsLoggingOut(true);
@@ -127,6 +179,46 @@ export default function MyProfileScreen() {
 
                 {/* Selector de tema */}
                 <ThemeSelector />
+
+                {/* Seguridad */}
+                {biometricAvailable && (
+                    <View style={[styles.section, { backgroundColor: colors.bg.card }]}>
+                        <View style={styles.sectionHeader}>
+                            <Ionicons name="shield-checkmark" size={20} color={colors.brand.primary} />
+                            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
+                                Seguridad
+                            </Text>
+                        </View>
+
+                        <View style={styles.biometricRow}>
+                            <View style={[styles.optionIcon, { backgroundColor: colors.brand.primary + '15' }]}>
+                                <Ionicons
+                                    name={getBiometricIcon(biometricType) as any}
+                                    size={20}
+                                    color={colors.brand.primary}
+                                />
+                            </View>
+                            <View style={styles.biometricInfo}>
+                                <Text style={[styles.biometricTitle, { color: colors.text.primary }]}>
+                                    {getBiometricLabel(biometricType)}
+                                </Text>
+                                <Text style={[styles.biometricSubtitle, { color: colors.text.secondary }]}>
+                                    Inicia sesión con {biometricType === 'facial' ? 'tu rostro' : 'tu huella'}
+                                </Text>
+                            </View>
+                            {biometricLoading ? (
+                                <ActivityIndicator size="small" color={colors.brand.primary} />
+                            ) : (
+                                <Switch
+                                    value={biometricEnabled}
+                                    onValueChange={handleToggleBiometrics}
+                                    trackColor={{ false: colors.border.default, true: colors.brand.primary + '50' }}
+                                    thumbColor={biometricEnabled ? colors.brand.primary : colors.bg.elevated}
+                                />
+                            )}
+                        </View>
+                    </View>
+                )}
 
                 {/* Opciones */}
                 <View style={[styles.section, { backgroundColor: colors.bg.card }]}>
@@ -270,6 +362,69 @@ export default function MyProfileScreen() {
                                         </>
                                     )}
                                 </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
+            {/* Password Modal for Biometric Setup */}
+            <Modal
+                visible={showPasswordModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => !isEnabling && setShowPasswordModal(false)}
+            >
+                <Pressable
+                    style={styles.modalOverlay}
+                    onPress={() => !isEnabling && setShowPasswordModal(false)}
+                >
+                    <Pressable style={[styles.passwordModalContent, { backgroundColor: colors.bg.card }]}>
+                        <View style={[styles.passwordModalIcon, { backgroundColor: colors.brand.primary + '15' }]}>
+                            <Ionicons
+                                name={getBiometricIcon(biometricType) as any}
+                                size={32}
+                                color={colors.brand.primary}
+                            />
+                        </View>
+                        <Text style={[styles.passwordModalTitle, { color: colors.text.primary }]}>
+                            Habilitar {getBiometricLabel(biometricType)}
+                        </Text>
+                        <Text style={[styles.passwordModalSubtitle, { color: colors.text.secondary }]}>
+                            Ingresa tu contraseña para confirmar
+                        </Text>
+                        <TextInput
+                            style={[styles.passwordInput, { backgroundColor: colors.bg.elevated, color: colors.text.primary, borderColor: colors.border.default }]}
+                            placeholder="Contraseña"
+                            placeholderTextColor={colors.text.muted}
+                            secureTextEntry
+                            value={passwordInput}
+                            onChangeText={setPasswordInput}
+                            editable={!isEnabling}
+                            autoFocus
+                        />
+                        <View style={styles.passwordModalButtons}>
+                            <TouchableOpacity
+                                style={[styles.passwordModalBtn, { backgroundColor: colors.bg.elevated }]}
+                                onPress={() => setShowPasswordModal(false)}
+                                disabled={isEnabling}
+                            >
+                                <Text style={[styles.passwordModalBtnText, { color: colors.text.primary }]}>
+                                    Cancelar
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.passwordModalBtn, styles.passwordModalBtnConfirm, { backgroundColor: colors.brand.primary }]}
+                                onPress={handleConfirmBiometricSetup}
+                                disabled={isEnabling}
+                            >
+                                {isEnabling ? (
+                                    <ActivityIndicator size="small" color="white" />
+                                ) : (
+                                    <Text style={[styles.passwordModalBtnText, { color: 'white' }]}>
+                                        Confirmar
+                                    </Text>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </Pressable>
@@ -547,5 +702,80 @@ const styles = StyleSheet.create({
     },
     modalBtnDisabled: {
         opacity: 0.7,
+    },
+
+    // Biometric styles
+    biometricRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 4,
+    },
+    biometricInfo: {
+        flex: 1,
+        marginLeft: 12,
+    },
+    biometricTitle: {
+        fontSize: 15,
+        fontWeight: '500',
+    },
+    biometricSubtitle: {
+        fontSize: 12,
+        marginTop: 2,
+    },
+
+    // Password Modal styles
+    passwordModalContent: {
+        width: '85%',
+        maxWidth: 400,
+        borderRadius: 20,
+        padding: 24,
+        alignItems: 'center',
+    },
+    passwordModalIcon: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    passwordModalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    passwordModalSubtitle: {
+        fontSize: 14,
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    passwordInput: {
+        width: '100%',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        fontSize: 15,
+        marginBottom: 20,
+    },
+    passwordModalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+    },
+    passwordModalBtn: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    passwordModalBtnConfirm: {
+        minHeight: 44,
+    },
+    passwordModalBtnText: {
+        fontSize: 15,
+        fontWeight: '600',
     },
 });
